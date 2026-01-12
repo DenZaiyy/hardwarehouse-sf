@@ -1,0 +1,6 @@
+user.registration.title: 'Crée votre compte'
+user.registration.agree_terms.label: "Acceptez les conditions d'utilisation"
+user.registration.email.label: 'Adresse mail'
+user.registration.password.label: 'Mot de passe'
+user.registration.password.confirm.label: 'Confirmez votre mot de passe'
+user.registration.submit: 'Crée'

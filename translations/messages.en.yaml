@@ -1,0 +1,6 @@
+user.registration.title: 'Create account'
+user.registration.agree_terms.label: 'Accept the terms of use'
+user.registration.email.label: 'Email address'
+user.registration.password.label: 'Password'
+user.registration.password.confirm.label: 'Confirm your password'
+user.registration.submit: 'Create'
