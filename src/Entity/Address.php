@@ -31,6 +31,10 @@ class Address
     #[ORM\Column(length: 50)]
     private ?string $city = null;
 
+    #[ORM\ManyToOne(inversedBy: 'addresses')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user_info = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -104,6 +108,18 @@ class Address
     public function setCity(string $city): static
     {
         $this->city = $city;
+
+        return $this;
+    }
+
+    public function getUserInfo(): ?User
+    {
+        return $this->user_info;
+    }
+
+    public function setUserInfo(?User $user_info): static
+    {
+        $this->user_info = $user_info;
 
         return $this;
     }
