@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'user.profile.title'|trans(domain = "title") }} - HardWareHouse{% endblock %}
+
+{% block body %}
+    <h1>{{ 'user.profile.title'|trans }}</h1>
+
+    <div class="block md:flex md:flex-col md:gap-4 border p-2 md:p-4 rounded">
+        {{ form_start(passwordForm) }}
+        <div class="flex-1 ">
+            {{ form_label(passwordForm.password) }}
+            {{ form_widget(passwordForm.password) }}
+            {{ form_help(passwordForm.password) }}
+        </div>
+
+        <div class="flex flex-row gap-4">
+            <div class="flex-1">
+                {{ form_label(passwordForm.plainPassword.first) }}
+                {{ form_widget(passwordForm.plainPassword.first) }}
+                {{ form_help(passwordForm.plainPassword.first) }}
+            </div>
+            <div class="flex-1">
+                {{ form_label(passwordForm.plainPassword.second) }}
+                {{ form_widget(passwordForm.plainPassword.second) }}
+                {{ form_help(passwordForm.plainPassword.second) }}
+            </div>
+        </div>
+
+        <div class="flex-1">
+            {{ form_widget(passwordForm.submit) }}
+        </div>
+
+        {{ form_end(passwordForm) }}
+    </div>
+{% endblock %}
