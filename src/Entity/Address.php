@@ -3,11 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\AddressRepository;
+use App\Trait\TimestampTrait;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AddressRepository::class)]
 class Address
 {
+    use TimestampTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
