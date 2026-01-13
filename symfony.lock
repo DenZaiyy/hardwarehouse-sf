@@ -282,6 +282,19 @@
             "templates/base.html.twig"
         ]
     },
+    "symfony/ux-icons": {
+        "version": "2.32",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "2.19",
+            "ref": "c965ca0bf8a40e03420d57e08cff0bf6045e4ae7"
+        },
+        "files": [
+            "assets/icons/symfony.svg",
+            "config/packages/ux_icons.yaml"
+        ]
+    },
     "symfony/ux-live-component": {
         "version": "2.32",
         "recipe": {
@@ -293,6 +306,9 @@
         "files": [
             "config/routes/ux_live_component.yaml"
         ]
+    },
+    "symfony/ux-toggle-password": {
+        "version": "v2.32.0"
     },
     "symfony/ux-turbo": {
         "version": "2.32",
