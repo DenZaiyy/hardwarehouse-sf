@@ -1,6 +1,14 @@
-user.registration.title: 'Create account'
-user.registration.agree_terms.label: 'Accept the terms of use'
-user.registration.email.label: 'Email address'
-user.registration.password.label: 'Password'
-user.registration.password.confirm.label: 'Confirm your password'
-user.registration.submit: 'Create'
+user.registration.title: Create account
+user.registration.agree_terms.label: Accept the terms and conditions
+user.registration.agree_terms.is_true: You must accept our terms and conditions.
+user.registration.email.label: Email address
+user.registration.username.label: Username
+user.registration.password.label: Password
+user.registration.password.confirm.label: Confirm your password
+user.registration.submit: Create my account
+user.registration.flash.success: You have just registered, welcome!
+user.register.email.confirm.subject: Please confirm your e-mail address.
+user.login.title: Log in
+user.login.logged.message: You are logged in as %user%
+user.login.logged.logout.label: Logout
+seo.description.default: "Discover our selection of PC components: graphics cards, processors, motherboards, RAM and storage. Fast delivery and dedicated technical support."

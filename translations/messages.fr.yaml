@@ -1,6 +1,14 @@
-user.registration.title: 'Crée votre compte'
-user.registration.agree_terms.label: "Acceptez les conditions d'utilisation"
-user.registration.email.label: 'Adresse mail'
-user.registration.password.label: 'Mot de passe'
-user.registration.password.confirm.label: 'Confirmez votre mot de passe'
-user.registration.submit: 'Crée'
+user.registration.title: Crée votre compte
+user.registration.agree_terms.label: Acceptez les conditions
+user.registration.agree_terms.is_true: Vous devez accepter nos conditions générales
+user.registration.email.label: Adresse mail
+user.registration.username.label: Pseudonyme
+user.registration.password.label: Mot de passe
+user.registration.password.confirm.label: Confirmez votre mot de passe
+user.registration.submit: Crée mon compte
+user.registration.flash.success: Vous venez de vous inscrire, bienvenue !
+user.register.email.confirm.subject: Veuillez confirmer votre adresse e-mail
+user.login.title: Se connecter
+user.login.logged.message: Vous êtes connecté en tant que %user%
+user.login.logged.logout.label: Déconnexion
+seo.description.default: "Découvrez notre sélection de composants PC : cartes graphiques, processeurs, cartes mères, mémoire RAM et stockage. Livraison rapide et support technique dédié."
