@@ -1,0 +1,13 @@
+<header class="h-[125px]">
+    <nav>
+        <ul>
+            {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+                <li><a href="{{ path('profile.index') }}">{{ 'header.nav.profile.label'|trans }}</a></li>
+                <li><a href="{{ logout_path()  }}">{{ 'header.nav.logout.label'|trans }}</a></li>
+            {% else %}
+                <li><a href="{{ path('app.register') }}">{{ 'header.nav.register.label'|trans }}</a></li>
+                <li><a href="{{ path('app.login') }}">{{ 'header.nav.login.label'|trans }}</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</header>
