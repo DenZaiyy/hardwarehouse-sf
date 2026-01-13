@@ -6,19 +6,19 @@
        ========================= */
 
     h1 {
-        @apply text-2xl font-bold tracking-tight text-slate-900
+        @apply text-2xl font-bold tracking-tight text-slate-900 mb-4
         sm:text-3xl
         lg:text-4xl;
     }
 
     h2 {
-        @apply text-xl font-semibold tracking-tight text-slate-900
+        @apply text-xl font-semibold tracking-tight text-slate-900 mb-2
         sm:text-2xl
         lg:text-3xl;
     }
 
     h3 {
-        @apply text-lg font-semibold text-slate-800
+        @apply text-lg font-semibold text-slate-800 mb-2
         sm:text-xl
         lg:text-2xl;
     }
@@ -81,3 +81,37 @@
     }
 }
 
+form label:has(+ input:required)::after, form label:has(+ select:required)::after {
+    content: ' *';
+    color: red;
+}
+
+form .help-text::before {
+    content: 'ℹ ';
+    font-size: 0.8em;
+    color: #3b82f6;
+}
+
+form .help-text {
+    @apply text-gray-500 text-xs mt-2 w-max leading-[1.4];
+}
+
+.flash-message {
+    @apply transition-opacity duration-500 ease-in-out z-50;
+}
+
+.flash-success {
+    @apply bg-green-600 text-white px-4 py-2 rounded-lg;
+}
+
+.flash-danger {
+    @apply bg-red-600 text-white px-4 py-2 rounded-lg;
+}
+
+.flash-notice {
+    @apply bg-yellow-600 text-white px-4 py-2 rounded-lg;
+}
+
+.flash-warning {
+    @apply bg-orange-600 text-white px-4 py-2 rounded-lg;
+}
