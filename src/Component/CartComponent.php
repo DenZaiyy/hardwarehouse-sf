@@ -21,7 +21,8 @@ final class CartComponent
 
     public function __construct(
         private readonly CartService $cartService
-    ) {}
+    ) {
+    }
 
     public function mount(): void
     {
