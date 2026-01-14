@@ -1,0 +1,21 @@
+<div class="dropdown group relative" tabindex="0" role="button" aria-haspopup="true">
+    <div class="flex flex-col items-center text-xs cursor-pointer">
+        {{ ux_icon('heroicons-solid:shopping-cart', {class: 'size-7'}) }}
+        <span>{{ 'header.cart.label'|trans }}</span>
+    </div>
+
+    <div
+        class="
+        p-2
+        absolute right-0 mt-3 w-48
+        rounded-lg bg-secondary shadow-lg
+        opacity-0 scale-95 pointer-events-none
+        transition-all duration-200 ease-out
+        origin-top-right
+        group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto
+        group-focus-within:opacity-100 group-focus-within:scale-100 group-focus-within:pointer-events-auto
+    "
+    >
+        {{ component('cart') }}
+    </div>
+</div>

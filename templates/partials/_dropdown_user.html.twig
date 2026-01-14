@@ -1,0 +1,43 @@
+<div class="dropdown group relative" tabindex="0" role="button" aria-haspopup="true">
+    <div class="flex flex-col items-center text-xs cursor-pointer">
+        {{ ux_icon('heroicons-solid:user', {class: 'size-7'}) }}
+        <span>{{ 'header.user.label'|trans }}</span>
+    </div>
+
+    <div
+        class="
+        absolute right-0 mt-3 w-48
+        rounded-lg bg-paragraph shadow-lg
+        opacity-0 scale-95 pointer-events-none
+        transition-all duration-200 ease-out
+        origin-top-right
+        group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto
+        group-focus-within:opacity-100 group-focus-within:scale-100 group-focus-within:pointer-events-auto
+    "
+    >
+        <ul class="text-sm">
+            {% if is_granted('ROLE_USER') %}
+                <li>
+                    <a href="{{ path('profile.index') }}" class="block rounded-md px-3 py-2 hover:bg-primary/10 transition">
+                        {{ 'header.nav.profile.label'|trans }}
+                    </a>
+                </li>
+                <li class="my-1 h-px bg-border"></li>
+                <li>
+                    <a href="{{ logout_path() }}" class="block rounded-md px-3 py-2 hover:bg-primary/10 transition">
+                        {{ 'header.nav.logout.label'|trans }}
+                    </a>
+                </li>
+            {% else %}
+                <li><a href="{{ path('app.login') }}" class="block rounded-md px-3 py-2 hover:bg-primary/10 transition">
+                        {{ 'header.nav.login.label'|trans }}
+                    </a></li>
+                <li><a href="{{ path('app.register') }}" class="block rounded-md px-3 py-2 hover:bg-primary/10 transition">
+                        {{ 'header.nav.register.label'|trans }}
+                    </a></li>
+            {% endif %}
+
+        </ul>
+    </div>
+
+</div>

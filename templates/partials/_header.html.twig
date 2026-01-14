@@ -1,13 +1,38 @@
-<header class="h-[125px]">
-    <nav>
-        <ul>
-            {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
-                <li><a href="{{ path('profile.index') }}">{{ 'header.nav.profile.label'|trans }}</a></li>
-                <li><a href="{{ logout_path()  }}">{{ 'header.nav.logout.label'|trans }}</a></li>
-            {% else %}
-                <li><a href="{{ path('app.register') }}">{{ 'header.nav.register.label'|trans }}</a></li>
-                <li><a href="{{ path('app.login') }}">{{ 'header.nav.login.label'|trans }}</a></li>
-            {% endif %}
+<header class="bg-primary text-paragraph">
+    <div class="flex items-center justify-between gap-3 p-4">
+        <!-- Logo -->
+        <a href="{{ path('homepage') }}" class="flex items-center gap-2 font-semibold">
+            <img src="{{ asset('carton-40x40.webp') }}" class="size-8" alt="Logo">
+            <span class="hidden sm:inline">HardWareHouse</span>
+        </a>
+
+        <!-- Search -->
+        <div class="flex-1 md:flex md:justify-center">
+            <div class="relative w-full md:max-w-xl">
+                {{ ux_icon('heroicons-solid:magnifying-glass', {class: 'absolute left-3 top-1/2 -translate-y-1/2 size-4 text-secondary'}) }}
+                <input
+                    type="search"
+                    placeholder="Cherche un produit, une marque…"
+                    class="w-full rounded-md bg-search pl-10 pr-3 py-2 text-sm"
+                >
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-4">
+            {% include 'partials/_dropdown_user.html.twig' %}
+            {% include 'partials/_dropdown_cart.html.twig' %}
+        </div>
+    </div>
+
+    <!-- Categories -->
+    <nav class="bg-secondary">
+        <ul class="flex gap-4 overflow-x-auto px-4 py-2 text-sm md:justify-center">
+            <li><a href="#">test</a></li>
+            <li><a href="#">test</a></li>
+            <li><a href="#">test</a></li>
+            <li><a href="#">test</a></li>
+            <li><a href="#">test</a></li>
         </ul>
     </nav>
 </header>
