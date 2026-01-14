@@ -1,0 +1,9 @@
+home:
+    title: Homepage
+register:
+    title: Register
+login:
+    title: Login
+user:
+    profile:
+        title: Profile

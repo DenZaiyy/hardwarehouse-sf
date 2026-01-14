@@ -1,14 +1,40 @@
-user.registration.title: Crée votre compte
-user.registration.agree_terms.label: Acceptez les conditions
-user.registration.agree_terms.is_true: Vous devez accepter nos conditions générales
-user.registration.email.label: Adresse mail
-user.registration.username.label: Pseudonyme
-user.registration.password.label: Mot de passe
-user.registration.password.confirm.label: Confirmez votre mot de passe
-user.registration.submit: Crée mon compte
-user.registration.flash.success: Vous venez de vous inscrire, bienvenue !
-user.register.email.confirm.subject: Veuillez confirmer votre adresse e-mail
-user.login.title: Se connecter
-user.login.logged.message: Vous êtes connecté en tant que %user%
-user.login.logged.logout.label: Déconnexion
-seo.description.default: "Découvrez notre sélection de composants PC : cartes graphiques, processeurs, cartes mères, mémoire RAM et stockage. Livraison rapide et support technique dédié."
+user:
+    registration:
+        title: 'Crée votre compte'
+        agree_terms: { label: 'Acceptez les conditions', is_true: 'Vous devez accepter nos conditions générales' }
+        email: { label: 'Adresse mail' }
+        username: { label: Pseudonyme }
+        password: { label: 'Mot de passe', confirm: { label: 'Confirmez votre mot de passe' } }
+        avatar: { label: 'Image de profile', placeholder: 'Glissez ou cliquer pour choisir votre image' }
+        submit: 'Crée mon compte'
+        flash: { success: 'Vous venez de vous inscrire, bienvenue !' }
+    register:
+        email: { confirm: { subject: 'Veuillez confirmer votre adresse e-mail' } }
+    login:
+        title: 'Se connecter'
+        logged: { message: 'Vous êtes connecté en tant que %user%', logout: { label: Déconnexion } }
+        email: { label: 'Adresse email' }
+        password: { label: 'Mot de passe' }
+        remember: { label: 'Se souvenir de moi' }
+        submit: { label: 'Se connecter' }
+    changePassword:
+        current: { constraint: { not_blank: __user.changePassword.current.constraint.not_blank }, label: __user.changePassword.current.label, help: __user.changePassword.current.help }
+        new: { constraint: { not_blank: __user.changePassword.new.constraint.not_blank, length: { minMessage: __user.changePassword.new.constraint.length.minMessage } } }
+    changePassowrd:
+        new: { first: { label: __user.changePassowrd.new.first.label, help: __user.changePassowrd.new.first.help }, second: { label: __user.changePassowrd.new.second.label, help: __user.changePassowrd.new.second.help }, invalid: { message: __user.changePassowrd.new.invalid.message } }
+        submit: { label: __user.changePassowrd.submit.label }
+    profile:
+        title: __user.profile.title
+seo:
+    description:
+        default: 'Découvrez notre sélection de composants PC : cartes graphiques, processeurs, cartes mères, mémoire RAM et stockage. Livraison rapide et support technique dédié.'
+header:
+    user:
+        label: Utilisateur
+    cart:
+        label: Panier
+    nav:
+        profile: { label: Profile }
+        logout: { label: Déconnexion }
+        register: { label: S'inscrire }
+        login: { label: Se connecter }

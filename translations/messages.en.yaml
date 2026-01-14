@@ -1,14 +1,34 @@
-user.registration.title: Create account
-user.registration.agree_terms.label: Accept the terms and conditions
-user.registration.agree_terms.is_true: You must accept our terms and conditions.
-user.registration.email.label: Email address
-user.registration.username.label: Username
-user.registration.password.label: Password
-user.registration.password.confirm.label: Confirm your password
-user.registration.submit: Create my account
-user.registration.flash.success: You have just registered, welcome!
-user.register.email.confirm.subject: Please confirm your e-mail address.
-user.login.title: Log in
-user.login.logged.message: You are logged in as %user%
-user.login.logged.logout.label: Logout
-seo.description.default: "Discover our selection of PC components: graphics cards, processors, motherboards, RAM and storage. Fast delivery and dedicated technical support."
+user:
+    registration:
+        title: 'Create account'
+        agree_terms: { label: 'Accept the terms and conditions', is_true: 'You must accept our terms and conditions.' }
+        email: { label: 'Email address' }
+        username: { label: Username }
+        password: { label: Password, confirm: { label: 'Confirm your password' } }
+        submit: 'Create my account'
+        flash: { success: 'You have just registered, welcome!' }
+    register:
+        email: { confirm: { subject: 'Please confirm your e-mail address.' } }
+    login:
+        title: 'Log in'
+        logged: { message: 'You are logged in as %user%', logout: { label: Logout } }
+        email: { label: __user.login.email.label }
+        password: { label: __user.login.password.label }
+        remember: { label: __user.login.remember.label }
+        submit: { label: __user.login.submit.label }
+    changePassword:
+        current: { constraint: { not_blank: __user.changePassword.current.constraint.not_blank }, label: __user.changePassword.current.label, help: __user.changePassword.current.help }
+        new: { constraint: { not_blank: __user.changePassword.new.constraint.not_blank, length: { minMessage: __user.changePassword.new.constraint.length.minMessage } } }
+    changePassowrd:
+        new: { first: { label: __user.changePassowrd.new.first.label, help: __user.changePassowrd.new.first.help }, second: { label: __user.changePassowrd.new.second.label, help: __user.changePassowrd.new.second.help }, invalid: { message: __user.changePassowrd.new.invalid.message } }
+        submit: { label: __user.changePassowrd.submit.label }
+    profile:
+        title: __user.profile.title
+seo:
+    description:
+        default: 'Discover our selection of PC components: graphics cards, processors, motherboards, RAM and storage. Fast delivery and dedicated technical support.'
+header:
+    user:
+        label: __header.user.label
+    cart:
+        label: __header.cart.label
