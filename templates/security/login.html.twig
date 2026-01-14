@@ -2,16 +2,18 @@
 
 {% block title %}{{ 'login.title'|trans(domain = "title") }} - HardWareHouse{% endblock %}
 
+{% block meta_description %}Connectez vous sur HardWareHouse pour pouvoir valider votre panier !{% endblock %}
+
 {% block body %}
-    <form method="post" class="mx-auto flex flex-col p-4 rounded border">
+    {% if app.user %}
+        <div class="mb-3">
+            {{ 'user.login.logged.message'|trans(arguments = { '%user%': app.user.userIdentifier }) }}, <a href="{{ logout_path() }}">{{ 'user.login.logged.logout.label'|trans }}</a>
+        </div>
+    {% endif %}
+
+    <form method="post" class="mx-auto flex flex-col p-4 gap-4 rounded border md:max-w-7xl">
         {% if error %}
             <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-        {% endif %}
-
-        {% if app.user %}
-            <div class="mb-3">
-                {{ 'user.login.logged.message'|trans(arguments = { '%user%': app.user.userIdentifier }) }}, <a href="{{ logout_path() }}">{{ 'user.login.logged.logout.label'|trans }}</a>
-            </div>
         {% endif %}
 
         <h1>{{ 'user.login.title'|trans }}</h1>
@@ -28,12 +30,10 @@
         {#
             Uncomment this section and add a remember_me option below your firewall to activate remember me functionality.
             See https://symfony.com/doc/current/security/remember_me.html
-
-
         #}
-        <div class="checkbox mb-3">
-            <input type="checkbox" name="_remember_me" id="_remember_me">
-            <label for="_remember_me">{{ 'user.login.remember.label'|trans }}</label>
+        <div class="flex gap-2 items-center flex-1">
+            <input type="checkbox" name="_remember_me" id="_remember_me" class="size-5">
+            <label class="mb-0" for="_remember_me">{{ 'user.login.remember.label'|trans }}</label>
         </div>
 
         <button class="btn btn-lg btn-primary" type="submit">
