@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+@theme {
+    --color-primary: oklch(0.4012 0.1251 254.53);
+    --color-secondary: oklch(0.5579 0.0849 240.94);
+    --color-paragraph: oklch(0.9582 0.0131 251.56);
+    --color-search: oklch(0.931 0 0);
+}
+
 @layer base {
     /* =========================
        TYPOGRAPHY (RESPONSIVE)
@@ -81,37 +88,59 @@
     }
 }
 
-form label:has(+ input:required)::after, form label:has(+ select:required)::after {
-    content: ' *';
-    color: red;
+@layer components {
+    /* =========================
+       HEADER LINKS
+       ========================= */
+    header a {
+        @apply text-paragraph;
+    }
+
+    header .dropdown a {
+        @apply text-secondary;
+    }
+
+    /* =========================
+       FORM REQUIRED + HELP TEXT
+       ========================= */
+
+    form :has(:is(input, select, textarea):required) > label::after {
+        content: ' *';
+        color: red;
+    }
+
+    form .help-text::before {
+        content: 'ℹ ';
+        font-size: 0.8em;
+        color: #3b82f6;
+    }
+
+    form .help-text {
+        @apply text-gray-500 text-xs mt-2 w-max leading-[1.4];
+    }
+
+    /* =========================
+       ALERT MESSAGE
+       ========================= */
+
+    .flash-message {
+        @apply transition-opacity duration-500 ease-in-out z-50;
+    }
+
+    .flash-success {
+        @apply bg-green-600 text-white px-4 py-2 rounded-lg;
+    }
+
+    .flash-danger {
+        @apply bg-red-600 text-white px-4 py-2 rounded-lg;
+    }
+
+    .flash-notice {
+        @apply bg-yellow-600 text-white px-4 py-2 rounded-lg;
+    }
+
+    .flash-warning {
+        @apply bg-orange-600 text-white px-4 py-2 rounded-lg;
+    }
 }
 
-form .help-text::before {
-    content: 'ℹ ';
-    font-size: 0.8em;
-    color: #3b82f6;
-}
-
-form .help-text {
-    @apply text-gray-500 text-xs mt-2 w-max leading-[1.4];
-}
-
-.flash-message {
-    @apply transition-opacity duration-500 ease-in-out z-50;
-}
-
-.flash-success {
-    @apply bg-green-600 text-white px-4 py-2 rounded-lg;
-}
-
-.flash-danger {
-    @apply bg-red-600 text-white px-4 py-2 rounded-lg;
-}
-
-.flash-notice {
-    @apply bg-yellow-600 text-white px-4 py-2 rounded-lg;
-}
-
-.flash-warning {
-    @apply bg-orange-600 text-white px-4 py-2 rounded-lg;
-}
