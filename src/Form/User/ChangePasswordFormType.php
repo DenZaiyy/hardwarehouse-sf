@@ -35,8 +35,8 @@ class ChangePasswordFormType extends AbstractType
                 'attr' => [
                     'autocomplete' => 'current-password',
                 ],
-                'label' => $this->translator->trans('user.changePassword.current.label'),
-                'help' => $this->translator->trans('user.changePassword.current.help'),
+                'label' => $this->translator->trans('user.update.changePassword.current.label'),
+                'help' => $this->translator->trans('user.update.changePassword.current.help'),
                 'required' => true,
                 'toggle' => true
             ])
@@ -45,18 +45,18 @@ class ChangePasswordFormType extends AbstractType
                 'mapped' => false,
                 'required' => true,
                 'first_options' => [
-                    'label' => $this->translator->trans('user.changePassowrd.new.first.label'),
-                    'help' => $this->translator->trans('user.changePassowrd.new.first.help'),
+                    'label' => $this->translator->trans('user.update.changePassword.new.first.label'),
+                    'help' => $this->translator->trans('user.update.changePassword.new.first.help'),
                     'attr' => [
                         'autocomplete' => 'new-password',
                     ],
                     'toggle' => true,
                     'constraints' => [
-                        new NotBlank(message: $this->translator->trans('user.changePassword.new.constraint.not_blank')),
+                        new NotBlank(message: $this->translator->trans('user.update.changePassword.new.constraint.not_blank')),
                         new Length(
                             min: 6,
                             max: 4096,
-                            minMessage: $this->translator->trans('user.changePassword.new.constraint.length.minMessage'),
+                            minMessage: $this->translator->trans('user.update.changePassword.new.constraint.length.minMessage'),
                         ),
                         new PasswordStrength(),
                         new NotCompromisedPassword(),
@@ -68,17 +68,17 @@ class ChangePasswordFormType extends AbstractType
                     ]
                 ],
                 'second_options' => [
-                    'label' => $this->translator->trans('user.changePassowrd.new.second.label'),
-                    'help' => $this->translator->trans('user.changePassowrd.new.second.help'),
+                    'label' => $this->translator->trans('user.update.changePassword.new.second.label'),
+                    'help' => $this->translator->trans('user.update.changePassword.new.second.help'),
                     'attr' => [
                         'autocomplete' => 'new-password',
                     ],
                     'toggle' => true
                 ],
-                'invalid_message' => $this->translator->trans('user.changePassowrd.new.invalid.message'),
+                'invalid_message' => $this->translator->trans('user.update.changePassword.new.invalid.message'),
             ])
             ->add('submit', SubmitType::class, [
-                'label' => $this->translator->trans('user.changePassowrd.submit.label'),
+                'label' => $this->translator->trans('user.update.changePassword.submit.label'),
                 'attr' => [
                     'class' => 'w-full'
                 ]
