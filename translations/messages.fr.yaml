@@ -11,20 +11,25 @@ user:
     register:
         email: { confirm: { subject: 'Veuillez confirmer votre adresse e-mail' } }
     login:
-        title: 'Se connecter'
+        title: 'Se connecter à votre compte client'
         logged: { message: 'Vous êtes connecté en tant que %user%', logout: { label: Déconnexion } }
         email: { label: 'Adresse email' }
         password: { label: 'Mot de passe' }
         remember: { label: 'Se souvenir de moi' }
         submit: { label: 'Se connecter' }
-    changePassword:
-        current: { constraint: { not_blank: __user.changePassword.current.constraint.not_blank }, label: __user.changePassword.current.label, help: __user.changePassword.current.help }
-        new: { constraint: { not_blank: __user.changePassword.new.constraint.not_blank, length: { minMessage: __user.changePassword.new.constraint.length.minMessage } } }
-    changePassowrd:
-        new: { first: { label: __user.changePassowrd.new.first.label, help: __user.changePassowrd.new.first.help }, second: { label: __user.changePassowrd.new.second.label, help: __user.changePassowrd.new.second.help }, invalid: { message: __user.changePassowrd.new.invalid.message } }
-        submit: { label: __user.changePassowrd.submit.label }
     profile:
-        title: __user.profile.title
+        title: 'Mon profile'
+    update:
+        infos: {
+            email: { label: __user.update.infos.email.label },
+            username: { label: __user.update.infos.username.label },
+            avatar: { label: __user.update.infos.avatar.label }
+        }
+        changePassword: {
+            current: { label: __user.update.changePassword.current.label, help: __user.update.changePassword.current.help },
+            new: { first: { label: __user.update.changePassword.new.first.label, help: __user.update.changePassword.new.first.help }, constraint: { not_blank: __user.update.changePassword.new.constraint.not_blank, length: { minMessage: __user.update.changePassword.new.constraint.length.minMessage } }, second: { label: __user.update.changePassword.new.second.label, help: __user.update.changePassword.new.second.help }, invalid: { message: __user.update.changePassword.new.invalid.message } },
+            submit: { label: __user.update.changePassword.submit.label }
+        }
 seo:
     description:
         default: 'Découvrez notre sélection de composants PC : cartes graphiques, processeurs, cartes mères, mémoire RAM et stockage. Livraison rapide et support technique dédié.'

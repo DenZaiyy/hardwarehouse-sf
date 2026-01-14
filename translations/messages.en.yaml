@@ -14,16 +14,21 @@ user:
         logged: { message: 'You are logged in as %user%', logout: { label: Logout } }
         email: { label: Email }
         password: { label: Password }
-        remember: { label: Remember me }
+        remember: { label: 'Remember me' }
         submit: { label: Login }
-    changePassword:
-        current: { constraint: { not_blank: __user.changePassword.current.constraint.not_blank }, label: __user.changePassword.current.label, help: __user.changePassword.current.help }
-        new: { constraint: { not_blank: __user.changePassword.new.constraint.not_blank, length: { minMessage: __user.changePassword.new.constraint.length.minMessage } } }
-    changePassowrd:
-        new: { first: { label: __user.changePassowrd.new.first.label, help: __user.changePassowrd.new.first.help }, second: { label: __user.changePassowrd.new.second.label, help: __user.changePassowrd.new.second.help }, invalid: { message: __user.changePassowrd.new.invalid.message } }
-        submit: { label: __user.changePassowrd.submit.label }
     profile:
         title: __user.profile.title
+    update:
+        infos: {
+            email: { label: __user.update.infos.email.label },
+            username: { label: __user.update.infos.username.label },
+            avatar: { label: __user.update.infos.avatar.label }
+        }
+        changePassword: {
+            current: { label: __user.update.changePassword.current.label, help: __user.update.changePassword.current.help },
+            new: { first: { label: __user.update.changePassword.new.first.label, help: __user.update.changePassword.new.first.help }, constraint: { not_blank: __user.update.changePassword.new.constraint.not_blank, length: { minMessage: __user.update.changePassword.new.constraint.length.minMessage } }, second: { label: __user.update.changePassword.new.second.label, help: __user.update.changePassword.new.second.help }, invalid: { message: __user.update.changePassword.new.invalid.message } },
+            submit: { label: __user.update.changePassword.submit.label }
+        }
 seo:
     description:
         default: 'Discover our selection of PC components: graphics cards, processors, motherboards, RAM and storage. Fast delivery and dedicated technical support.'

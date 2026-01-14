@@ -216,13 +216,13 @@ Error: Error
 'Please select a valid option.': 'Please select a valid option.'
 'Please select a valid range.': 'Please select a valid range.'
 'Please enter a valid week.': 'Please enter a valid week.'
-'Please enter a password': '__Please enter a password'
-'Your password should be at least {{ limit }} characters': '__Your password should be at least {{ limit }} characters'
+'Please enter a password': 'Please enter a password'
+'Your password should be at least {{ limit }} characters': 'Your password should be at least {{ limit }} characters'
 user:
     reset_password:
-        email: { not_blank: __user.reset_password.email.not_blank }
+        email: { not_blank: 'Email field cannot be blank, please enter your email address' }
     registration:
         password: { not_blank: __user.registration.password.not_blank, min_length: __user.registration.password.min_length }
         agree_terms: { is_true: __user.registration.agree_terms.is_true }
-'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.': '__Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.'
-'There is already an account with this email': '__There is already an account with this email'
+'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.': 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.'
+'There is already an account with this email': 'There is already an account with this email'
