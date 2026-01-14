@@ -51,7 +51,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private bool $is_banned = false;
 
     #[ORM\Column]
-    private bool $isVerified = false;
+    private bool $is_verified = false;
 
     /**
      * @var Collection<int, Address>
@@ -134,7 +134,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __serialize(): array
     {
         $data = (array) $this;
-        $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
+        $data["\0".self::class."\0password"] = hash('crc32c', (string) $this->password);
 
         return $data;
     }
