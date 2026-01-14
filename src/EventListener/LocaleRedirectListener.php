@@ -2,10 +2,10 @@
 
 namespace App\EventListener;
 
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Routing\RouterInterface;
 
 #[AsEventListener(event: KernelEvents::REQUEST, priority: 40)]
@@ -14,7 +14,8 @@ final readonly class LocaleRedirectListener
     public function __construct(
         private RouterInterface $router,
         private string $defaultLocale = 'fr',
-    ) {}
+    ) {
+    }
 
     public function __invoke(RequestEvent $event): void
     {
