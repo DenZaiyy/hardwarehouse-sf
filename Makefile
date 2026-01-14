@@ -46,6 +46,16 @@ twb: ## Building tailwind css and minify
 	$(call banner,$(INFO),Starting minify build for tailwind css...)
 	php bin/console tailwind:build --minify
 
+.PHONY: translate-FR
+translate-FR: ## Dump translations for french language
+	$(call banner,$(INFO),Dump and extract translations keys for french language...)
+	php bin/console translation:extract --force --format=yaml --as-tree=3 fr
+
+.PHONY: translate-EN
+translate-EN: ## Dump translations for english language
+	$(call banner,$(INFO),Dump and extract translations keys for english language...)
+	php bin/console translation:extract --force --format=yaml --as-tree=3 en
+
 .PHONY: quality
 quality: ## Running quality code check using Rector, ECS and PHPStan
 	$(call banner,$(INFO),Running ECS with autofix...)
