@@ -36,5 +36,5 @@ header:
     nav:
         profile: { label: Profile }
         logout: { label: Déconnexion }
-        register: { label: S'inscrire }
-        login: { label: Se connecter }
+        register: { label: "S'inscrire" }
+        login: { label: 'Se connecter' }

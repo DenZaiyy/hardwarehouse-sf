@@ -12,10 +12,10 @@ user:
     login:
         title: 'Log in'
         logged: { message: 'You are logged in as %user%', logout: { label: Logout } }
-        email: { label: __user.login.email.label }
-        password: { label: __user.login.password.label }
-        remember: { label: __user.login.remember.label }
-        submit: { label: __user.login.submit.label }
+        email: { label: Email }
+        password: { label: Password }
+        remember: { label: Remember me }
+        submit: { label: Login }
     changePassword:
         current: { constraint: { not_blank: __user.changePassword.current.constraint.not_blank }, label: __user.changePassword.current.label, help: __user.changePassword.current.help }
         new: { constraint: { not_blank: __user.changePassword.new.constraint.not_blank, length: { minMessage: __user.changePassword.new.constraint.length.minMessage } } }
@@ -29,6 +29,11 @@ seo:
         default: 'Discover our selection of PC components: graphics cards, processors, motherboards, RAM and storage. Fast delivery and dedicated technical support.'
 header:
     user:
-        label: __header.user.label
+        label: User
     cart:
-        label: __header.cart.label
+        label: Cart
+    nav:
+        profile: { label: Profil }
+        logout: { label: Logout }
+        login: { label: Login }
+        register: { label: Register }
