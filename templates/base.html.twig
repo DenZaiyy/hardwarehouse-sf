@@ -85,7 +85,7 @@
 <body class="flex flex-col min-h-screen relative">
 {% for label, messages in app.flashes %}
     {% for message in messages %}
-        <div data-controller="flash-message"
+        <div data-controller="alert"
              class="flash-message flash-{{ label }} fixed top-4 right-4 flex gap-2 items-center z-99" role="alert">
             <div class="icon">
                 {% if label == "success" %}
@@ -103,7 +103,7 @@
     {% endfor %}
 {% endfor %}
 {% include 'partials/_header.html.twig' %}
-<main class="flex-1 p-2 md:p-4 md:mx-auto w-full md:max-w-7xl">
+<main class="flex-1 p-2 md:p-4 md:mx-auto w-full">
     {% block body %}{% endblock %}
 </main>
 {% include 'partials/_footer.html.twig' %}
