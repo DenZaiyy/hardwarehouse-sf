@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Service;
+
+class CartService
+{
+    public function computeTotals(array $items): array
+    {
+        $subtotal = 0;
+        $vatRate = 0.20;
+
+        foreach ($items as $item) {
+            $subtotal += $item['price_ht'] * $item['quantity'];
+        }
+
+        $vatAmount = $subtotal * $vatRate;
+        $total = $subtotal + $vatAmount;
+
+        return [
+            'subtotal' => $subtotal,
+            'vat_rate' => $vatRate,
+            'vat_amount' => $vatAmount,
+            'total' => $total,
+        ];
+    }
+}
