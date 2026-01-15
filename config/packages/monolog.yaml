@@ -6,17 +6,17 @@ when@dev:
     monolog:
         handlers:
             security:
-                level: debug
                 type: rotating_file
-                max_files: 10
                 path: "%kernel.logs_dir%/security/security.%kernel.environment%.log"
+                level: debug
+                max_files: 10
                 channels:
                     - "security"
             main:
                 type: rotating_file
-                max_files: 10
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: debug
+                max_files: 10
                 channels:
                     - "!event"
                     - "!security"
