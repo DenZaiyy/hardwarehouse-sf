@@ -5,31 +5,28 @@
 {% block body %}
     <h1>{{ 'user.profile.title'|trans }}</h1>
 
-    <div class="block md:flex md:flex-col md:gap-4 border p-2 md:p-4 rounded">
-        {{ form_start(passwordForm) }}
-        <div class="flex-1 ">
-            {{ form_label(passwordForm.password) }}
-            {{ form_widget(passwordForm.password) }}
-            {{ form_help(passwordForm.password) }}
-        </div>
+    {% if user.avatar is not null %}
+        <img src="{{ '/uploads/images/avatar/' ~ user.avatar }}" alt="Profile picture" class="object-cover size-48" />
+    {% endif %}
 
-        <div class="flex flex-row gap-4">
-            <div class="flex-1">
-                {{ form_label(passwordForm.plainPassword.first) }}
-                {{ form_widget(passwordForm.plainPassword.first) }}
-                {{ form_help(passwordForm.plainPassword.first) }}
+    <div>
+        <h2>{{ 'user.profile.informations.title'|trans }}</h2>
+        <div id="user-infos-displayed" class="flex flex-col">
+            <div>
+                {{ 'user.profile.informations.email.label'|trans }} : <span id="email-text">{{ user.email }}</span>
             </div>
-            <div class="flex-1">
-                {{ form_label(passwordForm.plainPassword.second) }}
-                {{ form_widget(passwordForm.plainPassword.second) }}
-                {{ form_help(passwordForm.plainPassword.second) }}
+            <div>
+                {{ 'user.profile.informations.username.label'|trans }} : <span id="username-text">{{ user.username }}</span>
             </div>
-        </div>
 
-        <div class="flex-1">
-            {{ form_widget(passwordForm.submit) }}
         </div>
-
-        {{ form_end(passwordForm) }}
     </div>
+
+    <turbo-frame id="user-password">
+        <a href="{{ path('profile.password') }}">Modifier mon mot de passe</a>
+    </turbo-frame>
+
+    <turbo-frame id="user-infos">
+        <a href="{{ path('profile.infos') }}">Modifier mes informations</a>
+    </turbo-frame>
 {% endblock %}

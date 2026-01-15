@@ -54,7 +54,8 @@ class RegistrationFormType extends AbstractType
                     'label' => 'user.registration.password.label',
                     'attr' => [
                         'class' => 'w-full'
-                    ]
+                    ],
+                    'toggle' => true
                 ],
                 'second_options' => [
                     'label' => 'user.registration.password.confirm.label',
@@ -114,6 +115,7 @@ class RegistrationFormType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => User::class,
+            'validation_groups' => ['Default'],
         ]);
     }
 }

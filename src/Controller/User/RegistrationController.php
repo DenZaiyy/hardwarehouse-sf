@@ -5,6 +5,7 @@ namespace App\Controller\User;
 use App\Entity\User;
 use App\Form\RegistrationFormType;
 use App\Security\EmailVerifier;
+use App\Service\ImageUploadService;
 use App\Service\MailerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
@@ -29,7 +30,7 @@ class RegistrationController extends AbstractController
     }
 
     #[Route('/register', name: 'app.register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager, TranslatorInterface $translator): Response
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager, TranslatorInterface $translator, ImageUploadService $uploadService): Response
     {
         if ($this->isGranted('ROLE_USER')) {
             return $this->redirectToRoute('homepage');
@@ -42,6 +43,16 @@ class RegistrationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var string $plainPassword */
             $plainPassword = $form->get('plainPassword')->getData();
+            $avatar = $form->get('avatar')->getData();
+
+            if ($avatar) {
+                $avatarFile = $uploadService->upload(
+                    file: $avatar,
+                    username: $user->getUsername(),
+                    subdirectory: 'avatar'
+                );
+                $user->setAvatar($avatarFile);
+            }
 
             // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
