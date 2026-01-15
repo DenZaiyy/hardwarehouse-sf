@@ -83,29 +83,13 @@
     {% endblock %}
 </head>
 <body class="flex flex-col min-h-screen relative">
-{% for label, messages in app.flashes %}
-    {% for message in messages %}
-        <div data-controller="alert"
-             class="flash-message flash-{{ label }} fixed top-4 right-4 flex gap-2 items-center z-99" role="alert">
-            <div class="icon">
-                {% if label == "success" %}
-                    {{ ux_icon('lucide:badge-check', {height: "20px", width: "20px"}) }}
-                {% elseif label == "notice" %}
-                    {{ ux_icon('lucide:badge-info', {height: "20px", width: "20px"}) }}
-                {% else %}
-                    {{ ux_icon('lucide:badge-alert', {height: "20px", width: "20px"}) }}
-                {% endif %}
-            </div>
-            <div>
-                {{ message }}
-            </div>
-        </div>
-    {% endfor %}
-{% endfor %}
-{% include 'partials/_header.html.twig' %}
+<div id="flash-messages">
+    {% include '_partials/_flash_messages.html.twig' %}
+</div>
+{% include '_partials/_header.html.twig' %}
 <main class="flex-1 p-2 md:p-4 md:mx-auto w-full">
     {% block body %}{% endblock %}
 </main>
-{% include 'partials/_footer.html.twig' %}
+{% include '_partials/_footer.html.twig' %}
 </body>
 </html>
