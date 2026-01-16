@@ -18,7 +18,8 @@ class ImageUploadService
     public function __construct(
         private readonly string $uploadDirectory,
         private readonly SluggerInterface $slugger,
-    ) {}
+    ) {
+    }
 
     public function upload(UploadedFile $file, ?string $username = null, ?string $oldFile = null, ?string $subdirectory = null): string
     {
