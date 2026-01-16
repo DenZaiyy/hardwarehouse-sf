@@ -1,0 +1,4 @@
+<form action="{{ action }}" method="post" onsubmit="return confirm('{{ 'form.delete.confirm.message'|trans }}')">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
+    <button type="submit">{{ ux_icon('heroicons-solid:trash', {class: 'size-4'}) }}</button>
+</form>
