@@ -1,24 +1,31 @@
 @import "tailwindcss";
 
+@theme {
+    --color-primary: oklch(0.4012 0.1251 254.53);
+    --color-secondary: oklch(0.5579 0.0849 240.94);
+    --color-paragraph: oklch(0.9582 0.0131 251.56);
+    --color-search: oklch(0.931 0 0);
+}
+
 @layer base {
     /* =========================
        TYPOGRAPHY (RESPONSIVE)
        ========================= */
 
     h1 {
-        @apply text-2xl font-bold tracking-tight text-slate-900
+        @apply text-2xl font-bold tracking-tight text-slate-900 mb-4
         sm:text-3xl
         lg:text-4xl;
     }
 
     h2 {
-        @apply text-xl font-semibold tracking-tight text-slate-900
+        @apply text-xl font-semibold tracking-tight text-slate-900 mb-2
         sm:text-2xl
         lg:text-3xl;
     }
 
     h3 {
-        @apply text-lg font-semibold text-slate-800
+        @apply text-lg font-semibold text-slate-800 mb-2
         sm:text-xl
         lg:text-2xl;
     }
@@ -78,6 +85,107 @@
         @apply text-blue-600 underline-offset-2
         hover:underline
         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+    }
+
+    /* =========================
+   TABLES (RESPONSIVE)
+   ========================= */
+
+    table {
+        @apply w-full text-sm text-left text-slate-700
+        sm:text-base;
+    }
+
+    thead {
+        @apply bg-slate-100 border-b-2 border-slate-200;
+    }
+
+    th {
+        @apply px-3 py-2 text-xs font-semibold text-slate-900 uppercase tracking-wider
+        sm:px-4 sm:py-3 sm:text-sm;
+    }
+
+    tbody tr {
+        @apply border-b border-slate-200
+        hover:bg-slate-50
+        transition-colors duration-150;
+    }
+
+    td {
+        @apply px-3 py-2
+        sm:px-4 sm:py-3;
+    }
+
+    /* Ligne paire pour zebra striping (optionnel) */
+    tbody tr:nth-child(even) {
+        @apply bg-slate-50/50;
+    }
+
+    /* Dernière ligne sans bordure */
+    tbody tr:last-child {
+        @apply border-b-0;
+    }
+
+    /* Caption si utilisé */
+    caption {
+        @apply py-2 text-sm text-slate-500 text-left
+        sm:text-base;
+    }
+}
+
+@layer components {
+    /* =========================
+       HEADER LINKS
+       ========================= */
+    header a {
+        @apply text-paragraph;
+    }
+
+    header .dropdown a {
+        @apply text-secondary;
+    }
+
+    /* =========================
+       FORM REQUIRED + HELP TEXT
+       ========================= */
+
+    form :has(:is(input, select, textarea):required) > label::after {
+        content: ' *';
+        color: red;
+    }
+
+    form .help-text::before {
+        content: 'ℹ ';
+        font-size: 0.8em;
+        color: #3b82f6;
+    }
+
+    form .help-text {
+        @apply text-gray-500 text-xs mt-2 w-max leading-[1.4];
+    }
+
+    /* =========================
+       ALERT MESSAGE
+       ========================= */
+
+    .flash-message {
+        @apply transition-opacity duration-500 ease-in-out z-50;
+    }
+
+    .flash-success {
+        @apply bg-green-600 text-white px-4 py-2 rounded-lg;
+    }
+
+    .flash-danger {
+        @apply bg-red-600 text-white px-4 py-2 rounded-lg;
+    }
+
+    .flash-notice {
+        @apply bg-yellow-600 text-white px-4 py-2 rounded-lg;
+    }
+
+    .flash-warning {
+        @apply bg-orange-600 text-white px-4 py-2 rounded-lg;
     }
 }
 

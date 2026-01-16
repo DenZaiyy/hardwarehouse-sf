@@ -29,9 +29,10 @@ class ChangePasswordFormType extends AbstractType
                         new NotBlank(
                             message: 'Please enter a password',
                         ),
-                        new Length(min: 12,
+                        new Length(
+                            min: 12,
                             max: 4096,
-                            minMessage:'Your password should be at least {{ limit }} characters',
+                            minMessage: 'Your password should be at least {{ limit }} characters',
                         ),
                         new PasswordStrength(),
                         new NotCompromisedPassword(),

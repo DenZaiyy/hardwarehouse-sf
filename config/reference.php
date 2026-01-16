@@ -1488,6 +1488,60 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     throttle_limit?: int|Param, // Another password reset cannot be made faster than this throttle time in seconds. // Default: 3600
  *     enable_garbage_collection?: bool|Param, // Enable/Disable automatic garbage collection. // Default: true
  * }
+ * @psalm-type UxIconsConfig = array{
+ *     icon_dir?: scalar|null|Param, // The local directory where icons are stored. // Default: "%kernel.project_dir%/assets/icons"
+ *     default_icon_attributes?: array<string, scalar|null|Param>,
+ *     icon_sets?: array<string, array{ // the icon set prefix (e.g. "acme") // Default: []
+ *         path?: scalar|null|Param, // The local icon set directory path. (cannot be used with 'alias')
+ *         alias?: scalar|null|Param, // The remote icon set identifier. (cannot be used with 'path')
+ *         icon_attributes?: array<string, scalar|null|Param>,
+ *     }>,
+ *     aliases?: array<string, string|Param>,
+ *     iconify?: bool|array{ // Configuration for the remote icon service.
+ *         enabled?: bool|Param, // Default: true
+ *         on_demand?: bool|Param, // Whether to download icons "on demand". // Default: true
+ *         endpoint?: scalar|null|Param, // The endpoint for the Iconify icons API. // Default: "https://api.iconify.design"
+ *     },
+ *     ignore_not_found?: bool|Param, // Ignore error when an icon is not found. Set to 'true' to fail silently. // Default: false
+ * }
+ * @psalm-type VichUploaderConfig = array{
+ *     default_filename_attribute_suffix?: scalar|null|Param, // Default: "_name"
+ *     db_driver: scalar|null|Param,
+ *     storage?: scalar|null|Param, // Default: "file_system"
+ *     use_flysystem_to_resolve_uri?: bool|Param, // Default: false
+ *     twig?: scalar|null|Param, // twig requires templating // Default: true
+ *     form?: scalar|null|Param, // Default: true
+ *     metadata?: array{
+ *         cache?: scalar|null|Param, // Default: "file"
+ *         type?: scalar|null|Param, // Default: "attribute"
+ *         file_cache?: array{
+ *             dir?: scalar|null|Param, // Default: "%kernel.cache_dir%/vich_uploader"
+ *         },
+ *         auto_detection?: bool|Param, // Default: true
+ *         directories?: list<array{ // Default: []
+ *             path: scalar|null|Param,
+ *             namespace_prefix?: scalar|null|Param, // Default: ""
+ *         }>,
+ *     },
+ *     mappings?: array<string, array{ // Default: []
+ *         uri_prefix?: scalar|null|Param, // Default: "/uploads"
+ *         upload_destination?: scalar|null|Param, // Default: null
+ *         namer?: string|array{
+ *             service?: scalar|null|Param, // Default: null
+ *             options?: mixed, // Default: null
+ *         },
+ *         directory_namer?: string|array{
+ *             service?: scalar|null|Param, // Default: null
+ *             options?: mixed, // Default: null
+ *         },
+ *         delete_on_remove?: scalar|null|Param, // Default: true
+ *         erase_fields?: scalar|null|Param, // Default: true
+ *         delete_on_update?: scalar|null|Param, // Default: true
+ *         inject_on_load?: scalar|null|Param, // Default: false
+ *         namer_keep_extension?: scalar|null|Param, // Default: false
+ *         db_driver?: scalar|null|Param, // Default: null
+ *     }>,
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
@@ -1506,6 +1560,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     twig_component?: TwigComponentConfig,
  *     live_component?: LiveComponentConfig,
  *     symfonycasts_reset_password?: SymfonycastsResetPasswordConfig,
+ *     ux_icons?: UxIconsConfig,
+ *     vich_uploader?: VichUploaderConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -1527,6 +1583,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         twig_component?: TwigComponentConfig,
  *         live_component?: LiveComponentConfig,
  *         symfonycasts_reset_password?: SymfonycastsResetPasswordConfig,
+ *         ux_icons?: UxIconsConfig,
+ *         vich_uploader?: VichUploaderConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -1546,6 +1604,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         twig_component?: TwigComponentConfig,
  *         live_component?: LiveComponentConfig,
  *         symfonycasts_reset_password?: SymfonycastsResetPasswordConfig,
+ *         ux_icons?: UxIconsConfig,
+ *         vich_uploader?: VichUploaderConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -1566,6 +1626,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         twig_component?: TwigComponentConfig,
  *         live_component?: LiveComponentConfig,
  *         symfonycasts_reset_password?: SymfonycastsResetPasswordConfig,
+ *         ux_icons?: UxIconsConfig,
+ *         vich_uploader?: VichUploaderConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,

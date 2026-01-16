@@ -1,6 +1,45 @@
-user.registration.title: 'Crée votre compte'
-user.registration.agree_terms.label: "Acceptez les conditions d'utilisation"
-user.registration.email.label: 'Adresse mail'
-user.registration.password.label: 'Mot de passe'
-user.registration.password.confirm.label: 'Confirmez votre mot de passe'
-user.registration.submit: 'Crée'
+user:
+    registration:
+        title: 'Crée votre compte'
+        agree_terms: { label: 'Acceptez les conditions', is_true: 'Vous devez accepter nos conditions générales' }
+        email: { label: 'Adresse mail' }
+        username: { label: Pseudonyme }
+        password: { label: 'Mot de passe', confirm: { label: 'Confirmez votre mot de passe' } }
+        avatar: { label: 'Image de profile', placeholder: 'Glissez ou cliquer pour choisir votre image' }
+        submit: 'Crée mon compte'
+        flash: { success: 'Vous venez de vous inscrire, bienvenue !' }
+    register:
+        email: { confirm: { subject: 'Veuillez confirmer votre adresse e-mail' } }
+    login:
+        title: 'Se connecter à votre compte client'
+        logged: { message: 'Vous êtes connecté en tant que %user%', logout: { label: Déconnexion } }
+        email: { label: 'Adresse email' }
+        password: { label: 'Mot de passe' }
+        remember: { label: 'Se souvenir de moi' }
+        submit: { label: 'Se connecter' }
+    profile:
+        title: 'Mon profile'
+    update:
+        infos: {
+            email: { label: __user.update.infos.email.label },
+            username: { label: __user.update.infos.username.label },
+            avatar: { label: __user.update.infos.avatar.label }
+        }
+        changePassword: {
+            current: { label: __user.update.changePassword.current.label, help: __user.update.changePassword.current.help },
+            new: { first: { label: __user.update.changePassword.new.first.label, help: __user.update.changePassword.new.first.help }, constraint: { not_blank: __user.update.changePassword.new.constraint.not_blank, length: { minMessage: __user.update.changePassword.new.constraint.length.minMessage } }, second: { label: __user.update.changePassword.new.second.label, help: __user.update.changePassword.new.second.help }, invalid: { message: __user.update.changePassword.new.invalid.message } },
+            submit: { label: __user.update.changePassword.submit.label }
+        }
+seo:
+    description:
+        default: 'Découvrez notre sélection de composants PC : cartes graphiques, processeurs, cartes mères, mémoire RAM et stockage. Livraison rapide et support technique dédié.'
+header:
+    user:
+        label: Utilisateur
+    cart:
+        label: Panier
+    nav:
+        profile: { label: Profile }
+        logout: { label: Déconnexion }
+        register: { label: "S'inscrire" }
+        login: { label: 'Se connecter' }

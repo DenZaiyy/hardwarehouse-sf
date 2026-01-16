@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% endblock %}
+
+{% block body %}
+    <h1>Éditer vos informations</h1>
+
+    <turbo-frame id="user-infos">
+        <div class="block md:flex md:flex-col md:gap-4 border p-2 md:p-4 rounded">
+            {{ form_start(form, {action: path('profile.infos')}) }}
+            <div class="flex flex-row gap-4">
+                <div class="flex-1">
+                    {{ form_label(form.email) }}
+                    {{ form_widget(form.email) }}
+                    {{ form_errors(form.email) }}
+                    {{ form_help(form.email) }}
+                </div>
+                <div class="flex-1">
+                    {{ form_label(form.username) }}
+                    {{ form_widget(form.username) }}
+                    {{ form_errors(form.username) }}
+                    {{ form_help(form.username) }}
+                </div>
+            </div>
+
+            <div class="flex-1">
+                {{ form_label(form.avatarFile) }}
+                {{ form_widget(form.avatarFile) }}
+                {{ form_errors(form.avatarFile) }}
+                {{ form_help(form.avatarFile) }}
+            </div>
+
+            <div class="flex flex-row gap-4">
+                <div class="flex-1">
+                    {{ form_widget(form.save) }}
+                </div>
+                <div class="flex-1">
+                    <a href="{{ path('profile.index') }}">Annuler</a>
+                </div>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </turbo-frame>
+{% endblock %}
+
+

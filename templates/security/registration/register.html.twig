@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'register.title'|trans(domain = "title") }} - HardWareHouse{% endblock %}
+
+{% block meta_description %}Crée votre compte client et profiter de notre catalogue de produits !{% endblock %}
+
+{% block body %}
+    {% for flash_error in app.flashes('verify_email_error') %}
+        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+    {% endfor %}
+
+    <div class="mx-auto flex flex-col p-4 gap-2 rounded border md:max-w-7xl">
+        <h1>{{ 'user.registration.title'|trans }}</h1>
+
+        {{ form_start(registrationForm, { 'attr': {'class': 'flex flex-col gap-4' }}) }}
+        <div class="flex flex-row gap-2 w-full">
+            <div class="w-1/2">
+                {{ form_label(registrationForm.email) }}
+                {{ form_widget(registrationForm.email) }}
+                {{ form_errors(registrationForm.email) }}
+            </div>
+            <div class="w-1/2">
+                {{ form_label(registrationForm.username) }}
+                {{ form_widget(registrationForm.username) }}
+                {{ form_errors(registrationForm.username) }}
+            </div>
+        </div>
+
+        <div class="flex flex-row gap-2 w-full">
+            {{ form_errors(registrationForm.plainPassword) }}
+            <div class="w-1/2">
+                {{ form_label(registrationForm.plainPassword.first) }}
+                {{ form_widget(registrationForm.plainPassword.first) }}
+            </div>
+            <div class="w-1/2">
+                {{ form_label(registrationForm.plainPassword.second) }}
+                {{ form_widget(registrationForm.plainPassword.second) }}
+            </div>
+        </div>
+
+        <div>
+            {{ form_label(registrationForm.avatar) }}
+            {{ form_widget(registrationForm.avatar) }}
+        </div>
+
+        <div class="flex gap-2 items-center flex-1">
+            {{ form_widget(registrationForm.agreeTerms, {attr: {class: 'size-5'}}) }}
+            {{ form_label(registrationForm.agreeTerms) }}
+        </div>
+
+        <button type="submit" class="btn">{{ 'user.registration.submit'|trans }}</button>
+        {{ form_end(registrationForm) }}
+    </div>
+{% endblock %}

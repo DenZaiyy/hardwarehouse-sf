@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% endblock %}
+
+{% block body %}
+    <h1>{{ 'user.address.form.title'|trans }}</h1>
+
+    <turbo-frame id='address_{{ address.id }}'>
+        {{ form(form) }}
+    </turbo-frame>
+{% endblock %}
+
+
