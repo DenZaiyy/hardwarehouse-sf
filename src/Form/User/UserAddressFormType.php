@@ -25,47 +25,47 @@ class UserAddressFormType extends AbstractType
     {
         $builder
             ->add('label', TextType::class, [
-                'label' => $this->translator->trans('user.address.label.label'),
+                'label' => $this->translator->trans('user.address.form.label.label'),
             ])
             ->add('firstname', TextType::class, [
-                'label' => $this->translator->trans('user.address.firstname.label'),
+                'label' => $this->translator->trans('user.address.form.firstname.label'),
                 'attr' => [
                     'autocomplete' => 'given-name',
                 ]
             ])
             ->add('lastname', TextType::class, [
-                'label' => $this->translator->trans('user.address.lastname.label'),
+                'label' => $this->translator->trans('user.address.form.lastname.label'),
                 'attr' => [
                     'autocomplete' => 'family-name',
                 ]
             ])
             ->add('address', TextType::class, [
-                'label' => $this->translator->trans('user.address.address.label'),
+                'label' => $this->translator->trans('user.address.form.address.label'),
                 'attr' => [
                     'autocomplete' => 'address-line1',
                 ]
             ])
             ->add('cp', TextType::class, [
-                'label' => $this->translator->trans('user.address.cp.label'),
+                'label' => $this->translator->trans('user.address.form.cp.label'),
                 'attr' => [
                     'autocomplete' => 'postal-code',
                 ]
             ])
             ->add('city', TextType::class, [
-                'label' => $this->translator->trans('user.address.city.label'),
+                'label' => $this->translator->trans('user.address.form.city.label'),
                 'attr' => [
                     'autocomplete' => 'city',
                 ]
             ])
             ->add('country', EnumType::class, [
-                'label' => $this->translator->trans('user.address.country.label'),
+                'label' => $this->translator->trans('user.address.form.country.label'),
                 'class' => CountryList::class,
                 'attr' => [
                     'autocomplete' => 'country',
                 ]
             ])
             ->add('save', SubmitType::class, [
-                'label' => $this->translator->trans('user.address.save.label'),
+                'label' => $this->translator->trans('user.address.form.save.label'),
             ])
             ->addEventListener(FormEvents::POST_SUBMIT, $this->attachTimestamps(...))
         ;

@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title 'test' %}
+{% block title %}{{ 'user.address.home.title'|trans(domain = "title") }} - HardWareHouse{% endblock %}
 
 {% block body %}
     <h1>{{ 'user.address.home.title'|trans }}</h1>
@@ -48,7 +48,7 @@
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="8">{{ 'user.address.home.no_items.message' }}</td>
+                    <td colspan="8">{{ 'user.address.home.no_items.message'|trans }}</td>
                 </tr>
             {% endif %}
         </tbody>
