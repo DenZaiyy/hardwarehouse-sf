@@ -2,9 +2,12 @@
 
 namespace App\Entity;
 
+use App\Config\CountryList;
+use App\Enum\CountryEnum;
 use App\Repository\AddressRepository;
 use App\Trait\TimestampTrait;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: AddressRepository::class)]
 class Address
@@ -17,26 +20,42 @@ class Address
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 50)]
+    #[Assert\GreaterThanOrEqual(value: 3)]
     private ?string $label = null;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 100)]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
     private ?string $address = null;
 
     #[ORM\Column(length: 10)]
+    #[Assert\NotBlank]
     private ?string $cp = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank]
     private ?string $city = null;
 
     #[ORM\ManyToOne(inversedBy: 'addresses')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user_info = null;
+
+    #[ORM\Column(type: 'string', enumType: CountryList::class)]
+    private ?CountryList $country = null;
+
+    #[ORM\Column]
+    private ?bool $is_default = null;
 
     public function getId(): ?int
     {
@@ -123,6 +142,30 @@ class Address
     public function setUserInfo(?User $user_info): static
     {
         $this->user_info = $user_info;
+
+        return $this;
+    }
+
+    public function getCountry(): ?CountryList
+    {
+        return $this->country;
+    }
+
+    public function setCountry(CountryList $country): static
+    {
+        $this->country = $country;
+
+        return $this;
+    }
+
+    public function isDefault(): ?bool
+    {
+        return $this->is_default;
+    }
+
+    public function setIsDefault(bool $is_default): static
+    {
+        $this->is_default = $is_default;
 
         return $this;
     }
