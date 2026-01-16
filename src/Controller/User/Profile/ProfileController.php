@@ -56,14 +56,8 @@ class ProfileController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var User $data */
             $data = $form->getData();
-            dd($data,$request->files->get('avatar'));
-            $email = $data->getEmail();
 
-            if ($request->files->get('avatar')) {
-                $avatar = $request->files->get('avatar');
-                $avatarImage = $imageUploadService->upload($avatar, 'avatar');
-                $user->setAvatar($avatarImage);
-            }
+            $email = $data->getEmail();
 
             if ($email !== $user->getEmail()) {
                 // check if email not exists
@@ -93,7 +87,6 @@ class ProfileController extends AbstractController
             'user' => $user,
             'form' => $form->createView(),
         ]);
-
     }
 
     #[Route('/password', name: 'password')]
