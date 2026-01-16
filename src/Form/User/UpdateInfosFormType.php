@@ -30,7 +30,7 @@ class UpdateInfosFormType extends AbstractType
             ->add('username', TextType::class, [
                 'label' => $this->translator->trans('user.update.infos.username.label')
             ])
-            ->add('avatar', DropzoneType::class, [
+            ->add('avatarFile', DropzoneType::class, [
                 'label' => $this->translator->trans('user.update.infos.avatar.label'),
                 'required' => false,
             ])
@@ -41,7 +41,7 @@ class UpdateInfosFormType extends AbstractType
         ;
     }
 
-    private function attachTimestamps(PostSubmitEvent $event):void
+    private function attachTimestamps(PostSubmitEvent $event): void
     {
         $data = $event->getData();
 
