@@ -28,11 +28,10 @@
     <!-- Categories -->
     <nav class="bg-secondary">
         <ul class="flex gap-4 overflow-x-auto px-4 py-2 text-sm md:justify-center">
-            <li><a href="#">test</a></li>
-            <li><a href="#">test</a></li>
-            <li><a href="#">test</a></li>
-            <li><a href="#">test</a></li>
-            <li><a href="#">test</a></li>
+            <li><a href="{{ path('homepage') }}">Configuration PC</a></li>
+            {% for category in categories() %}
+                <li><a href="{{ path('category.show', {slug: category.slug}) }}">{{ category.name }}</a></li>
+            {% endfor %}
         </ul>
     </nav>
 </header>
