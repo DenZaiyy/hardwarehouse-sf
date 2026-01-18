@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% endblock %}
+
+{% block body %}
+    <h1>{{ product.name }}</h1>
+
+    <h2>Caractéristiques techniques</h2>
+
+    <div class="flex flex-col gap-2">
+        {% for attribute in attributes %}
+            <span>{{ attribute.categoryAttribute.attribute.name }}: <strong>{{ attribute.value }}</strong></span>
+        {% endfor %}
+    </div>
+{% endblock %}
+

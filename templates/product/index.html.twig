@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello ProductController!{% endblock %}
+
+{% block body %}
+    <h1>Products list</h1>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Slug</th>
+            <th>Price</th>
+            <th>Image</th>
+            <th>Category</th>
+            <th>Brand</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if products is not null %}
+            {% for product in products %}
+                <tr>
+                    <td><a href="{{ path('product.show', {slug: product.slug}) }}">{{ product.id }}</a></td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.slug }}</td>
+                    <td>{{ product.price }}</td>
+                    <td>{{ product.image }}</td>
+                    <td>{{ product.category.name }}</td>
+                    <td>{{ product.brand.name }}</td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="7">No results founds</td>
+            </tr>
+        {% endif %}
+
+        </tbody>
+    </table>
+{% endblock %}
