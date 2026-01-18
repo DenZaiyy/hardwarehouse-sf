@@ -3,7 +3,10 @@
 {% block title %}{{ 'user.address.home.title'|trans(domain = "title") }} - HardWareHouse{% endblock %}
 
 {% block body %}
-    <h1>{{ 'user.address.home.title'|trans }}</h1>
+    <div class="md:flex md:gap-2 md:items-center md:mb-4">
+        <h1>{{ 'user.address.home.title'|trans }}</h1>
+        <a href="{{ path('address.add') }}">{{ 'user.address.home.button.add.label'|trans }}</a>
+    </div>
 
     <table>
         <thead>
