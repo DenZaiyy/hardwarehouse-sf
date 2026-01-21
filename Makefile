@@ -15,6 +15,25 @@ help: ## Show this help
 	$(call banner,$(INFO),Available targets:)
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+.PHONY: start
+start: ## Starting symfony server with logs
+	$(call banner,$(INFO),Starting symfony server...)
+	symfony server:start
+
+.PHONY: stop
+stop: ## Stopping symfony server
+	$(call banner,$(INFO),Shutdown symfony server...)
+	symfony server:stop
+
+.PHONY: up
+up: ## Starting docker container for db and mailer
+	$(call banner,$(INFO),Starting docker containers...:)
+	docker compose up -d
+
+.PHONY: down
+down: ## Stopping docker containers
+	$(call banner,$(INFO),Stopping docker containers...)
+	docker compose down
 
 .PHONY: migration
 migration: ## Make new migration about current changes
