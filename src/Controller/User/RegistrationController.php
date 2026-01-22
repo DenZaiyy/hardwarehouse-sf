@@ -64,6 +64,8 @@ class RegistrationController extends AbstractController
             $this->addFlash('success', $translator->trans('user.registration.flash.success'));
             $this->redirectToRoute('homepage');
 
+            $this->mailerService->sendAdminNotification("Inscription", sprintf("Un nouvel utilisateur c'est inscrit sur le site : %s (%s)", $user->getUsername(), $user->getEmail()));
+
             return $security->login($user, 'form_login', 'main');
         }
 
