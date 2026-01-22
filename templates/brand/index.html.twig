@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello BrandController!{% endblock %}
+
+{% block body %}
+    <h1>Brands list</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Slug</th>
+            <th>Logo</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if brands is not null %}
+            {% for brand in brands %}
+                <tr>
+                    <td>{{ brand.id }}</td>
+                    <td>{{ brand.name }}</td>
+                    <td>{{ brand.slug }}</td>
+                    <td><img src="{{ brand.logo }}" alt="{{ brand.name }} logo" class="size-16"/></td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="4">No results founds</td>
+            </tr>
+        {% endif %}
+
+        </tbody>
+    </table>
+{% endblock %}

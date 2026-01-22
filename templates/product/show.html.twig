@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ product.brand.name }} {{ product.name }} - HardWareHouse{% endblock %}
+
+{% block body %}
+    <div class="flex flex-col gap-4">
+        <div class="flex gap-3.75">
+            <div class="grid grid-flow-col gap-3.75">
+                {% for idx, image in product.images %}
+                    <img src="{{ image }}" alt="Image of product: {{ product.name }} ({{ idx + 1 }})" class="{{ idx == 0 ? 'max-w-150 row-span-2' : 'w-50' }}">
+                {% endfor %}
+            </div>
+            <div class="shrink">
+                <h1>{{ product.name }}</h1>
+                <p>{{ product.shortDescription }}</p>
+            </div>
+        </div>
+
+        {% from 'components/tabs.html.twig' import tabs %}
+
+        {{ tabs([
+            { label: 'Description', content: product.description },
+            { label: 'Specs', content: include('product/_specs.html.twig', { 'attributes': attributes }) },
+            { label: 'Avis', content: include('product/_reviews.html.twig') }
+        ]) }}
+    </div>
+
+{% endblock %}
+

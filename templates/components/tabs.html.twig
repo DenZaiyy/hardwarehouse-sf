@@ -1,0 +1,26 @@
+{% macro tabs(items, default = 0) %}
+    <div data-controller="tabs" data-tabs-index-value="{{ default }}" class="bg-paragraph text-primary rounded-section">
+        <div class="border-b border-secondary" role="tablist">
+            <nav class="flex gap-x-1">
+                {% for item in items %}
+                    <button
+                        type="button"
+                        role="tab"
+                        data-tabs-target="tab"
+                        data-action="tabs#select"
+                        class="px-4 py-2.5 text-xl font-bold bg-paragraph font-title transition-colors cursor-pointer text-primary"
+                    >
+                        {{ item.label }}
+                    </button>
+                {% endfor %}
+            </nav>
+        </div>
+        <div class="p-5">
+            {% for item in items %}
+                <div data-tabs-target="panel" role="tabpanel" {% if loop.index0 != default %}hidden{% endif %}>
+                    {{ item.content|raw }}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endmacro %}

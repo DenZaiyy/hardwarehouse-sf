@@ -3,15 +3,15 @@
 {% block title %}{{ 'user.profile.title'|trans(domain = "title") }} - HardWareHouse{% endblock %}
 
 {% block body %}
-    <div class="md:mx-auto md:max-w-4xl">
+    <div class="md:mx-auto md:max-w-6xl">
         <h1>{{ 'user.profile.title'|trans }}</h1>
             <h2>{{ 'user.profile.informations.title'|trans }}</h2>
 
         <div class="md:flex md:gap-2">
             <div class="img">
-                <img src="{{ vich_uploader_asset(user, 'avatarFile') }}" alt="Avatar of user" class="object-cover size-40" />
+                <img src="{{ vich_uploader_asset(user, 'avatarFile') }}" alt="Avatar of user" class="object-cover rounded-md size-40" />
             </div>
-            <div id="user-infos-displayed" class="flex flex-col">
+            <div id="user-infos-displayed" class="flex flex-col flex-1">
                 <div>
                     {{ 'user.profile.informations.email.label'|trans }} : <span id="email-text">{{ user.email }}</span>
                 </div>
@@ -25,12 +25,12 @@
                     </div>
                 {% endif %}
 
-                <div>
+                <div class="w-full">
                     <turbo-frame id="user-password">
                         <a href="{{ path('profile.password') }}">{{ 'user.profile.informations.password.edit.label'|trans }}</a>
                     </turbo-frame>
                 </div>
-                <div>
+                <div class="w-full">
                     <turbo-frame id="user-infos">
                         <a href="{{ path('profile.infos') }}">{{ 'user.profile.informations.infos.edit.label'|trans }}</a>
                     </turbo-frame>
@@ -38,7 +38,7 @@
             </div>
         </div>
 
-        <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-2 mt-2">
             <div class="md:flex md:gap-2 md:items-center">
                 <h2 class="mb-0">{{ 'user.profile.addresses.label'|trans }}</h2>
                 <a href="{{ path('address.add') }}">{{ 'user.profile.addresses.add.label'|trans }}</a>
@@ -53,7 +53,7 @@
                             </li>
                         {% endfor %}
                         {% else %}
-                        <li><span>{{ 'user.profile.addresses.not_' }}</span></li>
+                        <li><span>{{ 'user.profile.addresses.empty.label'|trans }}</span></li>
                     {% endif %}
 
                 </ul>

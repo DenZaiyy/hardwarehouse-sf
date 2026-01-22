@@ -46,7 +46,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column]
     #[Assert\NotBlank(message: 'user.assert.password.not_blank', groups: ['password_change'])]
-    #[Assert\Length(min: 6, max: 4096, minMessage: 'user.assert.password.min_length', groups: ['password_change'])]
+    #[Assert\Length(min: 12, max: 4096, minMessage: 'user.assert.password.min_length', groups: ['password_change'])]
     #[Assert\Regex(
         pattern: '/^(?=.*\d)(?=.*[!-\/:-@[-`{-~À-ÿ§µ²°£])(?=.*[a-z])(?=.*[A-Z])(?=.*[A-Za-z]).{12,32}$/',
         message: 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.',

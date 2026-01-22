@@ -76,7 +76,7 @@ class AddressController extends AbstractController
     }
 
     #[Route('/edit/{id}', name: 'edit', methods: ['GET', 'PUT'])]
-    public function edit (Address $address, Request $request): Response
+    public function edit(Address $address, Request $request): Response
     {
         $user = $this->getUser();
         if (!$user instanceof User) {
@@ -104,7 +104,7 @@ class AddressController extends AbstractController
     }
 
     #[Route('/delete/{id}', name: 'delete', methods: ['POST'])]
-    public function delete (Address $address, Request $request): Response
+    public function delete(Address $address, Request $request): Response
     {
         if ($this->isCsrfTokenValid('delete'.$address->getId(), $request->request->get('_token'))) {
             $this->em->remove($address);
