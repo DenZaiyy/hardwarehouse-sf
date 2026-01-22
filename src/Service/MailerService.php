@@ -4,12 +4,14 @@ namespace App\Service;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 
 readonly class MailerService
 {
     public function __construct(
+        private RequestStack $requestStack,
         private MailerInterface $mailer,
         private LoggerInterface $logger,
         private string          $adminEmail = "grischko.kevin@gmail.com",
@@ -34,7 +36,7 @@ readonly class MailerService
             'emails/welcome.html.twig',
             [
                 'userEmail' => $userEmail,
-                'loginUrl' => 'https://denz.ovh/login'
+                'loginUrl' => $this->getBaseDomain() . '/login'
             ]
         );
 
@@ -84,7 +86,7 @@ readonly class MailerService
     private function sendTemplatedEmail(string $to, string $subject, string $template, array $context = [], ?string $from = null): void
     {
         try {
-            $email = (new TemplatedEmail())
+            $email = new TemplatedEmail()
                 ->from($from ?? $this->fromEmail)
                 ->to($to)
                 ->subject($subject)
@@ -104,5 +106,16 @@ readonly class MailerService
     {
         $pattern = "/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,})$/i";
         return (bool) preg_match($pattern, $email);
+    }
+
+    private function getBaseDomain(): ?string
+    {
+        $request = $this->requestStack->getCurrentRequest();
+
+        if (!$request) {
+            return null;
+        }
+
+        return $request->getSchemeAndHttpHost();
     }
 }
