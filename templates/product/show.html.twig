@@ -1,16 +1,29 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{% endblock %}
+{% block title %}{{ product.brand.name }} {{ product.name }} - HardWareHouse{% endblock %}
 
 {% block body %}
-    <h1>{{ product.name }}</h1>
+    <div class="flex flex-col gap-4">
+        <div class="flex gap-3.75">
+            <div class="grid grid-flow-col gap-3.75">
+                {% for idx, image in product.images %}
+                    <img src="{{ image }}" alt="Image of product: {{ product.name }} ({{ idx + 1 }})" class="{{ idx == 0 ? 'max-w-150 row-span-2' : 'w-50' }}">
+                {% endfor %}
+            </div>
+            <div class="shrink">
+                <h1>{{ product.name }}</h1>
+                <p>{{ product.shortDescription }}</p>
+            </div>
+        </div>
 
-    <h2>Caractéristiques techniques</h2>
+        {% from 'components/tabs.html.twig' import tabs %}
 
-    <div class="flex flex-col gap-2">
-        {% for attribute in attributes %}
-            <span>{{ attribute.categoryAttribute.attribute.name }}: <strong>{{ attribute.value }}</strong></span>
-        {% endfor %}
+        {{ tabs([
+            { label: 'Description', content: product.description },
+            { label: 'Specs', content: include('product/_specs.html.twig', { 'attributes': attributes }) },
+            { label: 'Avis', content: include('product/_reviews.html.twig') }
+        ]) }}
     </div>
+
 {% endblock %}
 

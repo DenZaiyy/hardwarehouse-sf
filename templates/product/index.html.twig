@@ -3,9 +3,23 @@
 {% block title %}Hello ProductController!{% endblock %}
 
 {% block body %}
-    <h1>Products list</h1>
+    <div class="relative flex flex-col md:flex-row gap-10">
+        <div class="basis-1/4 relative">
+            {% include '_partials/filters/_filters.html.twig' %}
+        </div>
+        <div class="basis-3/4">
+            <h1>Products list</h1>
+            {% if products is not null %}
+                <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
+                    {% for product in products %}
+                        {% include '_partials/_product_card.html.twig' with {product: product} %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
 
-    <table>
+    {#<table>
         <thead>
         <tr>
             <th>ID</th>
@@ -25,7 +39,7 @@
                     <td>{{ product.name }}</td>
                     <td>{{ product.slug }}</td>
                     <td>{{ product.price }}</td>
-                    <td>{{ product.image }}</td>
+                    <td><img src="{{ product.image }}" alt="Image of {{ product.name }}" class="size-16"/></td>
                     <td>{{ product.category.name }}</td>
                     <td>{{ product.brand.name }}</td>
                 </tr>
@@ -37,5 +51,5 @@
         {% endif %}
 
         </tbody>
-    </table>
+    </table>#}
 {% endblock %}

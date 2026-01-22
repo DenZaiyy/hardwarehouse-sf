@@ -108,11 +108,10 @@ class ProfileController extends AbstractController
             if ($hasher->hashPassword($user, $currentPassword)) {
                 $newPassword = $form->get('plainPassword')->getData();
                 $user->setPassword($hasher->hashPassword($user, $newPassword));
-                $user->setUpdatedAt(new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris')));
 
                 $entityManager->flush();
 
-                $this->addFlash('success', 'Your password has been changed.');
+                $this->addFlash('success', 'Your password has been changed successfully.');
 
                 // Si requête Turbo, retourne des streams
                 if ($request->headers->has('Turbo-Frame') || $request->getPreferredFormat() === 'turbo_stream') {
