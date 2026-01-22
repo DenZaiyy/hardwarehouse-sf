@@ -11,7 +11,7 @@
                 <th>ID</th>
                 <th>Name</th>
                 <th>Slug</th>
-                <th>Image</th>
+                <th>Thumbnail</th>
                 <th>Price</th>
                 <th>Brand</th>
                 <th>Stock</th>
@@ -23,9 +23,9 @@
                     <td><a href="{{ path('product.show', {slug: product.slug}) }}">{{ product.id }}</a></td>
                     <td>{{ product.name }}</td>
                     <td>{{ product.slug }}</td>
-                    <td>{{ product.image }}</td>
+                    <td><img src="{{ product.thumbnail }}" alt="{{ product.name }} preview" class="size-16" /></td>
                     <td>{{ product.price }}</td>
-                    <td>{{ product.brand.name }}</td>
+                    <td><a href="{{ path('brand.show', {slug: product.brand.slug}) }}">{{ product.brand.name }}</a></td>
                     <td>{{ product.stock.quantity }}</td>
                 </tr>
             {% endfor %}
