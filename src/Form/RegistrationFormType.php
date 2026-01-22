@@ -79,7 +79,7 @@ class RegistrationFormType extends AbstractType
                     )
                 ],
             ])
-            ->add('avatarFile', DropzoneType::class, [
+            ->add('avatar', DropzoneType::class, [
                 'label' => 'user.registration.avatar.label',
                 'attr' => [
                     'placeholder' => 'user.registration.avatar.placeholder',
