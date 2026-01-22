@@ -4,10 +4,12 @@ namespace App\Form\User;
 
 use App\Entity\User;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Event\PostSubmitEvent;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -83,7 +85,19 @@ class ChangePasswordFormType extends AbstractType
                     'class' => 'w-full'
                 ]
             ])
+            ->addEventListener(FormEvents::POST_SUBMIT, $this->attachTimestamps(...))
         ;
+    }
+
+    private function attachTimestamps(PostSubmitEvent $event): void
+    {
+        $data = $event->getData();
+
+        if (!($data instanceof User)) {
+            return;
+        }
+
+        $data->setUpdatedAt(new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris')));
     }
 
     public function configureOptions(OptionsResolver $resolver): void
