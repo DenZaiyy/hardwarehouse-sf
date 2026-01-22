@@ -5,6 +5,22 @@
     --color-secondary: oklch(0.5579 0.0849 240.94);
     --color-paragraph: oklch(0.9582 0.0131 251.56);
     --color-search: oklch(0.931 0 0);
+    --font-display: "Montserrats", sans-serif;
+    --font-title: "Exo 2", sans-serif;
+
+    --radius-section: 10px;
+
+    --animate-wiggle: wiggle 1s ease-in-out infinite;
+
+    @keyframes wiggle {
+        0%,
+        100% {
+            transform: rotate(-3deg);
+        }
+        50% {
+            transform: rotate(3deg);
+        }
+    }
 }
 
 @layer base {
@@ -13,27 +29,23 @@
        ========================= */
 
     h1 {
-        @apply text-2xl font-bold tracking-tight text-slate-900
-        sm:text-3xl
-        lg:text-4xl;
+        @apply text-2xl font-bold tracking-tight text-primary font-title;
     }
 
     h2 {
-        @apply text-xl font-semibold tracking-tight text-slate-900
-        sm:text-2xl
-        lg:text-3xl;
+        @apply text-xl font-bold tracking-tight text-primary font-title;
     }
 
     h3 {
-        @apply text-lg font-semibold text-slate-800
-        sm:text-xl
-        lg:text-2xl;
+        @apply text-lg font-bold text-slate-800 font-title;
     }
 
     p {
-        @apply text-sm leading-relaxed text-slate-700
-        sm:text-base
-        lg:text-lg;
+        @apply text-sm leading-relaxed text-slate-700;
+    }
+
+    body {
+        @apply font-display;
     }
 
     /* =========================
