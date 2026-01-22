@@ -20,7 +20,7 @@
                     <td>{{ brand.id }}</td>
                     <td>{{ brand.name }}</td>
                     <td>{{ brand.slug }}</td>
-                    <td><img src="{{ brand.logo }}" alt="Brand logo" class="size-16"/></td>
+                    <td><img src="{{ brand.logo }}" alt="{{ brand.name }} logo" class="size-16"/></td>
                 </tr>
             {% endfor %}
         {% else %}

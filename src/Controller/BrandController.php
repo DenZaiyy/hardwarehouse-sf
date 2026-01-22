@@ -25,4 +25,18 @@ final class BrandController extends AbstractController
             'brands' => $brands,
         ]);
     }
+
+    #[Route('/{slug}', name: 'show', methods: ['GET'])]
+    public function show(string $slug): Response
+    {
+        $brand = $this->apiService->getData('brands', $slug);
+        $products = $brand['Products'] ?? null;
+
+        //dd($category, $products);
+
+        return $this->render('brand/show.html.twig', [
+            'brand' => $brand,
+            'products' => $products,
+        ]);
+    }
 }
