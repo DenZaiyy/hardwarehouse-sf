@@ -62,10 +62,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $avatar = null;
 
-    #[Vich\UploadableField(mapping: 'avatars', fileNameProperty: 'avatar')]
-    #[Ignore]
-    private ?File $avatarFile = null;
-
     #[ORM\Column]
     private bool $is_banned = false;
 
@@ -232,18 +228,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $address->setUserInfo(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getAvatarFile(): ?File
-    {
-        return $this->avatarFile;
-    }
-
-    public function setAvatarFile(?File $avatarFile): static
-    {
-        $this->avatarFile = $avatarFile;
 
         return $this;
     }
