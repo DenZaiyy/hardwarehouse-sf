@@ -55,8 +55,30 @@ jobs:
                   done
 
             - name: Tests
-              run: make tests
+              run: |
+                  make tests 2>&1 | tee /tmp/test-output.log
               env:
                   APP_ENV: test
                   APP_SECRET: 53cr3t4T3st3NV
                   DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/hardwarehouse_test?serverVersion=16&charset=utf8
+
+            - name: Upload test results
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: test-results-${{ github.run_number }}
+                  path: |
+                      /tmp/test-output.log
+                      var/log/test.log
+                      tests/_output/
+                  retention-days: 30
+
+            - name: Upload PHPUnit coverage (if exists)
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: coverage-report-${{ github.run_number }}
+                  path: |
+                      var/coverage/
+                      coverage.xml
+                  retention-days: 30
