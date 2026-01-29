@@ -22,10 +22,6 @@ jobs:
         
     tests:
         uses: ./.github/workflows/test.yml
-        secrets:
-            POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-            POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-            POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
 
     # Déploie en production avec optimisations
     deploy-production:

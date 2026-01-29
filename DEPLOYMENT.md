@@ -142,11 +142,8 @@ PROJECT_PATH=/var/www/hardwarehouse  # Chemin du projet
 ```
 
 ### **Base de données (Tests)**
-```env
-POSTGRES_DB=hardwarehouse_test
-POSTGRES_USER=postgres  
-POSTGRES_PASSWORD=motdepasse_test
-```
+> ✅ **Configuration PostgreSQL automatique**  
+> Les tests utilisent maintenant une configuration PostgreSQL intégrée sans secrets requis.
 
 ### **Auto-merge dev→test**
 ```env
