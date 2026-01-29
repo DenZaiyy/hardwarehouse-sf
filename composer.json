@@ -106,6 +106,7 @@
         }
     },
     "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^4.3",
         "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^12.5",
         "rector/rector": "^2.3",
