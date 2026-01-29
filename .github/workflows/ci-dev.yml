@@ -1,0 +1,46 @@
+name: CI Dev Pipeline
+on:
+    push:
+        branches:
+            - dev
+    pull_request:
+        branches:
+            - dev
+
+permissions:
+    contents: write
+
+jobs:
+    # Réutilise les workflows modulaires
+    audit:
+        uses: ./.github/workflows/audit.yml
+
+    quality:
+        uses: ./.github/workflows/quality.yml
+
+    tests:
+        uses: ./.github/workflows/test.yml
+
+    # Auto-merge vers test si tout passe
+    auto-merge-to-test:
+        name: Auto-merge to test
+        needs: [audit, quality, tests]
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  token: ${{ secrets.PAT_TOKEN }}
+                  fetch-depth: 0
+
+            - name: Configure Git
+              run: |
+                  git config --global user.name "github-actions[bot]"
+                  git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+            - name: Fetch and merge
+              run: |
+                  git fetch origin
+                  git checkout test
+                  git merge origin/dev --no-ff -m "Auto-merge dev into test after successful CI"
+                  git push origin test

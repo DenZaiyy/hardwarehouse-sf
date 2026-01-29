@@ -1,0 +1,49 @@
+name: Tests
+on:
+    workflow_call:
+jobs:
+    tests:
+        name: Tests
+        runs-on: ubuntu-latest
+        services:
+            database:
+                image: postgres:16-alpine
+                env:
+                    POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+                    POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+                    POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+                ports:
+                    - 5432/tcp
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: 8.4
+                  tools: composer:v2
+
+            - name: Cache Composer dependencies
+              uses: actions/cache@v4
+              with:
+                  path: /tmp/composer-cache
+                  key: ${{ runner.os }}-composer-test-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-composer-test-
+                      ${{ runner.os }}-composer-
+
+            - name: Update composer
+              run: composer self-update
+
+            - name: Install dependencies
+              run: |
+                  composer config cache-dir /tmp/composer-cache
+                  composer install --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+            - name: Tests
+              run: make tests
+              env:
+                  APP_ENV: test
+                  APP_SECRET: 53cr3t4T3st3NV
+                  DATABASE_URL: postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@127.0.0.1:${{ job.services.database.ports['5432'] }}/${{ secrets.POSTGRES_DB }}?serverVersion=16
