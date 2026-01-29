@@ -56,7 +56,17 @@ jobs:
 
             - name: Tests
               run: |
+                  # Capturer le code de sortie des tests
+                  set +e  # Permettre de continuer même si tests échouent
                   make tests 2>&1 | tee /tmp/test-output.log
+                  TEST_EXIT_CODE=${PIPESTATUS[0]}
+                  set -e  # Revenir au mode strict
+                  
+                  # Ajouter le code de sortie au log
+                  echo "Tests exit code: $TEST_EXIT_CODE" | tee -a /tmp/test-output.log
+                  
+                  # Échouer si les tests ont échoué
+                  exit $TEST_EXIT_CODE
               env:
                   APP_ENV: test
                   APP_SECRET: 53cr3t4T3st3NV
