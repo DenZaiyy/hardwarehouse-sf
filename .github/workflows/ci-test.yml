@@ -28,7 +28,7 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@v4
               with:
-                  token: ${{ secrets.GITHUB_TOKEN }}
+                  token: ${{ secrets.PAT_TOKEN }}
                   fetch-depth: 0
 
             - name: Create Pull Request from test to main
@@ -36,7 +36,7 @@ jobs:
               with:
                   source_branch: test          # branche source
                   destination_branch: main     # branche destination
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  github_token: ${{ secrets.PAT_TOKEN }}
                   pr_title: "🚀 Deploy to Production - Auto PR from test"
                   pr_body: |
                       ## 🚀 Déploiement en Production
