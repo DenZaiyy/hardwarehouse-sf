@@ -132,9 +132,12 @@ readonly class AuthenticatorSubscriber implements EventSubscriberInterface
 
     private function getUserEmail(TokenInterface $securityToken): string
     {
-        /** @var User $user */
         $user = $securityToken->getUser();
 
-        return $user->getEmail();
+        if (!$user instanceof User) {
+            return 'unknown';
+        }
+
+        return $user->getEmail() ?? 'unknown';
     }
 }

@@ -30,7 +30,7 @@ class RegistrationController extends AbstractController
     }
 
     #[Route('/register', name: 'app.register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager, TranslatorInterface $translator, ImageUploadService $uploadService): Response
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager, TranslatorInterface $translator): Response
     {
         if ($this->isGranted('ROLE_USER')) {
             return $this->redirectToRoute('homepage');
@@ -65,8 +65,8 @@ class RegistrationController extends AbstractController
             $this->redirectToRoute('homepage');
 
             $this->mailerService->sendAdminNotification("Inscription", sprintf("Un nouvel utilisateur c'est inscrit sur le site : %s (%s)", $user->getUsername(), $user->getEmail()));
-
-            return $security->login($user, 'form_login', 'main');
+            $security->login($user, 'form_login', 'main');
+            return $this->redirectToRoute('homepage');
         }
 
         return $this->render('security/registration/register.html.twig', [
@@ -90,7 +90,7 @@ class RegistrationController extends AbstractController
             // Vérification de l'email - cela met à jour isVerified=true et persiste
             $this->emailVerifier->handleEmailConfirmation($request, $user);
             $this->entityManager->refresh($user);
-            $welcomeSent = $this->mailerService->sendWelcomeMail($user->getEmail());
+            $welcomeSent = $this->mailerService->sendWelcomeMail((string) $user->getEmail());
 
             if ($welcomeSent) {
                 $this->addFlash('success', 'Votre adresse email à été vérifiée. Un mail de bienvenue vous a été envoyé.');

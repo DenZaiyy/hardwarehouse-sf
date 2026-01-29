@@ -12,6 +12,9 @@ class CategoryExtensionRuntime implements RuntimeExtensionInterface
     ) {
     }
 
+    /**
+     * @return array<array-key, mixed>
+     */
     public function getCategories(): array
     {
         return $this->apiService->getData('categories', null);

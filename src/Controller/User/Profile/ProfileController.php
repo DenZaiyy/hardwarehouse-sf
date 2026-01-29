@@ -65,7 +65,9 @@ class ProfileController extends AbstractController
                     $this->addFlash('danger', $this->translator->trans('user.update.infos.email.already_exists'));
                 }
 
-                $user->setEmail($email);
+                if ($email !== null) {
+                    $user->setEmail($email);
+                }
             }
 
             $entityManager->flush();
@@ -103,9 +105,11 @@ class ProfileController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var string $currentPassword */
             $currentPassword = $form->get('password')->getData();
 
             if ($hasher->hashPassword($user, $currentPassword)) {
+                /** @var string $newPassword */
                 $newPassword = $form->get('plainPassword')->getData();
                 $user->setPassword($hasher->hashPassword($user, $newPassword));
 

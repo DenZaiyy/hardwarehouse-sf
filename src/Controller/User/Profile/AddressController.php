@@ -47,10 +47,6 @@ class AddressController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        if (!$user instanceof User) {
-            throw new AccessDeniedHttpException();
-        }
-
         $address = new Address();
 
         $form = $this->createForm(UserAddressFormType::class, $address);
@@ -106,7 +102,7 @@ class AddressController extends AbstractController
     #[Route('/delete/{id}', name: 'delete', methods: ['POST'])]
     public function delete(Address $address, Request $request): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$address->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$address->getId(), (string)$request->request->get('_token'))) {
             $this->em->remove($address);
             $this->em->flush();
 

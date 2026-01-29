@@ -54,48 +54,95 @@ final class TogglePasswordTypeExtension extends AbstractTypeExtension
 
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
-        $view->vars['toggle'] = $options['toggle'];
+        /** @var bool $toggle */
+        $toggle = $options['toggle'];
+        $view->vars['toggle'] = $toggle;
 
-        if (!$options['toggle']) {
+        if (!$toggle) {
             return;
         }
 
-        if ($options['use_toggle_form_theme']) {
-            array_splice($view->vars['block_prefixes'], -1, 0, 'toggle_password');
+        /** @var bool $useToggleFormTheme */
+        $useToggleFormTheme = $options['use_toggle_form_theme'];
+        if ($useToggleFormTheme) {
+            /** @var list<string> $blockPrefixes */
+            $blockPrefixes = $view->vars['block_prefixes'];
+            array_splice($blockPrefixes, -1, 0, 'toggle_password');
+            $view->vars['block_prefixes'] = $blockPrefixes;
         }
 
         $controllerName = 'toggle-password';
-        $view->vars['attr']['data-controller'] = trim(\sprintf('%s %s', $view->vars['attr']['data-controller'] ?? '', $controllerName));
 
-        if (false !== $options['toggle_translation_domain']) {
-            $controllerValues['hidden-label'] = $this->translateLabel($options['hidden_label'], $options['toggle_translation_domain']);
-            $controllerValues['visible-label'] = $this->translateLabel($options['visible_label'], $options['toggle_translation_domain']);
+        /** @var array<string, mixed> $attr */
+        $attr = $view->vars['attr'];
+        $existingController = isset($attr['data-controller']) && \is_string($attr['data-controller'])
+            ? $attr['data-controller']
+            : '';
+        $attr['data-controller'] = trim(\sprintf('%s %s', $existingController, $controllerName));
+
+        /** @var string|TranslatableMessage|null $hiddenLabel */
+        $hiddenLabel = $options['hidden_label'];
+        /** @var string|TranslatableMessage|null $visibleLabel */
+        $visibleLabel = $options['visible_label'];
+        /** @var string|null $hiddenIcon */
+        $hiddenIcon = $options['hidden_icon'];
+        /** @var string|null $visibleIcon */
+        $visibleIcon = $options['visible_icon'];
+        /** @var list<string> $buttonClasses */
+        $buttonClasses = $options['button_classes'];
+        /** @var string|bool|null $toggleTranslationDomain */
+        $toggleTranslationDomain = $options['toggle_translation_domain'];
+
+        $translationDomain = \is_string($toggleTranslationDomain) ? $toggleTranslationDomain : null;
+
+        if (false !== $toggleTranslationDomain) {
+            $controllerValues['hidden-label'] = $this->translateLabel($hiddenLabel, $translationDomain);
+            $controllerValues['visible-label'] = $this->translateLabel($visibleLabel, $translationDomain);
         } else {
-            $controllerValues['hidden-label'] = $options['hidden_label'];
-            $controllerValues['visible-label'] = $options['visible_label'];
+            $controllerValues['hidden-label'] = $this->labelToString($hiddenLabel);
+            $controllerValues['visible-label'] = $this->labelToString($visibleLabel);
         }
 
-        $controllerValues['hidden-icon'] = $options['hidden_icon'];
-        $controllerValues['visible-icon'] = $options['visible_icon'];
-        $controllerValues['button-classes'] = json_encode($options['button_classes'], \JSON_THROW_ON_ERROR);
+        $controllerValues['hidden-icon'] = $hiddenIcon;
+        $controllerValues['visible-icon'] = $visibleIcon;
+        $controllerValues['button-classes'] = json_encode($buttonClasses, \JSON_THROW_ON_ERROR);
 
         foreach ($controllerValues as $name => $value) {
-            $view->vars['attr'][\sprintf('data-%s-%s-value', $controllerName, $name)] = $value;
+            $attr[\sprintf('data-%s-%s-value', $controllerName, $name)] = $value;
         }
 
-        $view->vars['toggle_container_classes'] = $options['toggle_container_classes'];
+        $view->vars['attr'] = $attr;
+
+        /** @var list<string> $toggleContainerClasses */
+        $toggleContainerClasses = $options['toggle_container_classes'];
+        $view->vars['toggle_container_classes'] = $toggleContainerClasses;
     }
 
     private function translateLabel(string|TranslatableMessage|null $label, ?string $translationDomain): ?string
     {
-        if (null === $this->translator || null === $label) {
-            return $label;
+        if (null === $label) {
+            return null;
         }
 
         if ($label instanceof TranslatableMessage) {
-            return $label->trans($this->translator);
+            return null !== $this->translator
+                ? $label->trans($this->translator)
+                : $label->getMessage();
         }
 
-        return $this->translator->trans($label, domain: $translationDomain);
+        return null !== $this->translator
+            ? $this->translator->trans($label, domain: $translationDomain)
+            : $label;
+    }
+
+    private function labelToString(string|TranslatableMessage|null $label): ?string
+    {
+        if (null === $label) {
+            return null;
+        }
+
+        return $label instanceof TranslatableMessage
+            ? $label->getMessage()
+            : $label;
     }
 }
