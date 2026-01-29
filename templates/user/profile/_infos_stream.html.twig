@@ -1,0 +1,33 @@
+<turbo-stream action="update" target="flash-messages">
+    <template>
+        {% include '_partials/_flash_messages.html.twig' %}
+    </template>
+</turbo-stream>
+
+<turbo-stream action="replace" target="user-infos">
+    <template>
+        <turbo-frame id="user-infos">
+            <a href="{{ path('profile.infos') }}">Modifier mes informations</a>
+        </turbo-frame>
+    </template>
+</turbo-stream>
+
+<turbo-stream action="replace" target="user-infos-displayed">
+    <template>
+        <div id="user-infos-displayed" class="flex flex-col">
+            <div>
+                {{ 'user.profile.informations.email.label'|trans }} : <span id="email-text">{{ user.email }}</span>
+            </div>
+            <div>
+                {{ 'user.profile.informations.username.label'|trans }} : <span id="username-text">{{ user.username }}</span>
+            </div>
+
+        </div>
+    </template>
+</turbo-stream>
+
+{#<turbo-stream action="replace" target="username-text">
+    <template>
+        <span id="username-text">{{ user.username }}</span>
+    </template>
+</turbo-stream>#}

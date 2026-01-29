@@ -1,0 +1,84 @@
+name: Quality Analysis
+on:
+    workflow_call:
+jobs:
+    quality:
+        name: Quality Analysis
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: 8.4
+                  tools: composer:v2
+
+            - name: Cache Composer dependencies
+              uses: actions/cache@v4
+              with:
+                  path: /tmp/composer-cache
+                  key: ${{ runner.os }}-composer-quality-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-composer-quality-
+                      ${{ runner.os }}-composer-
+
+            - name: Update composer
+              run: composer self-update
+
+            - name: Install dependencies
+              run: |
+                  composer config cache-dir /tmp/composer-cache
+                  composer install --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+            - name: Quality Analysis
+              run: |
+                  # Créer dossiers pour rapports
+                  mkdir -p /tmp/quality-reports
+                  
+                  # Exécuter ECS avec rapport
+                  echo "🔍 Running ECS..." | tee -a /tmp/quality-reports/quality-output.log
+                  php ./vendor/bin/ecs check --fix --output-format=json > /tmp/quality-reports/ecs-report.json 2>&1 || true
+                  
+                  # Exécuter Rector avec rapport
+                  echo "🔧 Running Rector..." | tee -a /tmp/quality-reports/quality-output.log  
+                  php ./vendor/bin/rector --dry-run --output-format=json > /tmp/quality-reports/rector-report.json 2>&1 || true
+                  
+                  # Lint YAML
+                  echo "📝 Linting YAML..." | tee -a /tmp/quality-reports/quality-output.log
+                  php bin/console lint:yaml config --parse-tags 2>&1 | tee -a /tmp/quality-reports/yaml-lint.log || true
+                  
+                  # Lint Twig  
+                  echo "🎨 Linting Twig..." | tee -a /tmp/quality-reports/quality-output.log
+                  php bin/console lint:twig templates 2>&1 | tee -a /tmp/quality-reports/twig-lint.log || true
+                  
+                  # Lint Container
+                  echo "🏗️ Linting Container..." | tee -a /tmp/quality-reports/quality-output.log
+                  php bin/console lint:container 2>&1 | tee -a /tmp/quality-reports/container-lint.log || true
+                  
+                  # PHPStan avec rapport JSON
+                  echo "🧪 Running PHPStan..." | tee -a /tmp/quality-reports/quality-output.log
+                  php ./vendor/bin/phpstan analyse --memory-limit=-1 --level max --error-format=json > /tmp/quality-reports/phpstan-report.json 2>&1 || true
+                  
+                  # Rapport final
+                  echo "✅ Quality analysis completed" | tee -a /tmp/quality-reports/quality-output.log
+
+            - name: Upload quality reports
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: quality-reports-${{ github.run_number }}
+                  path: |
+                      /tmp/quality-reports/
+                  retention-days: 30
+
+            - name: Upload PHPStan cache (for analysis)
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: phpstan-cache-${{ github.run_number }}
+                  path: |
+                      var/cache/phpstan/
+                      .phpstan.cache
+                  retention-days: 7

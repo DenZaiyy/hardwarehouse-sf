@@ -13,6 +13,7 @@
 /docker/*
 /.idea
 .DS_Store
+/coverage/
 
 ###> phpunit/phpunit ###
 /phpunit.xml

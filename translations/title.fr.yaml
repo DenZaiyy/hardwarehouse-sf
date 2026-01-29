@@ -1,0 +1,12 @@
+home:
+    title: "Page d'accueil"
+register:
+    title: "S'inscrire"
+login:
+    title: Connexion
+user:
+    profile:
+        title: Profil
+    address:
+        form: { title: Ajouter une adresse }
+        home: { title: Mes adresses }

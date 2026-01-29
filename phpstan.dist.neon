@@ -1,7 +1,8 @@
 parameters:
     level: max
     paths:
-        - bin/
-        - config/
-        - src/
-        - tests/
+        - src
+    excludePaths:
+        - tests/bootstrap.php
+    ignoreErrors:
+        - '#Property .+::\$id \(int\|null\) is never assigned int#'

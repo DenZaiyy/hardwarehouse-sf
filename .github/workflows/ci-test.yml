@@ -1,0 +1,48 @@
+name: CI Test Pipeline
+on:
+    push:
+        branches:
+            - test
+
+permissions:
+    contents: write
+    pull-requests: write
+
+jobs:
+    # Re-teste tout sur test pour sécurité
+    audit:
+        uses: ./.github/workflows/audit.yml
+
+    quality:
+        uses: ./.github/workflows/quality.yml
+
+    tests:
+        uses: ./.github/workflows/test.yml
+
+    # Crée PR vers master
+    create-pr-to-master:
+        name: Create PR to Master
+        needs: [audit, quality, tests]
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  fetch-depth: 0
+
+            - name: Create Pull Request from test to main
+              uses: repo-sync/pull-request@v2
+              with:
+                  source_branch: test          # branche source
+                  destination_branch: main     # branche destination
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  pr_title: "🚀 Deploy to Production - Auto PR from test"
+                  pr_body: |
+                      ## 🚀 Déploiement en Production
+
+                      ✅ **Tests passés sur :** dev → test
+                      ✅ **Déploiement test :** Réussi
+
+                      **Environnement de test :** [test.mtf-storage.fr]
+                  pr_draft: false

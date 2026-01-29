@@ -1,6 +1,67 @@
-user.registration.title: 'Crée votre compte'
-user.registration.agree_terms.label: "Acceptez les conditions d'utilisation"
-user.registration.email.label: 'Adresse mail'
-user.registration.password.label: 'Mot de passe'
-user.registration.password.confirm.label: 'Confirmez votre mot de passe'
-user.registration.submit: 'Crée'
+vich_uploader:
+    form_label:
+        delete_confirm: 'Supprimer?'
+    link:
+        download: Télécharger
+user:
+    registration:
+        title: 'Crée votre compte'
+        agree_terms: { label: 'Acceptez les conditions', is_true: 'Vous devez accepter nos conditions générales' }
+        email: { label: 'Adresse mail' }
+        username: { label: Pseudonyme }
+        password: { label: 'Mot de passe', confirm: { label: 'Confirmez votre mot de passe' } }
+        avatar: { label: 'Image de profile', placeholder: 'Glissez ou cliquer pour choisir votre image' }
+        submit: 'Crée mon compte'
+        flash: { success: 'Vous venez de vous inscrire, bienvenue !' }
+    register:
+        email: { confirm: { subject: 'Veuillez confirmer votre adresse e-mail' } }
+    login:
+        title: 'Se connecter à votre compte client'
+        logged: { message: 'Vous êtes connecté en tant que %user%', logout: { label: Déconnexion } }
+        email: { label: 'Adresse email' }
+        password: { label: 'Mot de passe' }
+        remember: { label: 'Se souvenir de moi' }
+        submit: { label: 'Se connecter' }
+    profile:
+        title: 'Mon profile'
+        informations: { title: 'Mes informations', email: { label: 'Adresse email' }, username: { label: Pseudo }, addresses: { label: Adresses }, password: { edit: { label: 'Modifier le mot de passe' } }, infos: { edit: { label: 'Modifier mes informations' } } }
+        addresses: { label: "Liste d'adresses", add: { label: 'Ajouter une adresse' }, address: { label: Intitulé }, empty: { label: 'Aucune adresses enregistrés' } }
+    update:
+        infos: { email: { label: 'Adresse email', already_exists: "L'adresse email renseigné est déjà utiliser par un autre utilisateur." }, username: { label: Pseudo }, avatar: { label: Avatar }, submit: { label: 'Mettre à jour' }, not_logged: { message: __user.update.infos.not_logged.message }, success: __user.update.infos.success }
+        changePassword: { current: { label: 'Mot de passe', help: 'Saisir votre mot de passe actuelle' }, new: { first: { label: 'Nouveau mot de passe', help: 'Saisir le nouveau mot de passe' }, constraint: { not_blank: 'Le nouveau mot de passe ne peux pas être vide', length: { minMessage: 'Votre mot de passe doit contenir au minimum 12 caractères.' } }, second: { label: 'Répétez le mot de passe', help: 'Répétez votre nouveau mot de passe' }, invalid: { message: "Votre mot de passe n'est pas valide." } }, submit: { label: 'Mettre à jour' } }
+    changePassword:
+        current: { constraint: { not_blank: __user.changePassword.current.constraint.not_blank } }
+    address:
+        home: { title: 'Mes adresses', table: { label: { label: Intitulé }, firstname: { label: Prénom }, lastname: { label: Nom }, address: { label: Adresse }, cp: { label: 'Code postal' }, city: { label: Ville }, country: { label: Pays }, actions: { label: Actions } }, no_items: { message: 'Aucune adresses enregistrés' }, button: { add: { label: __user.address.home.button.add.label } } }
+        form: { label: { label: Intitulé }, firstname: { label: Prénom }, lastname: { label: 'Nom de famille' }, address: { label: Adresse }, cp: { label: 'Code postal' }, city: { label: Ville }, country: { label: Pays }, save: { label: Ajouter }, title: 'Ajouter une nouvelle adresse' }
+        create: { success: 'Votre adresse à été enregistré avec succès' }
+        update: { success: 'Votre adresse à été mis à jour avec succès' }
+        delete: { success: 'Votre adresse à été supprimé avec succès' }
+seo:
+    description:
+        default: 'Découvrez notre sélection de composants PC : cartes graphiques, processeurs, cartes mères, mémoire RAM et stockage. Livraison rapide et support technique dédié.'
+header:
+    user:
+        label: Utilisateur
+    cart:
+        label: Panier
+    nav:
+        profile: { label: Profile }
+        logout: { label: Déconnexion }
+        register: { label: "S'inscrire" }
+        login: { label: 'Se connecter' }
+        addresses: { label: 'Mes adresses' }
+country:
+    french:
+        label: France
+    english:
+        label: __country.english.label
+    german:
+        label: __country.german.label
+    spanish:
+        label: __country.spanish.label
+    italian:
+        label: __country.italian.label
+form:
+    delete:
+        confirm: { message: 'Êtes-vous sûre de vouloir supprimer cet élément?' }

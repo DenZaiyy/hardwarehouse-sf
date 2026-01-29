@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\User;
 
 use App\Entity\User;
 use App\Form\ChangePasswordFormType;
@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -33,6 +34,7 @@ class ResetPasswordController extends AbstractController
 
     /**
      * Display & process form to request a password reset.
+     * @throws TransportExceptionInterface
      */
     #[Route('', name: 'app_forgot_password_request')]
     public function request(Request $request, MailerInterface $mailer, TranslatorInterface $translator): Response
@@ -44,11 +46,14 @@ class ResetPasswordController extends AbstractController
             /** @var string $email */
             $email = $form->get('email')->getData();
 
-            return $this->processSendingPasswordResetEmail($email, $mailer, $translator
+            return $this->processSendingPasswordResetEmail(
+                $email,
+                $mailer,
+                $translator
             );
         }
 
-        return $this->render('reset_password/request.html.twig', [
+        return $this->render('security/reset_password/request.html.twig', [
             'requestForm' => $form,
         ]);
     }
@@ -65,7 +70,7 @@ class ResetPasswordController extends AbstractController
             $resetToken = $this->resetPasswordHelper->generateFakeResetToken();
         }
 
-        return $this->render('reset_password/check_email.html.twig', [
+        return $this->render('security/reset_password/check_email.html.twig', [
             'resetToken' => $resetToken,
         ]);
     }
@@ -121,14 +126,17 @@ class ResetPasswordController extends AbstractController
             // The session is cleaned up after the password has been changed.
             $this->cleanSessionAfterReset();
 
-            return $this->redirectToRoute('app_login');
+            return $this->redirectToRoute('app.login');
         }
 
-        return $this->render('reset_password/reset.html.twig', [
+        return $this->render('security/reset_password/reset.html.twig', [
             'resetForm' => $form,
         ]);
     }
 
+    /**
+     * @throws TransportExceptionInterface
+     */
     private function processSendingPasswordResetEmail(string $emailFormData, MailerInterface $mailer, TranslatorInterface $translator): RedirectResponse
     {
         $user = $this->entityManager->getRepository(User::class)->findOneBy([
@@ -142,7 +150,7 @@ class ResetPasswordController extends AbstractController
 
         try {
             $resetToken = $this->resetPasswordHelper->generateResetToken($user);
-        } catch (ResetPasswordExceptionInterface $e) {
+        } catch (ResetPasswordExceptionInterface) {
             // If you want to tell the user why a reset email was not sent, uncomment
             // the lines below and change the redirect to 'app_forgot_password_request'.
             // Caution: This may reveal if a user is registered or not.
@@ -160,7 +168,7 @@ class ResetPasswordController extends AbstractController
             ->from(new Address('support@denz.ovh', 'HardWareHouse - Support'))
             ->to((string) $user->getEmail())
             ->subject('Your password reset request')
-            ->htmlTemplate('reset_password/email.html.twig')
+            ->htmlTemplate('security/reset_password/email.html.twig')
             ->context([
                 'resetToken' => $resetToken,
             ])

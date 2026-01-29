@@ -37,6 +37,8 @@
         "symfony/string": "8.0.*",
         "symfony/translation": "8.0.*",
         "symfony/twig-bundle": "8.0.*",
+        "symfony/ux-dropzone": "^2.32",
+        "symfony/ux-icons": "^2.32",
         "symfony/ux-live-component": "^2.32",
         "symfony/ux-turbo": "^2.32",
         "symfony/ux-twig-component": "^2.32",
@@ -104,6 +106,7 @@
         }
     },
     "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^4.3",
         "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^12.5",
         "rector/rector": "^2.3",
