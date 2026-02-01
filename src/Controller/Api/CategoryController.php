@@ -19,19 +19,12 @@ final class CategoryController extends AbstractController
     }
 
     #[Route('', name: 'index', methods: ['GET'])]
-    public function index(Request $request): Response
+    public function index(): Response
     {
-        $page = $request->query->getInt('page', 1);
-        // $categories = $this->apiService->fetchAll('categories', CategoryDto::class);
-        $result = $this->apiService->fetchPaginated(
-            'categories',
-            CategoryDto::class,
-            ['page' => $page, 'limit' => 2]
-        );
+        $categories = $this->apiService->fetchAll('categories', CategoryDto::class);
 
         return $this->render('category/index.html.twig', [
-            'categories' => $result['data'],
-            'pagination' => $result['meta'],
+            'categories' => $categories,
         ]);
     }
 

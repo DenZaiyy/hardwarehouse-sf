@@ -19,19 +19,12 @@ final class BrandController extends AbstractController
     }
 
     #[Route('', name: 'index', methods: ['GET'])]
-    public function index(Request $request): Response
+    public function index(): Response
     {
-        $page = $request->query->getInt('page', 1);
-        // $brands = $this->apiService->fet('brands', BrandDto::class);
-        $result = $this->apiService->fetchPaginated(
-            'brands',
-            BrandDto::class,
-            ['page' => $page, 'limit' => 2]
-        );
+        $brands = $this->apiService->fetchAll('brands', BrandDto::class);
 
         return $this->render('brand/index.html.twig', [
-            'brands' => $result['data'],
-            'pagination' => $result['meta'],
+            'brands' => $brands,
         ]);
     }
 
