@@ -2,6 +2,7 @@
 
 namespace App\Twig\Runtime;
 
+use App\Dto\Api\Categories\CategoryDto;
 use App\Service\ApiService;
 use Twig\Extension\RuntimeExtensionInterface;
 
@@ -13,10 +14,10 @@ class CategoryExtensionRuntime implements RuntimeExtensionInterface
     }
 
     /**
-     * @return array<array-key, mixed>
+     * @return CategoryDto[]
      */
     public function getCategories(): array
     {
-        return $this->apiService->getData('categories', null);
+        return $this->apiService->fetchAll('categories', CategoryDto::class);
     }
 }
