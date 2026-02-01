@@ -91,7 +91,9 @@ translate-EN: ## Dump translations for english language
 	php bin/console translation:extract --force --format=yaml --as-tree=3 en
 
 .PHONY: quality
-quality: ## Running quality code check using Rector, ECS and PHPStan
+quality: ## Running quality code check using Rector, ECS PHP-CS and PHPStan
+	$(call banner,$(INFO),Running PHP-CS with autofix...)
+	php ./vendor/bin/php-cs-fixer fix
 	$(call banner,$(INFO),Running ECS with autofix...)
 	php ./vendor/bin/ecs check --fix
 	$(call banner,$(INFO),Running rector with autofix...)
