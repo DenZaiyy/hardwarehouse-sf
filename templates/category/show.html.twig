@@ -24,7 +24,7 @@
                     <td>{{ product.name }}</td>
                     <td>{{ product.slug }}</td>
                     <td><img src="{{ product.thumbnail }}" alt="{{ product.name }} preview" class="size-16" /></td>
-                    <td>{{ product.price }}</td>
+                    <td>{{ product.price|currency }}</td>
                     <td><a href="{{ path('brand.show', {slug: product.brand.slug}) }}">{{ product.brand.name }}</a></td>
                     <td>{{ product.stock.quantity }}</td>
                 </tr>

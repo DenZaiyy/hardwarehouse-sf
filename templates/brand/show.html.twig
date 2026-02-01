@@ -22,7 +22,7 @@
                     <td>{{ product.name }}</td>
                     <td>{{ product.slug }}</td>
                     <td><img src="{{ product.thumbnail }}" alt="{{ product.name }} preview" class="size-16" /></td>
-                    <td>{{ product.price }}</td>
+                    <td>{{ product.price|currency }}</td>
                 </tr>
             {% endfor %}
         </tbody>
