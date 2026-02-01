@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Api;
 
+use App\Dto\Api\Categories\CategoryDto;
+use App\Dto\Api\Categories\CategoryWithProductsDto;
 use App\Service\ApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +20,8 @@ final class CategoryController extends AbstractController
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(): Response
     {
-        $categories = $this->apiService->getData('categories', null);
+        $categories = $this->apiService->fetchAll('categories', CategoryDto::class);
+
         return $this->render('category/index.html.twig', [
             'categories' => $categories,
         ]);
@@ -27,14 +30,11 @@ final class CategoryController extends AbstractController
     #[Route('/{slug}', name: 'show', methods: ['GET'])]
     public function show(string $slug): Response
     {
-        $category = $this->apiService->getData('categories', $slug);
-        $products = $category['Products'] ?? null;
-
-        //dd($category, $products);
+        $category = $this->apiService->fetchOne('categories/' . $slug, CategoryWithProductsDto::class);
 
         return $this->render('category/show.html.twig', [
             'category' => $category,
-            'products' => $products,
+            'products' => $category->products ?? null,
         ]);
     }
 }

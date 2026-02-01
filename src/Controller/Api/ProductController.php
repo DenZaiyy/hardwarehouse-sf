@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Api;
 
+use App\Dto\Api\Attributes\ProductAttributeValueDto;
+use App\Dto\Api\Products\ProductDto;
 use App\Service\ApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,8 +20,7 @@ final class ProductController extends AbstractController
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(): Response
     {
-        $products = $this->apiService->getData('products', null);
-        //dd($products);
+        $products = $this->apiService->fetchAll('products', ProductDto::class);
 
         return $this->render('product/index.html.twig', [
             'products' => $products,
@@ -29,14 +30,11 @@ final class ProductController extends AbstractController
     #[Route('/{slug}', name: 'show', methods: ['GET'])]
     public function show(string $slug): Response
     {
-        $product = $this->apiService->getData('products', $slug);
-        $attributes = $product['productAttributeValues'];
-        //dd($product, $attributes);
-
+        $product = $this->apiService->fetchOne('products/' . $slug, ProductDto::class);
 
         return $this->render('product/show.html.twig', [
             'product' => $product,
-            'attributes' => $attributes,
+            'attributes' => $product->productAttributeValues,
         ]);
     }
 }

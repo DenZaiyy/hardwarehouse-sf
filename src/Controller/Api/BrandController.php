@@ -1,11 +1,14 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Api;
 
+use App\Dto\Api\Brands\BrandDto;
+use App\Dto\Api\Brands\BrandWithProductsDto;
 use App\Service\ApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 #[Route('/brands', name: 'brand.')]
 final class BrandController extends AbstractController
@@ -18,8 +21,7 @@ final class BrandController extends AbstractController
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(): Response
     {
-        $brands = $this->apiService->getData('brands', null);
-        //dd($brands);
+        $brands = $this->apiService->fetchAll('brands', BrandDto::class);
 
         return $this->render('brand/index.html.twig', [
             'brands' => $brands,
@@ -29,14 +31,15 @@ final class BrandController extends AbstractController
     #[Route('/{slug}', name: 'show', methods: ['GET'])]
     public function show(string $slug): Response
     {
-        $brand = $this->apiService->getData('brands', $slug);
-        $products = $brand['Products'] ?? null;
-
-        //dd($category, $products);
+        try {
+            $brand = $this->apiService->fetchOne('brands/' . $slug, BrandWithProductsDto::class);
+        } catch (HttpExceptionInterface) {
+            throw $this->createNotFoundException('Marque non trouvée');
+        }
 
         return $this->render('brand/show.html.twig', [
             'brand' => $brand,
-            'products' => $products,
+            'products' => $brand->products ?? null,
         ]);
     }
 }
