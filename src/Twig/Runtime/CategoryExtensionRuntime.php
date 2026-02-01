@@ -9,7 +9,7 @@ use Twig\Extension\RuntimeExtensionInterface;
 class CategoryExtensionRuntime implements RuntimeExtensionInterface
 {
     public function __construct(
-        private readonly ApiService $apiService
+        private readonly ApiService $apiService,
     ) {
     }
 

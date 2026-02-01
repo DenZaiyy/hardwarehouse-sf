@@ -17,7 +17,7 @@ use Symfony\UX\Dropzone\Form\DropzoneType;
 class UpdateInfosFormType extends AbstractType
 {
     public function __construct(
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -28,7 +28,7 @@ class UpdateInfosFormType extends AbstractType
                 'label' => $this->translator->trans('user.update.infos.email.label'),
             ])
             ->add('username', TextType::class, [
-                'label' => $this->translator->trans('user.update.infos.username.label')
+                'label' => $this->translator->trans('user.update.infos.username.label'),
             ])
             ->add('avatarFile', DropzoneType::class, [
                 'label' => $this->translator->trans('user.update.infos.avatar.label'),
@@ -45,7 +45,7 @@ class UpdateInfosFormType extends AbstractType
     {
         $data = $event->getData();
 
-        if (!($data instanceof User)) {
+        if (!$data instanceof User) {
             return;
         }
 
@@ -56,7 +56,7 @@ class UpdateInfosFormType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => User::class,
-            'validation_groups' => ['Default']
+            'validation_groups' => ['Default'],
         ]);
     }
 }

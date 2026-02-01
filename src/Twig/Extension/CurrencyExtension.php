@@ -5,7 +5,6 @@ namespace App\Twig\Extension;
 use App\Twig\Runtime\CurrencyExtensionRuntime;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
-use Twig\TwigFunction;
 
 class CurrencyExtension extends AbstractExtension
 {

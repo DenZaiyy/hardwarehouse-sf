@@ -27,7 +27,7 @@ final class CartComponent
     ];
 
     public function __construct(
-        private readonly CartService $cartService
+        private readonly CartService $cartService,
     ) {
     }
 
@@ -41,7 +41,7 @@ final class CartComponent
     {
         foreach ($this->items as &$item) {
             if ($item['id'] === $id) {
-                $item['quantity']++;
+                ++$item['quantity'];
                 break;
             }
         }
@@ -54,7 +54,7 @@ final class CartComponent
     {
         foreach ($this->items as &$item) {
             if ($item['id'] === $id && $item['quantity'] > 1) {
-                $item['quantity']--;
+                --$item['quantity'];
                 break;
             }
         }

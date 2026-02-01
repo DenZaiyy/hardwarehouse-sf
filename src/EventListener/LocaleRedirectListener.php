@@ -25,7 +25,7 @@ final readonly class LocaleRedirectListener
 
         $request = $event->getRequest();
 
-        if ($request->getPathInfo() !== '/') {
+        if ('/' !== $request->getPathInfo()) {
             return;
         }
 

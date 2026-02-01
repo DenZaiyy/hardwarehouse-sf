@@ -17,8 +17,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-#[Route('/profile', name: "profile.")]
-//#[IsGranted('ROLE_USER', message: 'You do not have access to this page.', statusCode: Response::HTTP_FORBIDDEN)]
+#[Route('/profile', name: 'profile.')]
+// #[IsGranted('ROLE_USER', message: 'You do not have access to this page.', statusCode: Response::HTTP_FORBIDDEN)]
 class ProfileController extends AbstractController
 {
     public function __construct(private readonly TranslatorInterface $translator)
@@ -32,6 +32,7 @@ class ProfileController extends AbstractController
 
         if (!$user instanceof User) {
             $this->addFlash('danger', $this->translator->trans('user.update.infos.not_logged.message'));
+
             return $this->redirectToRoute('app.login');
         }
 
@@ -47,6 +48,7 @@ class ProfileController extends AbstractController
 
         if (!$user instanceof User) {
             $this->addFlash('danger', $this->translator->trans('user.update.infos.not_logged.message'));
+
             return $this->redirectToRoute('app.login');
         }
 
@@ -65,7 +67,7 @@ class ProfileController extends AbstractController
                     $this->addFlash('danger', $this->translator->trans('user.update.infos.email.already_exists'));
                 }
 
-                if ($email !== null) {
+                if (null !== $email) {
                     $user->setEmail($email);
                 }
             }
@@ -74,7 +76,7 @@ class ProfileController extends AbstractController
             $this->addFlash('success', $this->translator->trans('user.update.infos.success'));
 
             // Si requête Turbo, retourne des streams
-            if ($request->headers->has('Turbo-Frame') || $request->getPreferredFormat() === 'turbo_stream') {
+            if ($request->headers->has('Turbo-Frame') || 'turbo_stream' === $request->getPreferredFormat()) {
                 return $this->render('user/profile/_infos_stream.html.twig', [
                     'user' => $user,
                 ], new Response('', Response::HTTP_OK, [
@@ -98,6 +100,7 @@ class ProfileController extends AbstractController
 
         if (!$user instanceof User) {
             $this->addFlash('danger', $this->translator->trans('user.update.infos.not_logged.message'));
+
             return $this->redirectToRoute('app.login');
         }
 
@@ -118,7 +121,7 @@ class ProfileController extends AbstractController
                 $this->addFlash('success', 'Your password has been changed successfully.');
 
                 // Si requête Turbo, retourne des streams
-                if ($request->headers->has('Turbo-Frame') || $request->getPreferredFormat() === 'turbo_stream') {
+                if ($request->headers->has('Turbo-Frame') || 'turbo_stream' === $request->getPreferredFormat()) {
                     return $this->render('user/profile/_infos_stream.html.twig', [
                         'user' => $user,
                     ], new Response('', Response::HTTP_OK, [

@@ -38,13 +38,13 @@ class ImageUploadService
         }
 
         $targetDirectory = $subdirectory
-            ? $this->uploadDirectory . '/' . $subdirectory
+            ? $this->uploadDirectory.'/'.$subdirectory
             : $this->uploadDirectory;
 
         try {
             $file->move($targetDirectory, $newFilename);
         } catch (FileException $e) {
-            throw new \RuntimeException('Impossible d\'uploader le fichier : ' . $e->getMessage());
+            throw new \RuntimeException('Impossible d\'uploader le fichier : '.$e->getMessage());
         }
 
         return $newFilename;
@@ -56,7 +56,7 @@ class ImageUploadService
             return false;
         }
 
-        $filePath = $this->uploadDirectory . '/' . $filename;
+        $filePath = $this->uploadDirectory.'/'.$filename;
 
         if (file_exists($filePath) && is_file($filePath)) {
             return unlink($filePath);
@@ -68,6 +68,7 @@ class ImageUploadService
     public function replace(?string $oldFilename, UploadedFile $newFile, ?string $subdirectory = null): string
     {
         $this->delete($oldFilename);
+
         return $this->upload($newFile, $subdirectory);
     }
 
@@ -76,11 +77,7 @@ class ImageUploadService
         $mimeType = $file->getMimeType();
 
         if (!in_array($mimeType, self::ALLOWED_MIME_TYPES, true)) {
-            throw new \InvalidArgumentException(sprintf(
-                'Type MIME non autorisé : "%s". Types acceptés : %s',
-                $mimeType,
-                implode(', ', self::ALLOWED_MIME_TYPES)
-            ));
+            throw new \InvalidArgumentException(sprintf('Type MIME non autorisé : "%s". Types acceptés : %s', $mimeType, implode(', ', self::ALLOWED_MIME_TYPES)));
         }
     }
 }

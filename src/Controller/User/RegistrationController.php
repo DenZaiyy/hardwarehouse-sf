@@ -5,7 +5,6 @@ namespace App\Controller\User;
 use App\Entity\User;
 use App\Form\RegistrationFormType;
 use App\Security\EmailVerifier;
-use App\Service\ImageUploadService;
 use App\Service\MailerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
@@ -25,7 +24,7 @@ class RegistrationController extends AbstractController
     public function __construct(
         private readonly EmailVerifier $emailVerifier,
         private readonly MailerService $mailerService,
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -64,8 +63,9 @@ class RegistrationController extends AbstractController
             $this->addFlash('success', $translator->trans('user.registration.flash.success'));
             $this->redirectToRoute('homepage');
 
-            $this->mailerService->sendAdminNotification("Inscription", sprintf("Un nouvel utilisateur c'est inscrit sur le site : %s (%s)", $user->getUsername(), $user->getEmail()));
+            $this->mailerService->sendAdminNotification('Inscription', sprintf("Un nouvel utilisateur c'est inscrit sur le site : %s (%s)", $user->getUsername(), $user->getEmail()));
             $security->login($user, 'form_login', 'main');
+
             return $this->redirectToRoute('homepage');
         }
 
@@ -100,6 +100,7 @@ class RegistrationController extends AbstractController
             }
         } catch (VerifyEmailExceptionInterface $exception) {
             $this->addFlash('verify_email_error', $translator->trans($exception->getReason(), [], 'VerifyEmailBundle'));
+
             return $this->redirectToRoute('app.register');
         }
 

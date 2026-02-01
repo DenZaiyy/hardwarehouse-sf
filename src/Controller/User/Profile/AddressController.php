@@ -23,7 +23,7 @@ class AddressController extends AbstractController
 {
     public function __construct(
         private readonly TranslatorInterface $translator,
-        private readonly EntityManagerInterface $em
+        private readonly EntityManagerInterface $em,
     ) {
     }
 
@@ -89,6 +89,7 @@ class AddressController extends AbstractController
                 'success',
                 $this->translator->trans('user.address.update.success')
             );
+
             return $this->redirectToRoute('address.index');
         }
 
@@ -102,7 +103,7 @@ class AddressController extends AbstractController
     #[Route('/delete/{id}', name: 'delete', methods: ['POST'])]
     public function delete(Address $address, Request $request): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$address->getId(), (string)$request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$address->getId(), (string) $request->request->get('_token'))) {
             $this->em->remove($address);
             $this->em->flush();
 
