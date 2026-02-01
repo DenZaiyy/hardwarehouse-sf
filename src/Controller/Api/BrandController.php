@@ -3,12 +3,12 @@
 namespace App\Controller\Api;
 
 use App\Dto\Api\Brands\BrandDto;
-use App\Dto\Api\Brands\BrandWithProductsDto;
+use App\Dto\Api\Brands\BrandsProductsDto;
 use App\Service\ApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 
 #[Route('/brands', name: 'brand.')]
 final class BrandController extends AbstractController
@@ -19,27 +19,38 @@ final class BrandController extends AbstractController
     }
 
     #[Route('', name: 'index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $brands = $this->apiService->fetchAll('brands', BrandDto::class);
+        $page = $request->query->getInt('page', 1);
+        // $brands = $this->apiService->fet('brands', BrandDto::class);
+        $result = $this->apiService->fetchPaginated(
+            'brands',
+            BrandDto::class,
+            ['page' => $page, 'limit' => 2]
+        );
 
         return $this->render('brand/index.html.twig', [
-            'brands' => $brands,
+            'brands' => $result['data'],
+            'pagination' => $result['meta'],
         ]);
     }
 
     #[Route('/{slug}', name: 'show', methods: ['GET'])]
-    public function show(string $slug): Response
+    public function show(string $slug, Request $request): Response
     {
-        try {
-            $brand = $this->apiService->fetchOne('brands/' . $slug, BrandWithProductsDto::class);
-        } catch (HttpExceptionInterface) {
-            throw $this->createNotFoundException('Marque non trouvée');
-        }
+        $page = $request->query->getInt('page', 1);
+        $brand = $this->apiService->fetchOne('brands/'.$slug, BrandDto::class);
+
+        $result = $this->apiService->fetchPaginated(
+            "brands/$slug/products",
+            BrandsProductsDto::class,
+            ['page' => $page, 'limit' => 2]
+        );
 
         return $this->render('brand/show.html.twig', [
             'brand' => $brand,
-            'products' => $brand->products ?? null,
+            'products' => $result['data'],
+            'pagination' => $result['meta'],
         ]);
     }
 }

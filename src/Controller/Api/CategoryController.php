@@ -3,9 +3,10 @@
 namespace App\Controller\Api;
 
 use App\Dto\Api\Categories\CategoryDto;
-use App\Dto\Api\Categories\CategoryWithProductsDto;
+use App\Dto\Api\Categories\CategoryProductsDto;
 use App\Service\ApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -18,23 +19,38 @@ final class CategoryController extends AbstractController
     }
 
     #[Route('', name: 'index', methods: ['GET'])]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $categories = $this->apiService->fetchAll('categories', CategoryDto::class);
+        $page = $request->query->getInt('page', 1);
+        // $categories = $this->apiService->fetchAll('categories', CategoryDto::class);
+        $result = $this->apiService->fetchPaginated(
+            'categories',
+            CategoryDto::class,
+            ['page' => $page, 'limit' => 2]
+        );
 
         return $this->render('category/index.html.twig', [
-            'categories' => $categories,
+            'categories' => $result['data'],
+            'pagination' => $result['meta'],
         ]);
     }
 
     #[Route('/{slug}', name: 'show', methods: ['GET'])]
-    public function show(string $slug): Response
+    public function show(string $slug, Request $request): Response
     {
-        $category = $this->apiService->fetchOne('categories/' . $slug, CategoryWithProductsDto::class);
+        $page = $request->query->getInt('page', 1);
+
+        $category = $this->apiService->fetchOne('categories/'.$slug, CategoryDto::class);
+        $result = $this->apiService->fetchPaginated(
+            "categories/$slug/products",
+            CategoryProductsDto::class,
+            ['page' => $page, 'limit' => 2]
+        );
 
         return $this->render('category/show.html.twig', [
             'category' => $category,
-            'products' => $category->products ?? null,
+            'products' => $result['data'],
+            'pagination' => $result['meta'],
         ]);
     }
 }

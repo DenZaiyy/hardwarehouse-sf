@@ -9,7 +9,7 @@ use App\Dto\Api\Categories\CategoryDto;
 readonly class ProductDto
 {
     /**
-     * @param string[] $images
+     * @param string[]                   $images
      * @param ProductAttributeValueDto[] $productAttributeValues
      */
     public function __construct(
