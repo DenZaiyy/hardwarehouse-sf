@@ -10,7 +10,7 @@ readonly class StockDto
         public int $quantity,
         public ?\DateTimeImmutable $createdAt = null,
         public ?\DateTimeImmutable $updatedAt = null,
-        public ?StockProductDto $product = null
+        public ?StockProductDto $product = null,
     ) {
     }
 }

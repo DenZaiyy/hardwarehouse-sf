@@ -9,7 +9,7 @@ readonly class StockProductDto
         public string $name,
         public string $slug,
         public float $price,
-        public ?string $thumbnail
+        public ?string $thumbnail,
     ) {
     }
 }
