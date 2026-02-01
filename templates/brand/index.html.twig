@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello BrandController!{% endblock %}
+{% block title %}Liste des marques - HardWareHouse{% endblock %}
 
 {% block body %}
     <h1>Brands list</h1>
@@ -17,7 +17,7 @@
         {% if brands is not null %}
             {% for brand in brands %}
                 <tr>
-                    <td>{{ brand.id }}</td>
+                    <td><a href="{{ path('brand.show', {slug: brand.slug}) }}">{{ brand.id }}</a></td>
                     <td>{{ brand.name }}</td>
                     <td>{{ brand.slug }}</td>
                     <td><img src="{{ brand.logo }}" alt="{{ brand.name }} logo" class="size-16"/></td>
@@ -28,7 +28,6 @@
                 <td colspan="4">No results founds</td>
             </tr>
         {% endif %}
-
         </tbody>
     </table>
 {% endblock %}
