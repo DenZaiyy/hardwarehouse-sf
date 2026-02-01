@@ -2,9 +2,8 @@
 
 namespace App\Service;
 
-use Symfony\Component\HttpClient\CachingHttpClient;
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Contracts\Cache\TagAwareCacheInterface;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -12,37 +11,61 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class ApiService
+readonly class ApiService
 {
-    private HttpClientInterface $client;
-
     public function __construct(
-        private readonly TagAwareCacheInterface $cache,
-        private readonly string $baseUrl,
+        private HttpClientInterface $apiClient,
+        private SerializerInterface $serializer,
     ) {
-        $this->client = HttpClient::create();
-        $this->client = new CachingHttpClient($this->client, $this->cache);
     }
 
     /**
-     * @param string $data
-     * @param string|null $arg
+     * @template T of object
+     * @param class-string<T> $dtoClass
+     * @return T
+     * @throws TransportExceptionInterface
+     * @throws ExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     */
+    public function fetchOne(string $endpoint, string $dtoClass): object
+    {
+        $response = $this->apiClient->request('GET', $endpoint);
+
+        /** @var T */
+        return $this->serializer->deserialize($response->getContent(), $dtoClass, 'json');
+    }
+
+    /**
+     * @template T of object
+     * @param class-string<T> $dtoClass
+     * @return T[]
+     * @throws TransportExceptionInterface
+     * @throws ExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     */
+    public function fetchAll(string $endpoint, string $dtoClass): array
+    {
+        $response = $this->apiClient->request('GET', $endpoint);
+
+        /** @var T[] */
+        return $this->serializer->deserialize($response->getContent(), $dtoClass . '[]', 'json');
+    }
+
+    /**
      * @return array<string, mixed>
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
-    public function getData(string $data, ?string $arg): array
+    public function getData(string $endpoint): array
     {
-        try {
-            $response = $this->client->request('GET', $this->baseUrl . $data . '/' . $arg);
-            /** @var array<string, mixed> */
-            return $response->toArray();
-        } catch (TransportExceptionInterface $e) {
-            echo $e->getMessage();
-            /** @var array<string, mixed> */
-            return [];
-        }
+        /** @var array<string, mixed> */
+        return $this->apiClient->request('GET', $endpoint)->toArray();
     }
 }
