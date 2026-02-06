@@ -39,7 +39,7 @@ user:
         delete: { success: 'Votre adresse à été supprimé avec succès' }
 seo:
     description:
-        default: 'Découvrez notre sélection de composants PC : cartes graphiques, processeurs, cartes mères, mémoire RAM et stockage. Livraison rapide et support technique dédié.'
+        default: 'Découvrez notre sélection de composants PC : cartes graphiques, processeurs, cartes mères, mémoire RAM et stockage. Livraison rapide.'
 header:
     user:
         label: Utilisateur
