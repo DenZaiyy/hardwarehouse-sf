@@ -39,6 +39,7 @@ class ResetPasswordControllerTest extends WebTestCase
     {
         // Create a test user
         $user = (new User())
+            ->setUsername('me')
             ->setEmail('me@example.com')
             ->setPassword('a-test-password-that-will-be-changed-later')
         ;
