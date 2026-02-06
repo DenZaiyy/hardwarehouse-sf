@@ -47,7 +47,7 @@
         </report>
     </coverage>
 
-    <extensions>
+    <!--<extensions>
         <bootstrap class="Symfony\Component\Panther\ServerExtension" />
-    </extensions>
+    </extensions>-->
 </phpunit>
