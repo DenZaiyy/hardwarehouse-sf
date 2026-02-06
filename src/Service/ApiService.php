@@ -58,16 +58,14 @@ readonly class ApiService
     {
         $response = $this->apiClient->request('GET', $endpoint);
 
-        /*
-         * @var array<T> $result
-         */
+        /** @var array<T> */
         return $this->serializer->deserialize($response->getContent(), $dtoClass.'[]', 'json');
     }
 
     /**
      * @template T of object
      *
-     * @param class-string<T>      $dtoClass
+     * @param class-string<T> $dtoClass
      * @param array<string, mixed> $params
      *
      * @return array{data: array<T>, meta: PaginationMeta}
@@ -78,6 +76,7 @@ readonly class ApiService
      * @throws DecodingExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
+     * @throws \JsonException
      */
     public function fetchPaginated(string $endpoint, string $dtoClass, array $params = []): array
     {
@@ -88,7 +87,7 @@ readonly class ApiService
         $response = $this->apiClient->request('GET', $url)->toArray();
 
         $result = $this->serializer->deserialize(
-            json_encode($response['data']),
+            json_encode($response['data'], JSON_THROW_ON_ERROR),
             $dtoClass.'[]',
             'json'
         );
