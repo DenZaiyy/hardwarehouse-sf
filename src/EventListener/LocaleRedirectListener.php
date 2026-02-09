@@ -6,16 +6,12 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Routing\RouterInterface;
 
-#[AsEventListener(event: KernelEvents::REQUEST, priority: 40)]
+#[AsEventListener(event: KernelEvents::REQUEST, priority: 33)]
 final readonly class LocaleRedirectListener
 {
-    public function __construct(
-        private RouterInterface $router,
-        private string $defaultLocale = 'fr',
-    ) {
-    }
+    private const array LOCALES = ['fr', 'en'];
+    private const string DEFAULT_LOCALE = 'fr';
 
     public function __invoke(RequestEvent $event): void
     {
@@ -24,18 +20,38 @@ final readonly class LocaleRedirectListener
         }
 
         $request = $event->getRequest();
+        $path = $request->getPathInfo();
 
-        if ('/' !== $request->getPathInfo()) {
+        // Ignorer tout ce qui commence par underscore (profiler, wdt, etc.)
+        if (str_starts_with($path, '/_')) {
             return;
         }
 
-        $locale = $request->getPreferredLanguage(['fr', 'en']) ?? $this->defaultLocale;
+        // Racine : rediriger vers la locale
+        if ('/' === $path) {
+            $locale = $request->getPreferredLanguage(self::LOCALES) ?? self::DEFAULT_LOCALE;
+            $event->setResponse(new RedirectResponse('/'.$locale, 302));
 
-        // Force locale into routing context
-        $this->router->getContext()->setParameter('_locale', $locale);
+            return;
+        }
 
-        $url = $this->router->generate('homepage');
+        $segments = explode('/', ltrim($path, '/'));
+        $firstSegment = $segments[0];
 
-        $event->setResponse(new RedirectResponse($url, 302));
+        // Locale déjà présente
+        if (in_array($firstSegment, self::LOCALES, true)) {
+            return;
+        }
+
+        // Redirection
+        $locale = $request->getPreferredLanguage(self::LOCALES) ?? self::DEFAULT_LOCALE;
+        $queryString = $request->getQueryString();
+        $redirectUrl = '/'.$locale.$path;
+
+        if ($queryString) {
+            $redirectUrl .= '?'.$queryString;
+        }
+
+        $event->setResponse(new RedirectResponse($redirectUrl, 302));
     }
 }
