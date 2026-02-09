@@ -65,7 +65,7 @@ readonly class ApiService
     /**
      * @template T of object
      *
-     * @param class-string<T> $dtoClass
+     * @param class-string<T>      $dtoClass
      * @param array<string, mixed> $params
      *
      * @return array{data: array<T>, meta: PaginationMeta}
