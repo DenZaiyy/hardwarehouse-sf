@@ -30,4 +30,6 @@
         {% endif %}
         </tbody>
     </table>
+
+    {% include '_partials/_pagination.html.twig' with {pagination: pagination} %}
 {% endblock %}

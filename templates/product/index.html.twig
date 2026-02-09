@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello ProductController!{% endblock %}
+{% block title %}La liste des produits disponibles - HardWareHouse{% endblock %}
 
 {% block body %}
     <div class="relative flex flex-col md:flex-row gap-10">
@@ -16,6 +16,8 @@
                     {% endfor %}
                 </div>
             {% endif %}
+
+            {% include '_partials/_pagination.html.twig' with {pagination: pagination} %}
         </div>
     </div>
 
