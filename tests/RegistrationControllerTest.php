@@ -36,9 +36,10 @@ class RegistrationControllerTest extends WebTestCase
         // Register a new user
         $this->client->request('GET', '/register');
         self::assertResponseIsSuccessful();
-        self::assertPageTitleContains('Register');
+        self::assertPageTitleContains('Create account');
 
-        $this->client->submitForm('Register', [
+        $this->client->submitForm('Create my account', [
+            'registration_form[username]' => 'me',
             'registration_form[email]' => 'me@example.com',
             'registration_form[plainPassword]' => 'password',
             'registration_form[agreeTerms]' => true,
@@ -69,7 +70,7 @@ class RegistrationControllerTest extends WebTestCase
         $messageBody = $templatedEmail->getHtmlBody();
         self::assertIsString($messageBody);
 
-        preg_match('#(http://localhost/verify/email.+)">#', $messageBody, $resetLink);
+        preg_match('#(http://localhost:8000/en/verify/email.+)">#', $messageBody, $resetLink);
 
         // "Click" the link and see if the user is verified
         $this->client->request('GET', $resetLink[1]);
