@@ -32,9 +32,7 @@ class ImageUploadService
         $this->validateMimeType($file);
         $this->valideFileSize($file);
 
-        if ($username) {
-            $newFilename = sprintf('%s-%s.%s', $username, uniqid('', true), $file->guessExtension());
-        } elseif (in_array($type, self::UPLOAD_TYPES, true)) {
+        if (in_array($type, self::UPLOAD_TYPES, true)) {
             switch ($type) {
                 case 'avatar':
                     $subdirectory = 'avatar';
