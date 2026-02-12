@@ -10,7 +10,7 @@
         <div class="basis-3/4">
             <h1>Products list</h1>
             {% if products is not null %}
-                <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
+                <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 items-stretch">
                     {% for product in products %}
                         {% include '_partials/_product_card.html.twig' with {product: product} %}
                     {% endfor %}
@@ -20,38 +20,4 @@
             {% include '_partials/_pagination.html.twig' with {pagination: pagination} %}
         </div>
     </div>
-
-    {#<table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nom</th>
-            <th>Slug</th>
-            <th>Price</th>
-            <th>Image</th>
-            <th>Category</th>
-            <th>Brand</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% if products is not null %}
-            {% for product in products %}
-                <tr>
-                    <td><a href="{{ path('product.show', {slug: product.slug}) }}">{{ product.id }}</a></td>
-                    <td>{{ product.name }}</td>
-                    <td>{{ product.slug }}</td>
-                    <td>{{ product.price }}</td>
-                    <td><img src="{{ product.image }}" alt="Image of {{ product.name }}" class="size-16"/></td>
-                    <td>{{ product.category.name }}</td>
-                    <td>{{ product.brand.name }}</td>
-                </tr>
-            {% endfor %}
-        {% else %}
-            <tr>
-                <td colspan="7">No results founds</td>
-            </tr>
-        {% endif %}
-
-        </tbody>
-    </table>#}
 {% endblock %}
