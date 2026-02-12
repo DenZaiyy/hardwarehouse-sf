@@ -1,0 +1,11 @@
+<turbo-frame id="modal_content">
+    {{ form_start(form, {
+        action: address.id ? path('address.edit', {id: address.id}) : path('address.new')
+    }) }}
+    {{ form_widget(form) }}
+
+    <button class="btn btn-primary">
+        {{ address.id ? 'Modifier' : 'Ajouter' }}
+    </button>
+    {{ form_end(form) }}
+</turbo-frame>
