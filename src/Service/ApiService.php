@@ -83,7 +83,7 @@ readonly class ApiService
         $query = http_build_query($params);
         $url = $endpoint.($query ? '?'.$query : '');
 
-        /** @var array{data: array<mixed>, meta: array{total: int, page: int, limit: int, totalPages: int, hasNext: bool, hasPrev: bool}} $response */
+        /** @var array{data: array, meta: array{total: int, page: int, limit: int, totalPages: int, hasNext: bool, hasPrev: bool}} $response */
         $response = $this->apiClient->request('GET', $url)->toArray();
 
         $result = $this->serializer->deserialize(
@@ -121,6 +121,29 @@ readonly class ApiService
      */
     public function getData(string $endpoint): array
     {
+        /** @var array<string, mixed> $result */
+        $result = $this->apiClient->request('GET', $endpoint)->toArray();
+
+        return $result;
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     *
+     * @return array<string, mixed>
+     *
+     * @throws TransportExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     */
+    public function search(string $searchTerm, array $params = []): array
+    {
+        $allParams = array_merge(['search' => $searchTerm], $params);
+        $queryString = http_build_query($allParams);
+        $endpoint = 'products?'.$queryString;
+
         /** @var array<string, mixed> $result */
         $result = $this->apiClient->request('GET', $endpoint)->toArray();
 

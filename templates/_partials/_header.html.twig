@@ -3,18 +3,23 @@
         <!-- Logo -->
         <a href="{{ path('homepage') }}" class="flex items-center gap-2 font-semibold">
             <img src="{{ asset('carton-40x40.webp') }}" class="size-8" alt="Logo">
-            <span class="hidden sm:inline">HardWareHouse</span>
+            <span class="hidden sm:inline font-title md:text-xl">HardWareHouse</span>
         </a>
 
         <!-- Search -->
-        <div class="flex-1 md:flex md:justify-center">
+        <div class="flex-1 md:flex md:justify-center" data-controller="search" data-search-url-value="{{ path('search') }}">
             <div class="relative w-full md:max-w-xl">
                 {{ ux_icon('heroicons-solid:magnifying-glass', {class: 'absolute left-3 top-1/2 -translate-y-1/2 size-4 text-secondary'}) }}
                 <input
                     type="search"
                     placeholder="Cherche un produit, une marque…"
-                    class="w-full rounded-md bg-search pl-10 pr-3 py-2 text-sm"
+                    class="w-full rounded-md bg-search pl-10 pr-3 py-2 text-sm font-display font-medium"
+                    data-search-target="input"
+                    data-action="input->search#query"
                 >
+                <div class="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg hidden z-50" data-search-target="results">
+                    <!-- Résultats de recherche -->
+                </div>
             </div>
         </div>
 
@@ -36,7 +41,7 @@
             </ul>
         </div>
         <div class="desktop">
-            <ul class="hidden md:flex md:gap-4 overflow-x-auto md:px-4 md:py-2 md:text-sm md:justify-center">
+            <ul class="hidden md:flex md:gap-4 overflow-x-auto md:px-4 md:py-2 md:text-sm md:justify-center font-display font-bold">
                 <li><a href="{{ path('configuration.index') }}">Configuration PC</a></li>
                 <li><a href="{{ path('brand.index') }}">Marques</a></li>
                 {% for category in categories() %}
