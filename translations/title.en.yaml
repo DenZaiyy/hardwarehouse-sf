@@ -7,3 +7,5 @@ login:
 user:
     profile:
         title: Profile
+    address:
+        home: { title: __user.address.home.title }
