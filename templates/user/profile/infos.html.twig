@@ -5,8 +5,9 @@
 {% block body %}
     <h1>Éditer vos informations</h1>
 
-    <turbo-frame id="user-infos">
-        <div class="block md:flex md:flex-col md:gap-4 border p-2 md:p-4 rounded">
+    <turbo-frame id="modal_content">
+        <div class="block md:flex md:flex-col md:gap-4">
+            <h2 class="mb-4">Éditer vos informations</h2>
             {{ form_start(form, {action: path('profile.infos')}) }}
             <div class="flex flex-row gap-4">
                 <div class="flex-1">
@@ -24,10 +25,10 @@
             </div>
 
             <div class="flex-1">
-                {{ form_label(form.avatarFile) }}
-                {{ form_widget(form.avatarFile) }}
-                {{ form_errors(form.avatarFile) }}
-                {{ form_help(form.avatarFile) }}
+                {{ form_label(form.avatar) }}
+                {{ form_widget(form.avatar) }}
+                {{ form_errors(form.avatar) }}
+                {{ form_help(form.avatar) }}
             </div>
 
             <div class="flex flex-row gap-4">
@@ -35,7 +36,7 @@
                     {{ form_widget(form.save) }}
                 </div>
                 <div class="flex-1">
-                    <a href="{{ path('profile.index') }}">Annuler</a>
+                    <button type="button" data-action="modal#close" class="btn btn-secondary">Annuler</button>
                 </div>
             </div>
 
