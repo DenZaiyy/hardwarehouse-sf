@@ -65,6 +65,16 @@ install: ## Install composer dependencies
 	$(call banner,$(INFO),Installing dependencies...)
 	composer install --optimize-autoloader
 
+.PHONY: assets
+assets: ## Command to building assets
+	$(call banner,$(INFO),Building assets...)
+	php bin/console asset-map:compile
+
+.PHONY: imports
+imports: ## Command to install importmap
+	$(call banner,$(INFO),Installing importmap...)
+	php bin/console importmap:install
+
 .PHONY: cache
 cache: ## Clear the cache of symfony app
 	$(call banner,$(INFO),Clearing cache...)
@@ -121,4 +131,4 @@ tests: ## Running tests using PHPUnit
 	$(call banner,$(INFO),Clearing cache...)
 	php bin/console --env=test cache:clear
 	$(call banner,$(INFO),Running tests...)
-	php bin/phpunit
+	XDEBUG_MODE=coverage php bin/phpunit
