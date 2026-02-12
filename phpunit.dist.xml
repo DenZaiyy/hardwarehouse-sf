@@ -42,8 +42,6 @@
     <coverage>
         <report>
             <html outputDirectory="coverage" />
-            <!-- Optional: also generate Clover report for CI -->
-            <!-- <clover outputFile="coverage/clover.xml"/> -->
         </report>
     </coverage>
 
