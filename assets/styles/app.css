@@ -5,7 +5,7 @@
     --color-secondary: oklch(0.5579 0.0849 240.94);
     --color-paragraph: oklch(0.9582 0.0131 251.56);
     --color-search: oklch(0.931 0 0);
-    --font-display: "Montserrats", sans-serif;
+    --font-display: "Montserrat", sans-serif;
     --font-title: "Exo 2", sans-serif;
 
     --radius-section: 10px;
@@ -79,7 +79,7 @@
        ========================= */
 
     button {
-        @apply inline-flex items-center justify-center gap-2
+        @apply inline-flex items-center justify-center gap-2 cursor-pointer
         rounded-md font-medium
         px-4 py-2 text-sm
         bg-blue-600 text-white
