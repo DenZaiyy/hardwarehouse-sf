@@ -47,14 +47,17 @@ class SearchController extends AbstractController
                 'limit' => 5, // Limiter le nombre de résultats
             ]);
 
+            /** @var array<int, array{id: mixed, name: mixed, price: mixed, thumbnail: mixed, slug: mixed}> $items */
+            $items = $data['data'] ?? $data['products'] ?? [];
+
             // Formater les données pour le frontend
             $products = array_map(fn ($product) => [
                 'id' => $product['id'] ?? null,
                 'name' => $product['name'] ?? 'Produit sans nom',
                 'price' => $product['price'] ?? null,
                 'thumbnail' => $product['thumbnail'] ?? null,
-                'url' => $this->generateUrl('product.show', ['slug' => $product['slug'] ?? '']) ?? '#',
-            ], $data['data'] ?? $data['products'] ?? []);
+                'url' => $this->generateUrl('product.show', ['slug' => $product['slug'] ?? '']),
+            ], $items);
 
             return new JsonResponse([
                 'products' => $products,

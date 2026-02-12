@@ -83,7 +83,7 @@ readonly class ApiService
         $query = http_build_query($params);
         $url = $endpoint.($query ? '?'.$query : '');
 
-        /** @var array{data: array, meta: array{total: int, page: int, limit: int, totalPages: int, hasNext: bool, hasPrev: bool}} $response */
+        /** @var array{data: array<T>, meta: array{total: int, page: int, limit: int, totalPages: int, hasNext: bool, hasPrev: bool}} $response */
         $response = $this->apiClient->request('GET', $url)->toArray();
 
         $result = $this->serializer->deserialize(

@@ -12,6 +12,7 @@ use Doctrine\ORM\Exception\ORMException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\Address;
@@ -48,6 +49,7 @@ class RegistrationController extends AbstractController
             // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
+            /** @var UploadedFile $avatar */
             $avatar = $form->get('avatar')->getData();
             $uploadedFile = $this->uploadService->upload($avatar, $user->getUsername(), type: 'avatar');
 

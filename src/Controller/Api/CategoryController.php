@@ -21,7 +21,12 @@ final class CategoryController extends AbstractController
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(): Response
     {
-        $categories = $this->apiService->fetchAll('categories', CategoryDto::class);
+        $categories = [];
+
+        try {
+            $categories = $this->apiService->fetchAll('categories', CategoryDto::class);
+        } catch (\Error) {
+        }
 
         return $this->render('category/index.html.twig', [
             'categories' => $categories,
