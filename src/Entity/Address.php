@@ -36,10 +36,18 @@ class Address
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
+    #[Assert\Regex(
+        pattern: '/^\d{1,4}(?:\s?(?:bis|ter|quater))?\s+(?:rue|avenue|boulevard|place|impasse|allée|chemin|route|passage|square|cours|quai|voie|résidence|lotissement|hameau)\s+.{2,}$/iu',
+        message: 'Format d\'adresse invalide. Ex: 12 rue de la Paix'
+    )]
     private ?string $address = null;
 
     #[ORM\Column(length: 10)]
     #[Assert\NotBlank]
+    #[Assert\Regex(
+        pattern: '/^\d{5}$/',
+        message: 'Le code postal doit contenir 5 chiffres.'
+    )]
     private ?string $cp = null;
 
     #[ORM\Column(length: 50)]
