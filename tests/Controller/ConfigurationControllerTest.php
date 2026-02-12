@@ -10,7 +10,9 @@ final class ConfigurationControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $client->request('GET', '/configuration');
+        $client->followRedirect();
 
-        self::assertResponseIsSuccessful();
+        self::assertResponseRedirects();
+        self::assertSelectorTextContains('h1', 'Construis ton ordinateur');
     }
 }
