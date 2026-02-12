@@ -30,8 +30,9 @@ class UpdateInfosFormType extends AbstractType
             ->add('username', TextType::class, [
                 'label' => $this->translator->trans('user.update.infos.username.label'),
             ])
-            ->add('avatarFile', DropzoneType::class, [
+            ->add('avatar', DropzoneType::class, [
                 'label' => $this->translator->trans('user.update.infos.avatar.label'),
+                'mapped' => false,
                 'required' => false,
             ])
             ->add('save', SubmitType::class, [
