@@ -48,7 +48,7 @@ class SearchController extends AbstractController
             ]);
 
             // Formater les données pour le frontend
-            $products = array_map(fn($product) => [
+            $products = array_map(fn ($product) => [
                 'id' => $product['id'] ?? null,
                 'name' => $product['name'] ?? 'Produit sans nom',
                 'price' => $product['price'] ?? null,
