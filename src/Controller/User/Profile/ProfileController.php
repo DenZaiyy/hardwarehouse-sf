@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\User\Profile;
 
+use App\Entity\Address;
 use App\Entity\User;
 use App\Form\User\ChangePasswordFormType;
 use App\Form\User\UpdateInfosFormType;
@@ -21,12 +22,15 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 // #[IsGranted('ROLE_USER', message: 'You do not have access to this page.', statusCode: Response::HTTP_FORBIDDEN)]
 class ProfileController extends AbstractController
 {
-    public function __construct(private readonly TranslatorInterface $translator)
-    {
+    public function __construct(
+        private readonly TranslatorInterface $translator,
+        private readonly EntityManagerInterface $em,
+        private readonly ImageUploadService $uploadService,
+    ) {
     }
 
     #[Route('', name: 'index')]
-    public function index(Request $request, UserPasswordHasherInterface $hasher, EntityManagerInterface $entityManager): Response
+    public function index(): Response
     {
         $user = $this->getUser();
 
@@ -36,13 +40,16 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app.login');
         }
 
+        $defaultAddress = $this->em->getRepository(Address::class)->findOneBy(['user_info' => $user, 'is_default' => true]);
+
         return $this->render('user/profile/index.html.twig', [
             'user' => $user,
+            'defaultAddress' => $defaultAddress,
         ]);
     }
 
     #[Route('/infos', name: 'infos')]
-    public function updateInfos(Request $request, EntityManagerInterface $entityManager, ImageUploadService $imageUploadService): Response
+    public function updateInfos(Request $request): Response
     {
         $user = $this->getUser();
 
@@ -59,11 +66,16 @@ class ProfileController extends AbstractController
             /** @var User $data */
             $data = $form->getData();
 
+            $avatar = $form->get('avatar')->getData();
+            $uploadedAvatar = $this->uploadService->upload($avatar, $user->getUsername(), type: 'avatar');
+
+            $user->setAvatar($uploadedAvatar);
+
             $email = $data->getEmail();
 
             if ($email !== $user->getEmail()) {
                 // check if email not exists
-                if ($entityManager->getRepository(User::class)->findOneBy(['email' => $email])) {
+                if ($this->em->getRepository(User::class)->findOneBy(['email' => $email])) {
                     $this->addFlash('danger', $this->translator->trans('user.update.infos.email.already_exists'));
                 }
 
@@ -72,13 +84,16 @@ class ProfileController extends AbstractController
                 }
             }
 
-            $entityManager->flush();
+            $this->em->flush();
             $this->addFlash('success', $this->translator->trans('user.update.infos.success'));
 
             // Si requête Turbo, retourne des streams
             if ($request->headers->has('Turbo-Frame') || 'turbo_stream' === $request->getPreferredFormat()) {
+                $defaultAddress = $this->em->getRepository(Address::class)->findOneBy(['user_info' => $user, 'is_default' => true]);
+
                 return $this->render('user/profile/_infos_stream.html.twig', [
                     'user' => $user,
+                    'defaultAddress' => $defaultAddress,
                 ], new Response('', Response::HTTP_OK, [
                     'Content-Type' => 'text/vnd.turbo-stream.html',
                 ]));
@@ -122,8 +137,11 @@ class ProfileController extends AbstractController
 
                 // Si requête Turbo, retourne des streams
                 if ($request->headers->has('Turbo-Frame') || 'turbo_stream' === $request->getPreferredFormat()) {
+                    $defaultAddress = $this->em->getRepository(Address::class)->findOneBy(['user_info' => $user, 'is_default' => true]);
+
                     return $this->render('user/profile/_infos_stream.html.twig', [
                         'user' => $user,
+                        'defaultAddress' => $defaultAddress,
                     ], new Response('', Response::HTTP_OK, [
                         'Content-Type' => 'text/vnd.turbo-stream.html',
                     ]));

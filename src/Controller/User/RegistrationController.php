@@ -5,6 +5,7 @@ namespace App\Controller\User;
 use App\Entity\User;
 use App\Form\RegistrationFormType;
 use App\Security\EmailVerifier;
+use App\Service\ImageUploadService;
 use App\Service\MailerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
@@ -24,12 +25,13 @@ class RegistrationController extends AbstractController
     public function __construct(
         private readonly EmailVerifier $emailVerifier,
         private readonly MailerService $mailerService,
-        private readonly EntityManagerInterface $entityManager,
+        private readonly EntityManagerInterface $em,
+        private readonly ImageUploadService $uploadService,
     ) {
     }
 
     #[Route('/register', name: 'app.register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager, TranslatorInterface $translator): Response
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, TranslatorInterface $translator): Response
     {
         if ($this->isGranted('ROLE_USER')) {
             return $this->redirectToRoute('homepage');
@@ -46,8 +48,13 @@ class RegistrationController extends AbstractController
             // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
-            $entityManager->persist($user);
-            $entityManager->flush();
+            $avatar = $form->get('avatar')->getData();
+            $uploadedFile = $this->uploadService->upload($avatar, $user->getUsername(), type: 'avatar');
+
+            $user->setAvatar($uploadedFile);
+
+            $this->em->persist($user);
+            $this->em->flush();
 
             // generate a signed url and email it to the user
             $this->emailVerifier->sendEmailConfirmation(
@@ -89,7 +96,7 @@ class RegistrationController extends AbstractController
 
             // Vérification de l'email - cela met à jour isVerified=true et persiste
             $this->emailVerifier->handleEmailConfirmation($request, $user);
-            $this->entityManager->refresh($user);
+            $this->em->refresh($user);
             $welcomeSent = $this->mailerService->sendWelcomeMail((string) $user->getEmail());
 
             if ($welcomeSent) {
