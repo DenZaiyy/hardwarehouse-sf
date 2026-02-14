@@ -23,7 +23,7 @@ final readonly class LocaleRedirectListener
         $path = $request->getPathInfo();
 
         // Ignorer tout ce qui commence par underscore (profiler, wdt, etc.)
-        if (str_starts_with($path, '/_')) {
+        if (str_starts_with($path, '/_') || str_starts_with($path, '/sitemap')) {
             return;
         }
 
