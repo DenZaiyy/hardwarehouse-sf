@@ -30,4 +30,14 @@ readonly class ProductDto
         public ?\DateTimeImmutable $updatedAt = null,
     ) {
     }
+
+    public function getSlug(): string
+    {
+        return $this->slug;
+    }
+
+    public function getId(): string
+    {
+        return $this->id;
+    }
 }

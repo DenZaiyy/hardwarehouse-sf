@@ -13,4 +13,19 @@ readonly class CategoryDto
         public ?\DateTimeImmutable $updatedAt = null,
     ) {
     }
+
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getSlug(): string
+    {
+        return $this->slug;
+    }
 }
