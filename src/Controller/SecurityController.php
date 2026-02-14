@@ -9,7 +9,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
-    #[Route(path: '/login', name: 'app.login')]
+    #[Route(path: ['en' => '/login', 'fr' => '/connexion'], name: 'app.login', options: ['sitemap' => true])]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         if ($this->isGranted('ROLE_USER')) {
@@ -28,7 +28,7 @@ class SecurityController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/logout', name: 'app.logout')]
+    #[Route(path: ['en' => '/logout', 'fr' => '/deconnexion'], name: 'app.logout', options: ['sitemap' => true])]
     public function logout(): void
     {
         $this->addFlash('success', 'You have been logged out.');

@@ -31,7 +31,7 @@ class RegistrationController extends AbstractController
     ) {
     }
 
-    #[Route('/register', name: 'app.register')]
+    #[Route(path: ['en' => '/register', 'fr' => '/inscription'], name: 'app.register', options: ['sitemap' => true])]
     public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, TranslatorInterface $translator): Response
     {
         if ($this->isGranted('ROLE_USER')) {

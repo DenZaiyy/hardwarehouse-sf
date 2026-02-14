@@ -30,7 +30,7 @@ class ProfileController extends AbstractController
     ) {
     }
 
-    #[Route('', name: 'index')]
+    #[Route('', name: 'index', options: ['sitemap' => true])]
     public function index(): Response
     {
         $user = $this->getUser();
@@ -69,9 +69,11 @@ class ProfileController extends AbstractController
 
             /** @var UploadedFile $avatar */
             $avatar = $form->get('avatar')->getData();
-            $uploadedAvatar = $this->uploadService->upload($avatar, $user->getUsername(), type: 'avatar');
+            if ($avatar) {
+                $uploadedAvatar = $this->uploadService->upload($avatar, $user->getUsername(), type: 'avatar');
 
-            $user->setAvatar($uploadedAvatar);
+                $user->setAvatar($uploadedAvatar);
+            }
 
             $email = $data->getEmail();
 

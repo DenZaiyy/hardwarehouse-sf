@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/products', name: 'product.')]
+#[Route(path: ['en' => '/products', 'fr' => '/produits'], name: 'product.')]
 final class ProductController extends AbstractController
 {
     public function __construct(
