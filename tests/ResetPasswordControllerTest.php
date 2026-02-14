@@ -2,6 +2,7 @@
 
 namespace App\Tests;
 
+use App\Entity\ResetPasswordRequest;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,6 +28,12 @@ class ResetPasswordControllerTest extends WebTestCase
         $this->em = $em;
 
         $this->userRepository = $container->get(UserRepository::class);
+        $resetPasswordRequestRepository = $this->em->getRepository(ResetPasswordRequest::class);
+
+        // Remove any existing reset password requests first (foreign key constraint)
+        foreach ($resetPasswordRequestRepository->findAll() as $request) {
+            $this->em->remove($request);
+        }
 
         foreach ($this->userRepository->findAll() as $user) {
             $this->em->remove($user);
@@ -47,7 +54,7 @@ class ResetPasswordControllerTest extends WebTestCase
         $this->em->flush();
 
         // Test Request reset password page
-        $this->client->request('GET', '/reset-password');
+        $this->client->request('GET', '/fr/reset-password');
 
         self::assertResponseIsSuccessful();
         self::assertPageTitleContains('Reset your password');
@@ -68,7 +75,7 @@ class ResetPasswordControllerTest extends WebTestCase
         self::assertEmailAddressContains($messages[0], 'to', 'me@example.com');
         self::assertEmailTextBodyContains($messages[0], 'This link will expire in 1 hour.');
 
-        self::assertResponseRedirects('/reset-password/check-email');
+        self::assertResponseRedirects('/fr/reset-password/check-email');
 
         // Test check email landing page shows correct "expires at" time
         $crawler = $this->client->followRedirect();
@@ -82,7 +89,7 @@ class ResetPasswordControllerTest extends WebTestCase
 
         $this->client->request('GET', $resetLink[1]);
 
-        self::assertResponseRedirects('/reset-password/reset');
+        self::assertResponseRedirects('/fr/reset-password/reset');
 
         $this->client->followRedirect();
 
@@ -92,7 +99,8 @@ class ResetPasswordControllerTest extends WebTestCase
             'change_password_form[plainPassword][second]' => 'newStrongPassword',
         ]);
 
-        self::assertResponseRedirects('/login');
+        self::assertResponseRedirects('/fr/login');
+        $this->client->followRedirect();
 
         $user = $this->userRepository->findOneBy(['email' => 'me@example.com']);
 

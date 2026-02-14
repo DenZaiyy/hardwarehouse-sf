@@ -9,10 +9,9 @@ final class ConfigurationControllerTest extends WebTestCase
     public function testIndex(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/configuration');
-        $client->followRedirect();
+        $client->request('GET', '/fr/configurations');
 
-        self::assertResponseRedirects();
+        self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Construis ton ordinateur');
     }
 }
