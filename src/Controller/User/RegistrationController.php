@@ -51,7 +51,7 @@ class RegistrationController extends AbstractController
 
             /** @var ?UploadedFile $avatar */
             $avatar = $form->get('avatar')->getData();
-            if($avatar instanceof UploadedFile) {
+            if ($avatar instanceof UploadedFile) {
                 $uploadedFile = $this->uploadService->upload($avatar, $user->getUsername(), type: 'avatar');
 
                 $user->setAvatar($uploadedFile);
