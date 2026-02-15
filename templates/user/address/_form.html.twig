@@ -1,8 +1,28 @@
 <turbo-frame id="modal_content">
     {{ form_start(form, {
+        attr: {class: 'flex flex-col items-center justify-between gap-4 p-2 w-full rounded-lg'},
         action: address.id ? path('address.edit', {id: address.id}) : path('address.new')
     }) }}
-    {{ form_widget(form) }}
+
+    {% for field_name, field in form %}
+        {% if not field.rendered and field.vars.block_prefixes[1] != 'submit' and field.vars.block_prefixes[1] != 'hidden' and field.vars.block_prefixes[1] != 'checkbox' %}
+            <div class="flex flex-col gap-2 w-full">
+                {{ form_label(field) }}
+                {{ form_widget(field) }}
+                {{ form_help(field) }}
+            </div>
+        {% endif %}
+        {% if field.vars.block_prefixes[1] == 'checkbox' %}
+            <div class="flex flex-col gap-2 w-full">
+                <div class="flex gap-2 items-center">
+                    {{ form_widget(field) }}
+                    {{ form_label(field) }}
+                </div>
+                {{ form_help(field) }}
+            </div>
+
+        {% endif %}
+    {% endfor %}
 
     <button class="btn btn-primary">
         {{ address.id ? 'Modifier' : 'Ajouter' }}
