@@ -1,0 +1,94 @@
+name: Tests
+on:
+    workflow_call:
+jobs:
+    tests:
+        name: Tests
+        runs-on: ubuntu-latest
+        services:
+            postgres:
+                image: postgres:16-alpine
+                env:
+                    POSTGRES_DB: hardwarehouse_test
+                    POSTGRES_PASSWORD: postgres
+                    POSTGRES_USER: postgres
+                ports:
+                    - 5432:5432
+                options: >-
+                    --health-cmd pg_isready
+                    --health-interval 10s
+                    --health-timeout 5s
+                    --health-retries 5
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: 8.4
+                  extensions: pdo, pdo_pgsql, pgsql
+                  tools: composer:v2
+
+            - name: Cache Composer dependencies
+              uses: actions/cache@v4
+              with:
+                  path: /tmp/composer-cache
+                  key: ${{ runner.os }}-composer-test-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-composer-test-
+                      ${{ runner.os }}-composer-
+
+            - name: Update composer
+              run: composer self-update
+
+            - name: Install dependencies
+              run: |
+                  composer config cache-dir /tmp/composer-cache
+                  composer install --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+            - name: Wait for PostgreSQL
+              run: |
+                  until pg_isready -h localhost -p 5432 -U postgres; do
+                      echo "Waiting for PostgreSQL..."
+                      sleep 2
+                  done
+
+            - name: Tests
+              run: |
+                  # Capturer le code de sortie des tests
+                  set +e  # Permettre de continuer même si tests échouent
+                  make tests 2>&1 | tee /tmp/test-output.log
+                  TEST_EXIT_CODE=${PIPESTATUS[0]}
+                  set -e  # Revenir au mode strict
+                  
+                  # Ajouter le code de sortie au log
+                  echo "Tests exit code: $TEST_EXIT_CODE" | tee -a /tmp/test-output.log
+                  
+                  # Échouer si les tests ont échoué
+                  exit $TEST_EXIT_CODE
+              env:
+                  APP_ENV: test
+                  APP_SECRET: 53cr3t4T3st3NV
+                  DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/hardwarehouse_test?serverVersion=16&charset=utf8
+
+            - name: Upload test results
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: test-results-${{ github.run_number }}
+                  path: |
+                      /tmp/test-output.log
+                      var/log/test.log
+                      tests/_output/
+                  retention-days: 30
+
+            - name: Upload PHPUnit coverage (if exists)
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: coverage-report-${{ github.run_number }}
+                  path: |
+                      var/coverage/
+                      coverage.xml
+                  retention-days: 30

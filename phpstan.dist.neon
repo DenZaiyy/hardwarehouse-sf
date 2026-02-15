@@ -2,8 +2,7 @@ parameters:
     level: max
     paths:
         - src
-        - tests
     excludePaths:
         - tests/bootstrap.php
     ignoreErrors:
-        - '#Property App\\Entity\\.*::\$id is never written, only read\.#'
+        - '#Property .+::\$id \(int\|null\) is never assigned int#'

@@ -2,6 +2,7 @@
 
 namespace App\Tests;
 
+use App\Entity\ResetPasswordRequest;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -23,6 +24,12 @@ class RegistrationControllerTest extends WebTestCase
         /** @var EntityManager $em */
         $em = $container->get('doctrine')->getManager();
         $this->userRepository = $container->get(UserRepository::class);
+        $resetPasswordRequestRepository = $em->getRepository(ResetPasswordRequest::class);
+
+        // Remove any existing reset password requests first (foreign key constraint)
+        foreach ($resetPasswordRequestRepository->findAll() as $request) {
+            $em->remove($request);
+        }
 
         foreach ($this->userRepository->findAll() as $user) {
             $em->remove($user);
@@ -34,13 +41,15 @@ class RegistrationControllerTest extends WebTestCase
     public function testRegister(): void
     {
         // Register a new user
-        $this->client->request('GET', '/register');
+        $this->client->request('GET', '/fr/register');
         self::assertResponseIsSuccessful();
-        self::assertPageTitleContains('Register');
+        self::assertPageTitleContains('S\'inscrire');
 
-        $this->client->submitForm('Register', [
+        $this->client->submitForm('Crée mon compte', [
+            'registration_form[username]' => 'me',
             'registration_form[email]' => 'me@example.com',
-            'registration_form[plainPassword]' => 'password',
+            'registration_form[plainPassword][first]' => 'password',
+            'registration_form[plainPassword][second]' => 'password',
             'registration_form[agreeTerms]' => true,
         ]);
 
@@ -69,7 +78,7 @@ class RegistrationControllerTest extends WebTestCase
         $messageBody = $templatedEmail->getHtmlBody();
         self::assertIsString($messageBody);
 
-        preg_match('#(http://localhost/verify/email.+)">#', $messageBody, $resetLink);
+        preg_match('#(http://localhost:8000/en/verify/email.+)">#', $messageBody, $resetLink);
 
         // "Click" the link and see if the user is verified
         $this->client->request('GET', $resetLink[1]);

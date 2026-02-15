@@ -14,13 +14,20 @@ final class CartComponent
 {
     use DefaultActionTrait;
 
+    /** @var array<int, array{id: int, quantity: int, price_ht: float, name: string}> */
     #[LiveProp(writable: true)]
     public array $items = [];
 
-    public array $totals = [];
+    /** @var array{subtotal: float, vat_rate: float, vat_amount: float, total: float} */
+    public array $totals = [
+        'subtotal' => 0.0,
+        'vat_rate' => 0.20,
+        'vat_amount' => 0.0,
+        'total' => 0.0,
+    ];
 
     public function __construct(
-        private readonly CartService $cartService
+        private readonly CartService $cartService,
     ) {
     }
 
@@ -34,7 +41,7 @@ final class CartComponent
     {
         foreach ($this->items as &$item) {
             if ($item['id'] === $id) {
-                $item['quantity']++;
+                ++$item['quantity'];
                 break;
             }
         }
@@ -47,7 +54,7 @@ final class CartComponent
     {
         foreach ($this->items as &$item) {
             if ($item['id'] === $id && $item['quantity'] > 1) {
-                $item['quantity']--;
+                --$item['quantity'];
                 break;
             }
         }
@@ -60,7 +67,7 @@ final class CartComponent
     {
         $this->items = array_filter(
             $this->items,
-            fn ($item) => $item['id'] !== $id
+            static fn (array $item): bool => $item['id'] !== $id
         );
 
         $this->recalculate();

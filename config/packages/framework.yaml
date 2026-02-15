@@ -2,6 +2,12 @@
 framework:
     secret: '%env(APP_SECRET)%'
 
+    http_client:
+        scoped_clients:
+            api.client:
+                base_uri:  '%env(API_BASE_URL)%'
+                # caching géré automatiquement si tu utilises HttpCache
+
     # Note that the session will be started ONLY if you read or write from it.
     session: true
 

@@ -8,8 +8,8 @@
             <h2>{{ 'user.profile.informations.title'|trans }}</h2>
 
         <div class="md:flex md:gap-2">
-            <div class="img">
-                <img src="{{ vich_uploader_asset(user, 'avatarFile') }}" alt="Avatar of user" class="object-cover rounded-md size-40" />
+            <div id="user-avatar" class="img">
+                <img src="{{ '/uploads/images/avatar/' ~ user.avatar }}" alt="Avatar of user" class="object-cover rounded-md size-40" />
             </div>
             <div id="user-infos-displayed" class="flex flex-col flex-1">
                 <div>
@@ -19,21 +19,17 @@
                     {{ 'user.profile.informations.username.label'|trans }} : <span id="username-text">{{ user.username }}</span>
                 </div>
 
-                {% if user.addresses is not empty %}
+                {% if defaultAddress is not empty %}
                     <div>
-                        {{ 'user.profile.informations.addresses.label'|trans }} : <span id="addresses-text"><a href="{{ path('address.edit', {id: user.addresses[0].id }) }}">{{ user.addresses[0].label }}</a></span>
+                        {{ 'user.profile.informations.addresses.label'|trans }} : <span id="addresses-text"><a href="{{ path('address.edit', {id: defaultAddress.id }) }}">{{ defaultAddress.label }}</a></span>
                     </div>
                 {% endif %}
 
                 <div class="w-full">
-                    <turbo-frame id="user-password">
-                        <a href="{{ path('profile.password') }}">{{ 'user.profile.informations.password.edit.label'|trans }}</a>
-                    </turbo-frame>
+                    <a href="{{ path('profile.password') }}" data-turbo-frame="modal_content">{{ 'user.profile.informations.password.edit.label'|trans }}</a>
                 </div>
                 <div class="w-full">
-                    <turbo-frame id="user-infos">
-                        <a href="{{ path('profile.infos') }}">{{ 'user.profile.informations.infos.edit.label'|trans }}</a>
-                    </turbo-frame>
+                    <a href="{{ path('profile.infos') }}" data-turbo-frame="modal_content">{{ 'user.profile.informations.infos.edit.label'|trans }}</a>
                 </div>
             </div>
         </div>
@@ -41,14 +37,14 @@
         <div class="flex flex-col gap-2 mt-2">
             <div class="md:flex md:gap-2 md:items-center">
                 <h2 class="mb-0">{{ 'user.profile.addresses.label'|trans }}</h2>
-                <a href="{{ path('address.add') }}">{{ 'user.profile.addresses.add.label'|trans }}</a>
+                <a href="{{ path('address.new') }}" data-turbo-frame="modal_content">{{ 'user.profile.addresses.add.label'|trans }}</a>
             </div>
             <div>
                 <ul>
                     {% if user.addresses is not empty %}
                         {% for address in user.addresses %}
                             <li class="flex gap-2 items-center">
-                                <a href="{{ path('address.edit', {id: address.id}) }}">{{ ux_icon('heroicons-solid:pencil-square', {class: 'size-6'}) }}</a>
+                                <a href="{{ path('address.edit', {id: address.id}) }}" data-turbo-frame="modal_content">{{ ux_icon('heroicons-solid:pencil-square', {class: 'size-6'}) }}</a>
                                 <span>{{ 'user.profile.addresses.address.label'|trans }}: {{ address.label }}</span>
                             </li>
                         {% endfor %}
@@ -62,4 +58,5 @@
         </div>
     </div>
 
+    {% include '_partials/_modal.html.twig' %}
 {% endblock %}

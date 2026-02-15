@@ -3,32 +3,23 @@
 {% block title %}{{ category.name }} - HardWareHouse{% endblock %}
 
 {% block body %}
-    <h1>{{ category.name }}</h1>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Slug</th>
-                <th>Thumbnail</th>
-                <th>Price</th>
-                <th>Brand</th>
-                <th>Stock</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for product in products %}
-                <tr>
-                    <td><a href="{{ path('product.show', {slug: product.slug}) }}">{{ product.id }}</a></td>
-                    <td>{{ product.name }}</td>
-                    <td>{{ product.slug }}</td>
-                    <td><img src="{{ product.thumbnail }}" alt="{{ product.name }} preview" class="size-16" /></td>
-                    <td>{{ product.price }}</td>
-                    <td><a href="{{ path('brand.show', {slug: product.brand.slug}) }}">{{ product.brand.name }}</a></td>
-                    <td>{{ product.stock.quantity }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
+    <div class="relative flex flex-col md:flex-row gap-10">
+        <div class="basis-1/4 relative">
+            {% include '_partials/filters/_filters.html.twig' %}
+        </div>
+        <div class="basis-3/4">
+            <h1>Liste des produits - {{ category.name }}</h1>
+            {% if products is not null %}
+                <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
+                    {% for product in products %}
+                        {% include '_partials/_product_card.html.twig' with {product: product} %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% include '_partials/_pagination.html.twig' with {pagination: pagination} %}
+        </div>
+    </div>
 {% endblock %}

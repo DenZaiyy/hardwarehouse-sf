@@ -16,8 +16,8 @@ readonly class EmailVerifier
 {
     public function __construct(
         private VerifyEmailHelperInterface $verifyEmailHelper,
-        private MailerInterface            $mailer,
-        private EntityManagerInterface     $entityManager
+        private MailerInterface $mailer,
+        private EntityManagerInterface $entityManager,
     ) {
     }
 

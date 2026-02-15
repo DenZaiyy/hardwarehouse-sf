@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ app.locale }}">
+<html lang="{{ app.locale }}" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,8 +22,7 @@
           content="{% block twitter_description %}{{ block('meta_description')|default(default_description) }}{% endblock %}">
 
     {# SiteMap #}
-    {# <link rel="sitemap" type="application/xml" title="Sitemap" href="{{ path('app_sitemap') }}"> #}
-
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="{{ absolute_url('/sitemap.xml') }}">
 
     {# --- Open Graph --- #}
 
@@ -40,13 +39,6 @@
     <meta property="og:type" content="{% block og_type %}website{% endblock %}">
 
     {# --- Twitter Cards --- #}
-
-    {# Défini la taille de la card qui s'affiche sur twitter :
-            summary --> petite carte, image carrée à gauche + titre/description à droite.
-            summary_large_image --> grande image en pleine largeur + titre/description dessous.
-            app --> pour promouvoir une application mobile (rarement utilisé sauf pour les grosses apps).
-            player --> carte multimédia (intégrer un lecteur vidéo/audio).
-    #}
     <meta name="twitter:card" content="{% block twitter_card %}summary_large_image{% endblock %}">
 
     {# Les Images #}
@@ -76,10 +68,10 @@
     {# Fonts Google Exo2 #}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
     <link rel="icon"
-          href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+          href="{{ asset('carton-80x80.webp')}}">
     {% block stylesheets %}
     {% endblock %}
 

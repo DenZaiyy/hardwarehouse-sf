@@ -1,0 +1,73 @@
+name: Security Audit
+on:
+    workflow_call:
+jobs:
+    audit:
+        name: Security Audit
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: 8.4
+                  tools: composer:v2
+
+            - name: Cache Composer dependencies
+              uses: actions/cache@v4
+              with:
+                  path: /tmp/composer-cache
+                  key: ${{ runner.os }}-composer-audit-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-composer-audit-
+                      ${{ runner.os }}-composer-
+
+            - name: Update composer
+              run: composer self-update
+
+            - name: Install dependencies
+              run: |
+                  composer config cache-dir /tmp/composer-cache
+                  composer install --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+            - name: Security Audit
+              run: |
+                  mkdir -p /tmp/security-reports
+                  
+                  echo "🔒 Running security audit..." | tee /tmp/security-reports/audit-output.log
+                  
+                  # Audit complet avec format JSON
+                  composer audit \
+                    --no-dev \
+                    --abandoned="report" \
+                    --ignore-severity="low" \
+                    --ignore-severity="medium" \
+                    --format="json" \
+                    --no-ansi \
+                  > /tmp/security-reports/security-audit.json 2>&1 || true
+                  
+                  # Audit format texte pour lecture facile
+                  composer audit \
+                    --no-dev \
+                    --abandoned="report" \
+                    --ignore-severity="low" \
+                    --ignore-severity="medium" \
+                    --no-ansi \
+                  > /tmp/security-reports/security-audit.txt 2>&1 || true
+                  
+                  # Vérification outdated packages
+                  echo "📦 Checking outdated packages..." | tee -a /tmp/security-reports/audit-output.log
+                  composer outdated --direct --format=json > /tmp/security-reports/outdated-packages.json 2>&1 || true
+                  
+                  echo "✅ Security audit completed" | tee -a /tmp/security-reports/audit-output.log
+
+            - name: Upload security audit reports
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: security-audit-${{ github.run_number }}
+                  path: |
+                      /tmp/security-reports/
+                  retention-days: 60

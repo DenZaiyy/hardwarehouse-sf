@@ -1,29 +1,53 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ product.brand.name }} {{ product.name }} - HardWareHouse{% endblock %}
+{% block title %}{{ product.brand.name|upper }} - {{ product.name }} - HardWareHouse{% endblock %}
+
+{% block og_type %}product{% endblock %}
+
+{% block img %}{{ product.thumbnail }}{% endblock %}
+{% block og_description %}{{ product.shortDescription }}{% endblock %}
+{% block meta_description %}{{ product.shortDescription }}{% endblock %}
 
 {% block body %}
     <div class="flex flex-col gap-4">
-        <div class="flex gap-3.75">
-            <div class="grid grid-flow-col gap-3.75">
-                {% for idx, image in product.images %}
-                    <img src="{{ image }}" alt="Image of product: {{ product.name }} ({{ idx + 1 }})" class="{{ idx == 0 ? 'max-w-150 row-span-2' : 'w-50' }}">
-                {% endfor %}
-            </div>
-            <div class="shrink">
+        <div class="flex flex-col md:flex-row gap-3.75">
+            {{ include('product/_gallery.html.twig', { product: product }) }}
+            <div class="flex flex-col flex-grow">
                 <h1>{{ product.name }}</h1>
                 <p>{{ product.shortDescription }}</p>
+                <div class="reviews flex-grow">
+
+                </div>
+                <div class="product-infos flex flex-col gap-4 items-center">
+                    <div class="text-xl font-semibold text-primary text-center">
+                        {{ product.price|format_currency('EUR') }}
+                    </div>
+                    <button class="text-center text-paragraph rounded-md bg-primary font-title px-4 py-2">
+                        {{ 'listing.product.button.add_to_cart'|trans }}
+                    </button>
+                    <span class="text-sm">En stock ({{ product.stock.quantity }})</span>
+                </div>
+
             </div>
         </div>
 
         {% from 'components/tabs.html.twig' import tabs %}
 
-        {{ tabs([
-            { label: 'Description', content: product.description },
-            { label: 'Specs', content: include('product/_specs.html.twig', { 'attributes': attributes }) },
-            { label: 'Avis', content: include('product/_reviews.html.twig') }
-        ]) }}
-    </div>
+        <div class="flex flex-row gap-4">
+            <div class="w-1/3">
+                {{ tabs([
+                    { label: 'Specs', content: include('product/_specs.html.twig', { 'attributes': attributes }) },
+                ]) }}
+            </div>
 
+            <div class="w-2/3">
+                {{ tabs([
+                    { label: 'Description', content: product.description },
+                    { label: 'Avis', content: include('product/_reviews.html.twig') }
+                ]) }}
+            </div>
+
+        </div>
+    </div>
 {% endblock %}
 

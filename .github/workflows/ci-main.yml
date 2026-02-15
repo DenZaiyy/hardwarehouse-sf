@@ -1,0 +1,148 @@
+name: CI Main Pipeline
+on:
+    push:
+        branches:
+            - main
+
+permissions:
+    contents: read
+    actions: read
+
+concurrency:
+    group: production-deployment
+    cancel-in-progress: false
+
+jobs:
+    # Re-teste tout sur main pour sécurité maximale avec cache optimisé
+    audit:
+        uses: ./.github/workflows/audit.yml
+        
+    quality:
+        uses: ./.github/workflows/quality.yml
+        
+    tests:
+        uses: ./.github/workflows/test.yml
+
+    # Déploie en production avec optimisations
+    deploy-production:
+        name: Deploy to Production
+        needs: [audit, quality, tests]
+        runs-on: ubuntu-latest
+        environment: production
+        timeout-minutes: 15
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 1
+
+            - name: Setup PHP (pour validation locale)
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.4'
+                  extensions: ctype, iconv, json, mbstring, pdo_mysql
+                  tools: composer:v2
+                  coverage: none
+
+            - name: Cache Composer dependencies
+              uses: actions/cache@v4
+              with:
+                  path: /tmp/composer-cache
+                  key: ${{ runner.os }}-composer-prod-${{ hashFiles('**/composer.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-composer-prod-
+                      ${{ runner.os }}-composer-
+
+            - name: Validate deployment readiness
+              run: |
+                  composer validate --strict
+                  composer install --no-dev --optimize-autoloader --no-interaction --dry-run
+
+            - name: Deploy to production server
+              uses: appleboy/ssh-action@v1.2.0
+              with:
+                  host: ${{ secrets.HOST }}
+                  username: ${{ secrets.USERNAME }}
+                  port: ${{ secrets.PORT }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  passphrase: ${{ secrets.SSH_PASSPHRASE }}
+                  password: ${{ secrets.SSH_PASSWORD }}
+                  timeout: 300s
+                  script_stop: true
+                  script: |
+                      set -e
+                      echo "🚀 Starting production deployment..."
+                      
+                      # Variables
+                      PROJECT_PATH="${{ secrets.PROJECT_PATH }}"
+                      BACKUP_DIR="/var/backups/hardwarehouse"
+                      TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                      
+                      # Backup current version
+                      echo "📦 Creating backup..."
+                      sudo mkdir -p $BACKUP_DIR
+                      sudo cp -r $PROJECT_PATH $BACKUP_DIR/backup-$TIMESTAMP || true
+                      
+                      # Navigate to project
+                      cd $PROJECT_PATH
+                      
+                      # Maintenance mode (optional)
+                      echo "🔧 Enabling maintenance mode..."
+                      touch var/maintenance.flag || true
+                      
+                      # Update code
+                      echo "📥 Fetching latest code..."
+                      git fetch origin --prune
+                      git reset --hard origin/main
+                      
+                      # Install dependencies with optimizations
+                      echo "📦 Installing dependencies..."
+                      composer install --no-dev --optimize-autoloader --no-interaction --classmap-authoritative
+                      
+                      # Build assets with caching
+                      echo "🎨 Building assets..."
+                      php bin/console asset-map:compile
+                      php bin/console importmap:install
+                      php bin/console tailwind:build --minify
+                      
+                      # Database operations
+                      echo "🗃️ Updating database..."
+                      php bin/console doctrine:database:create --if-not-exists --env=prod
+                      php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration --env=prod
+                      
+                      # Clear and warm cache
+                      echo "🧹 Clearing cache..."
+                      php bin/console cache:clear --env=prod --no-warmup
+                      php bin/console cache:warmup --env=prod
+                      
+                      # Set proper permissions
+                      echo "🔐 Setting permissions..."
+                      sudo chown -R www-data:www-data var/ public/
+                      sudo chmod -R 775 var/
+                      sudo chmod -R 755 public/
+                      
+                      # Restart services
+                      echo "🔄 Restarting services..."
+                      sudo systemctl reload php8.4-fpm || sudo service php8.4-fpm reload
+                      sudo nginx -t && sudo systemctl reload nginx || true
+                      
+                      # Disable maintenance mode
+                      echo "✅ Disabling maintenance mode..."
+                      rm -f var/maintenance.flag || true
+                      
+                      # Health check
+                      echo "🩺 Running health check..."
+                      php bin/console about --env=prod > /dev/null
+                      
+                      echo "🎉 Production deployment completed successfully!"
+                      echo "📋 Backup location: $BACKUP_DIR/backup-$TIMESTAMP"
+
+            - name: Notify deployment status
+              if: always()
+              run: |
+                  if [ "${{ job.status }}" == "success" ]; then
+                      echo "✅ Deployment successful"
+                  else
+                      echo "❌ Deployment failed"
+                      exit 1
+                  fi

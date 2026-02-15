@@ -6,16 +6,12 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Routing\RouterInterface;
 
-#[AsEventListener(event: KernelEvents::REQUEST, priority: 40)]
+#[AsEventListener(event: KernelEvents::REQUEST, priority: 33)]
 final readonly class LocaleRedirectListener
 {
-    public function __construct(
-        private RouterInterface $router,
-        private string $defaultLocale = 'fr',
-    ) {
-    }
+    private const array LOCALES = ['fr', 'en'];
+    private const string DEFAULT_LOCALE = 'fr';
 
     public function __invoke(RequestEvent $event): void
     {
@@ -24,18 +20,29 @@ final readonly class LocaleRedirectListener
         }
 
         $request = $event->getRequest();
+        $path = $request->getPathInfo();
 
-        if ($request->getPathInfo() !== '/') {
+        if (str_starts_with($path, '/_') || str_starts_with($path, '/sitemap')) {
             return;
         }
 
-        $locale = $request->getPreferredLanguage(['fr', 'en']) ?? $this->defaultLocale;
+        $segments = explode('/', ltrim($path, '/'));
+        $firstSegment = $segments[0];
 
-        // Force locale into routing context
-        $this->router->getContext()->setParameter('_locale', $locale);
+        if (in_array($firstSegment, self::LOCALES, true)) {
+            return;
+        }
 
-        $url = $this->router->generate('homepage');
+        // Langue préférée du navigateur, sinon défaut
+        $locale = $request->getPreferredLanguage(self::LOCALES) ?? self::DEFAULT_LOCALE;
 
-        $event->setResponse(new RedirectResponse($url, 302));
+        $queryString = $request->getQueryString();
+        $redirectUrl = '/'.$locale.$path;
+
+        if ($queryString) {
+            $redirectUrl .= '?'.$queryString;
+        }
+
+        $event->setResponse(new RedirectResponse($redirectUrl, 302));
     }
 }

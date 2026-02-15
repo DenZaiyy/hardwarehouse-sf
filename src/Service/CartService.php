@@ -4,6 +4,11 @@ namespace App\Service;
 
 class CartService
 {
+    /**
+     * @param array<int, array{price_ht: float, quantity: int}> $items
+     *
+     * @return array{subtotal: float, vat_rate: float, vat_amount: float, total: float}
+     */
     public function computeTotals(array $items): array
     {
         $subtotal = 0;

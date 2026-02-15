@@ -5,56 +5,21 @@
 {% block body %}
     <div class="md:flex md:gap-2 md:items-center md:mb-4">
         <h1>{{ 'user.address.home.title'|trans }}</h1>
-        <a href="{{ path('address.add') }}">{{ 'user.address.home.button.add.label'|trans }}</a>
+
+            <a
+                href="{{ path('address.new') }}"
+                data-turbo-frame="modal_content"
+                class="btn btn-primary"
+            >
+                {{ 'user.address.home.button.add.label'|trans }}
+            </a>
+
+        {#        <a href="{{ path('address.add') }}">{{ 'user.address.home.button.add.label'|trans }}</a>#}
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>{{ 'user.address.home.table.label.label'|trans }}</th>
-                <th>{{ 'user.address.home.table.firstname.label'|trans }}</th>
-                <th>{{ 'user.address.home.table.lastname.label'|trans }}</th>
-                <th>{{ 'user.address.home.table.address.label'|trans }}</th>
-                <th>{{ 'user.address.home.table.cp.label'|trans }}</th>
-                <th>{{ 'user.address.home.table.city.label'|trans }}</th>
-                <th>{{ 'user.address.home.table.country.label'|trans }}</th>
-                <th>{{ 'user.address.home.table.actions.label'|trans }}</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% if addresses is not empty %}
-                {% for address in addresses %}
-                    <tr>
-                        <td>
-                            <turbo-frame id="address_{{ address.id }}">
-                                <a href="{{ path('address.edit', {id: address.id}) }}">{{ address.label }}</a>
-                            </turbo-frame>
-                        </td>
-                        <td>{{ address.firstname }}</td>
-                        <td>{{ address.lastname }}</td>
-                        <td>{{ address.address }}</td>
-                        <td>{{ address.cp }}</td>
-                        <td>{{ address.city }}</td>
-                        <td>{{ address.country.name }}</td>
-                        <td class="flex gap-2 items-center">
-                            <div>
-                                <a href="{{ path('address.edit', {id: address.id}) }}">{{ ux_icon('heroicons-solid:pencil-square', {class: 'size-4'}) }}</a>
-                            </div>
-                            <div>
-                                {% include '_partials/_form_delete.html.twig' with {
-                                    'action': path('address.delete', {id: address.id}),
-                                    'item': address
-                                } %}
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="8">{{ 'user.address.home.no_items.message'|trans }}</td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
+    <turbo-frame id="address_list">
+        {% include 'user/address/_list.html.twig' %}
+    </turbo-frame>
 
+    {% include '_partials/_modal.html.twig' %}
 {% endblock %}

@@ -5,7 +5,7 @@
                 <div>
                     <p class="font-medium">{{ item.name }}</p>
                     <p class="text-xs text-muted">
-                        {{ item.price_ht }} € HT
+                        {{ item.price_ht|format_currency('EUR') }} HT
                     </p>
                 </div>
 
@@ -32,25 +32,25 @@
                         data-live-action-param="remove"
                         data-live-id-param="{{ item.id }}"
                     >
-                        Supprimer
+                        {{ 'header.cart.item.delete.label'|trans }}
                     </button>
                 </div>
             </div>
 
             <div class="border-t pt-3 space-y-1">
                 <div class="flex justify-between">
-                    <span>Sous-total HT</span>
-                    <span>{{ totals.subtotal }} €</span>
+                    <span>{{ 'header.cart.subtotal.label'|trans }}</span>
+                    <span>{{ totals.subtotal|format_currency('EUR') }}</span>
                 </div>
 
                 <div class="flex justify-between">
-                    <span>TVA ({{ totals.vat_rate * 100 }}%)</span>
-                    <span>{{ totals.vat_amount }} €</span>
+                    <span>{{ 'header.cart.vat.label'|trans }} ({{ totals.vat_rate * 100 }}%)</span>
+                    <span>{{ totals.vat_amount|format_currency('EUR') }}</span>
                 </div>
 
                 <div class="flex justify-between font-semibold">
-                    <span>Total TTC</span>
-                    <span>{{ totals.total }} €</span>
+                    <span>{{ 'header.cart.totalttc.label'|trans }}</span>
+                    <span>{{ totals.total|format_currency('EUR') }}</span>
                 </div>
             </div>
 
@@ -58,11 +58,10 @@
                 {#            href="{{ path('checkout') }}"#}
                 class="block text-center bg-primary text-white py-2 rounded mt-4"
             >
-                Passer au paiement
+                {{ 'header.cart.checkout.label'|trans }}
             </a>
         {% else %}
-            <p class="text-muted">Panier vide</p>
+            <p class="text-muted">{{ 'header.cart.empty.label'|trans }}</p>
         {% endfor %}
     </div>
-
 </div>

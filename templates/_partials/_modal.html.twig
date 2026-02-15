@@ -1,0 +1,19 @@
+<div data-controller="modal">
+    <div
+        class="fixed inset-0 hidden items-center justify-center bg-black/50"
+        data-modal-target="container"
+    >
+        <div class="bg-white p-6 rounded shadow-xl w-[500px] relative">
+
+            <button
+                class="absolute top-2 right-2 px-4 py-2"
+                data-action="modal#close"
+            >
+                ✕
+            </button>
+
+            <turbo-frame id="modal_content" data-modal-target="content"></turbo-frame>
+
+        </div>
+    </div>
+</div>
