@@ -67,9 +67,9 @@ class ProfileController extends AbstractController
             /** @var User $data */
             $data = $form->getData();
 
-            /** @var UploadedFile $avatar */
+            /** @var ?UploadedFile $avatar */
             $avatar = $form->get('avatar')->getData();
-            if ($avatar) {
+            if ($avatar instanceof UploadedFile) {
                 $uploadedAvatar = $this->uploadService->upload($avatar, $user->getUsername(), type: 'avatar');
 
                 $user->setAvatar($uploadedAvatar);
