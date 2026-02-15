@@ -100,6 +100,11 @@ translate-EN: ## Dump translations for english language
 	$(call banner,$(INFO),Dump and extract translations keys for english language...)
 	php bin/console translation:extract --force --format=yaml --as-tree=3 en
 
+.PHONY: sitemap
+sitemap: ## Dump sitemap files
+	$(call banner,$(INFO),Dump all sitemap files...)
+	php bin/console presta:sitemaps:dump
+
 .PHONY: quality
 quality: ## Running quality code check using Rector, ECS PHP-CS and PHPStan
 	$(call banner,$(INFO),Running PHP-CS with autofix...)
