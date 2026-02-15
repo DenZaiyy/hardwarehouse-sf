@@ -49,11 +49,13 @@ class RegistrationController extends AbstractController
             // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
-            /** @var UploadedFile $avatar */
+            /** @var ?UploadedFile $avatar */
             $avatar = $form->get('avatar')->getData();
-            $uploadedFile = $this->uploadService->upload($avatar, $user->getUsername(), type: 'avatar');
+            if($avatar instanceof UploadedFile) {
+                $uploadedFile = $this->uploadService->upload($avatar, $user->getUsername(), type: 'avatar');
 
-            $user->setAvatar($uploadedFile);
+                $user->setAvatar($uploadedFile);
+            }
 
             $this->em->persist($user);
             $this->em->flush();
