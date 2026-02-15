@@ -17,7 +17,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 readonly class SitemapEventListener
 {
     public function __construct(
-        private ApiService $apiService
+        private ApiService $apiService,
     ) {
     }
 
