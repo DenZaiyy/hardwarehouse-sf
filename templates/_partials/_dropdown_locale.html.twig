@@ -1,0 +1,30 @@
+<div class="dropdown group relative z-50" tabindex="0" role="button" aria-haspopup="true">
+    <div class="flex flex-col items-center text-normal cursor-pointer">
+        {% if app.locale == 'fr' %}
+            {{ ux_icon('twemoji:flag-france', {class: 'size-7'}) }}
+        {% else %}
+            {{ ux_icon('twemoji:flag-united-states', {class: 'size-7'}) }}
+        {% endif %}
+        <span class="font-title font-medium">{{ 'header.locale.label'|trans }}</span>
+    </div>
+
+    <div class="absolute right-0 mt-3 w-48 rounded-lg bg-paragraph shadow-lg overflow-hidden opacity-0 scale-95 pointer-events-none transition-all duration-200 ease-out origin-top-right group-focus-within:opacity-100 group-focus-within:scale-100 group-focus-within:pointer-events-auto">
+        <ul class="text-sm">
+            {% for locale in ['fr', 'en'] %}
+                {% if app.locale != locale %}
+                    <li>
+                        <a href="{{ path(app.current_route, app.current_route_parameters|merge({_locale: locale})) }}"
+                           class="flex gap-2 align-center items-center px-3 py-2 hover:bg-primary/10 transition">
+                            {% if locale == 'fr' %}
+                                {{ ux_icon('twemoji:flag-france', {class: 'size-7'}) }}
+                            {% else %}
+                                {{ ux_icon('twemoji:flag-united-states', {class: 'size-7'}) }}
+                            {% endif %}
+                            - {{ ('app.locale.' ~ locale)|trans }}
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+</div>

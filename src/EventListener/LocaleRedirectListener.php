@@ -22,29 +22,20 @@ final readonly class LocaleRedirectListener
         $request = $event->getRequest();
         $path = $request->getPathInfo();
 
-        // Ignorer tout ce qui commence par underscore (profiler, wdt, etc.)
         if (str_starts_with($path, '/_') || str_starts_with($path, '/sitemap')) {
-            return;
-        }
-
-        // Racine : rediriger vers la locale
-        if ('/' === $path) {
-            $locale = $request->getPreferredLanguage(self::LOCALES) ?? self::DEFAULT_LOCALE;
-            $event->setResponse(new RedirectResponse('/'.$locale, 302));
-
             return;
         }
 
         $segments = explode('/', ltrim($path, '/'));
         $firstSegment = $segments[0];
 
-        // Locale déjà présente
         if (in_array($firstSegment, self::LOCALES, true)) {
             return;
         }
 
-        // Redirection
+        // Langue préférée du navigateur, sinon défaut
         $locale = $request->getPreferredLanguage(self::LOCALES) ?? self::DEFAULT_LOCALE;
+
         $queryString = $request->getQueryString();
         $redirectUrl = '/'.$locale.$path;
 

@@ -27,6 +27,7 @@
         <div class="flex items-center gap-4">
             {% include '_partials/_dropdown_user.html.twig' %}
             {% include '_partials/_dropdown_cart.html.twig' %}
+            {% include '_partials/_dropdown_locale.html.twig' %}
         </div>
     </div>
 
@@ -36,16 +37,16 @@
             <ul class="flex md:hidden flex-col px-4 py-2 text-sm items-center">
                 <li><a href="{{ path('configuration.index') }}">Configuration PC</a></li>
                 {% for category in categories() %}
-                    <li><a href="{{ path('category.show', {slug: category.slug}) }}">{{ category.name }}</a></li>
+                    <li><a href="{{ path('category.show', {slug: category.slug}) }}">{{ ('category.' ~ category.slug)|trans }}</a></li>
                 {% endfor %}
             </ul>
         </div>
         <div class="desktop">
-            <ul class="hidden md:flex md:gap-4 overflow-x-auto md:px-4 md:py-2 md:text-sm md:justify-center font-display font-bold">
-                <li><a href="{{ path('configuration.index') }}">Configuration PC</a></li>
-                <li><a href="{{ path('brand.index') }}">Marques</a></li>
+            <ul class="hidden md:flex md:gap-4 md:items-center overflow-x-auto md:px-4 md:py-2 md:text-sm md:justify-center font-display font-bold">
+                <li><a href="{{ path('configuration.index') }}">{{ 'category.configuration-pc'|trans }}</a></li>
+                <li><a href="{{ path('brand.index') }}">{{ 'category.marques'|trans }}</a></li>
                 {% for category in categories() %}
-                    <li><a href="{{ path('category.show', {slug: category.slug}) }}">{{ category.name }}</a></li>
+                    <li><a href="{{ path('category.show', {slug: category.slug}) }}">{{ ('category.' ~ category.slug)|trans }}</a></li>
                 {% endfor %}
             </ul>
         </div>
