@@ -54,7 +54,7 @@ class ResetPasswordControllerTest extends WebTestCase
         $this->em->flush();
 
         // Test Request reset password page
-        $this->client->request('GET', '/fr/reset-password');
+        $this->client->request('GET', '/en/reset-password');
 
         self::assertResponseIsSuccessful();
         self::assertPageTitleContains('Reset your password');
@@ -66,16 +66,16 @@ class ResetPasswordControllerTest extends WebTestCase
 
         // Ensure the reset password email was sent
         // Use either assertQueuedEmailCount() || assertEmailCount() depending on your mailer setup
-        // self::assertQueuedEmailCount(1);
-        self::assertEmailCount(1);
+        self::assertQueuedEmailCount(1);
+        //self::assertEmailCount(1);
 
-        self::assertCount(1, $messages = $this->getMailerMessages());
+        self::assertCount(1, $messages = self::getMailerMessages());
 
         self::assertEmailAddressContains($messages[0], 'from', 'support@denz.ovh');
         self::assertEmailAddressContains($messages[0], 'to', 'me@example.com');
         self::assertEmailTextBodyContains($messages[0], 'This link will expire in 1 hour.');
 
-        self::assertResponseRedirects('/fr/reset-password/check-email');
+        self::assertResponseRedirects('/en/reset-password/check-email');
 
         // Test check email landing page shows correct "expires at" time
         $crawler = $this->client->followRedirect();
@@ -85,13 +85,17 @@ class ResetPasswordControllerTest extends WebTestCase
 
         // Test the link sent in the email is valid
         $email = $messages[0]->toString();
-        preg_match('#(/reset-password/reset/[a-zA-Z0-9]+)#', $email, $resetLink);
+        preg_match('#(/en/reset-password/reset/[a-zA-Z0-9]+)#', $email, $resetLink);
+
+        dump($resetLink);
 
         $this->client->request('GET', $resetLink[1]);
 
-        self::assertResponseRedirects('/fr/reset-password/reset');
+        self::assertResponseRedirects('/en/reset-password/reset');
 
         $this->client->followRedirect();
+
+        dump($this->client->getResponse()->getContent());
 
         // Test we can set a new password
         $this->client->submitForm('Reset password', [
