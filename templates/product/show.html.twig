@@ -22,12 +22,15 @@
                     <div class="text-xl font-semibold text-primary text-center">
                         {{ product.price|format_currency('EUR') }}
                     </div>
-                    <button class="text-center text-paragraph rounded-md bg-primary font-title px-4 py-2">
-                        {{ 'listing.product.button.add_to_cart'|trans }}
-                    </button>
+                    <form class="flex flex-col gap-2" data-turbo-stream="" action="{{ path('cart.add') }}" method="POST">
+                        <input type="hidden" name="slug" value="{{ product.slug }}">
+                        <input type="number" name="quantity" value="1" min="1" max="{{ product.stock.quantity }}" class="border rounded px-3 py-2">
+                        <button type="submit" class="text-center text-paragraph rounded-md bg-primary font-title px-4 py-2 hover:bg-primary-dark">
+                            {{ 'listing.product.button.add_to_cart'|trans }}
+                        </button>
+                    </form>
                     <span class="text-sm">En stock ({{ product.stock.quantity }})</span>
                 </div>
-
             </div>
         </div>
 
