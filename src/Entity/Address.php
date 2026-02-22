@@ -55,7 +55,7 @@ class Address
     private ?string $city = null;
 
     #[ORM\ManyToOne(inversedBy: 'addresses')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $user_info = null;
 
     #[ORM\Column(type: 'string', enumType: CountryList::class)]
