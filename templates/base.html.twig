@@ -80,13 +80,19 @@
     {% endblock %}
 </head>
 <body class="flex flex-col min-h-screen relative">
-<div id="flash-messages">
-    {% include '_partials/_flash_messages.html.twig' %}
-</div>
-{% include '_partials/_header.html.twig' %}
-<main class="flex-1 p-2 md:p-4 md:mx-auto w-full">
-    {% block body %}{% endblock %}
-</main>
-{% include '_partials/_footer.html.twig' %}
+    {% include '_partials/_header.html.twig' %}
+    <div id="flash-messages relative">
+        {% include '_partials/_flash_messages.html.twig' %}
+    </div>
+    <div class="flex-1 grow relative">
+        <main id="main" class="grow {% if app.current_route != 'homepage' %}p-2 md:p-4{% endif%} md:mx-auto w-full">
+            {% block body %}{% endblock %}
+        </main>
+        <div id="overlay" class="hidden fixed bg-black/50 inset-0 z-40"></div>
+    </div>
+    {% include '_partials/_footer.html.twig' %}
+    <button id="goTop" class="fixed bottom-8 right-8 translate-y-4 bg-secondary rounded-full p-2 text-white shadow-lg inset-shadow-sm cursor-pointer opacity-0 invisible transition-all duration-200">
+        {{ ux_icon('heroicons:arrow-up', {class: 'size-6'}) }}
+    </button>
 </body>
 </html>
