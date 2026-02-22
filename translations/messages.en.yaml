@@ -51,8 +51,6 @@ header:
         register: { label: Register }
         addresses: { label: 'My addresses' }
     locale:
-        fr: { label: French }
-        en: { label: English }
         label: Languages
 country:
     french:
@@ -76,16 +74,52 @@ app:
         en: English
         fr: French
 category:
-    configuration-pc: PC Configuration
+    configuration-pc: 'PC Configuration'
     marques: Brands
     pc: PC
     ecrans: Screens
     peripheriques: Peripherals
-    alimentations: Power supplies
+    alimentations: 'Power supplies'
     boitiers: Case
     ssd: SSD
-    disques-durs: Hard drives
-    cartes-graphiques: Graphics cards
-    memoire-ram: RAM memory
+    disques-durs: 'Hard drives'
+    cartes-graphiques: 'Graphics cards'
+    memoire-ram: 'RAM memory'
     cartes-meres: Motherboards
     processeurs: Processors
+footer:
+    description: __footer.description
+    contact:
+        title: __footer.contact.title
+        address: __footer.contact.address
+        city: __footer.contact.city
+        zip: __footer.contact.zip
+        country: __footer.contact.country
+        email: __footer.contact.email
+        phone: __footer.contact.phone
+    information:
+        title: __footer.information.title
+        about: __footer.information.about
+        contact: __footer.information.contact
+        shipping: __footer.information.shipping
+        returns: __footer.information.returns
+        privacy: __footer.information.privacy
+        terms: __footer.information.terms
+        sales_terms: __footer.information.sales_terms
+    navigation:
+        title: __footer.navigation.title
+        account: __footer.navigation.account
+        addresses: __footer.navigation.addresses
+        connect: __footer.navigation.connect
+        register: __footer.navigation.register
+        brands: __footer.navigation.brands
+        categories: __footer.navigation.categories
+    newsletter:
+        title: __footer.newsletter.title
+        subtitle: __footer.newsletter.subtitle
+        placeholder: __footer.newsletter.placeholder
+        submit: __footer.newsletter.submit
+    payment:
+        mastercard: { alt: { message: __footer.payment.mastercard.alt.message } }
+        cb: { alt: { message: __footer.payment.cb.alt.message } }
+        paypal: { alt: { message: __footer.payment.paypal.alt.message } }

@@ -41,12 +41,12 @@ header:
         label: Utilisateur
     cart:
         label: Panier
-        item: { delete: { label: __header.cart.item.delete.label } }
-        subtotal: { label: __header.cart.subtotal.label }
-        vat: { label: __header.cart.vat.label }
-        totalttc: { label: __header.cart.totalttc.label }
-        checkout: { label: __header.cart.checkout.label }
-        empty: { label: __header.cart.empty.label }
+        item: { delete: { label: Retirer } }
+        subtotal: { label: Sous-total }
+        vat: { label: TVA }
+        totalttc: { label: 'Total TTC' }
+        checkout: { label: 'Passer au paiement' }
+        empty: { label: 'Panier vide' }
     nav:
         profile: { label: Profile }
         logout: { label: Déconnexion }
@@ -54,8 +54,6 @@ header:
         login: { label: 'Se connecter' }
         addresses: { label: 'Mes adresses' }
     locale:
-        fr: { label: __header.locale.fr.label }
-        en: { label: __header.locale.en.label }
         label: Langues
 country:
     french:
@@ -79,7 +77,7 @@ app:
         en: Anglais
         fr: Français
 category:
-    configuration-pc: Configuration PC
+    configuration-pc: 'Configuration PC'
     marques: Marques
     pc: PC
     ecrans: Écrans
@@ -87,8 +85,44 @@ category:
     alimentations: Alimentations
     boitiers: Boîtiers
     ssd: SSD
-    disques-durs: Disques durs
-    cartes-graphiques: Carte graphiques
-    memoire-ram: Mémoire RAM
-    cartes-meres: Cartes mères
+    disques-durs: 'Disques durs'
+    cartes-graphiques: 'Carte graphiques'
+    memoire-ram: 'Mémoire RAM'
+    cartes-meres: 'Cartes mères'
     processeurs: Processeurs
+footer:
+    description: 'Votre spécialiste en composants PC. Livraison rapide, expertise technique, meilleurs prix.'
+    contact:
+        title: Contact
+        address: Adresse
+        city: Ville
+        zip: 'Code postal'
+        country: Pays
+        email: Email
+        phone: Téléphone
+    information:
+        title: Information
+        about: 'A propos de nous'
+        contact: 'Nous contactez'
+        shipping: 'Expédition et livraison'
+        returns: 'Retours et échanges'
+        privacy: 'Politique de confidentialité'
+        terms: "Conditions générales d'utilisation"
+        sales_terms: 'Conditions générales de ventes'
+    navigation:
+        title: Navigation
+        account: 'Mon compte'
+        addresses: 'Mes adresses'
+        connect: 'Se connecter'
+        register: "S'inscrire"
+        brands: Marques
+        categories: 'Catégories'
+    newsletter:
+        title: 'Newsletter'
+        subtitle: "Offres exclusives & nouveautés"
+        placeholder: 'Votre adresse email'
+        submit: "S'inscrire"
+    payment:
+        mastercard: { alt: { message: __footer.payment.mastercard.alt.message } }
+        cb: { alt: { message: __footer.payment.cb.alt.message } }
+        paypal: { alt: { message: __footer.payment.paypal.alt.message } }
