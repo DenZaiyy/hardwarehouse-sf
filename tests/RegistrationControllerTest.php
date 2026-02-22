@@ -41,20 +41,20 @@ class RegistrationControllerTest extends WebTestCase
     public function testRegister(): void
     {
         // Register a new user
-        $this->client->request('GET', '/fr/register');
+        $this->client->request('GET', '/fr/inscription');
         self::assertResponseIsSuccessful();
         self::assertPageTitleContains('S\'inscrire');
 
         $this->client->submitForm('Crée mon compte', [
-            'registration_form[username]' => 'me',
+            'registration_form[username]' => 'Username',
             'registration_form[email]' => 'me@example.com',
-            'registration_form[plainPassword][first]' => 'password',
-            'registration_form[plainPassword][second]' => 'password',
+            'registration_form[plainPassword][first]' => 'PasswordTest168!',
+            'registration_form[plainPassword][second]' => 'PasswordTest168!',
             'registration_form[agreeTerms]' => true,
         ]);
 
         // Ensure the response redirects after submitting the form, the user exists, and is not verified
-        // self::assertResponseRedirects('/');  @TODO: set the appropriate path that the user is redirected to.
+        //self::assertResponseRedirects('/');
         self::assertCount(1, $this->userRepository->findAll());
         self::assertFalse(($user = $this->userRepository->findAll()[0])->isVerified());
 
@@ -63,7 +63,7 @@ class RegistrationControllerTest extends WebTestCase
         // self::assertQueuedEmailCount(1);
         self::assertEmailCount(1);
 
-        self::assertCount(1, $messages = $this->getMailerMessages());
+        self::assertCount(1, $messages = self::getMailerMessages());
         self::assertEmailAddressContains($messages[0], 'from', 'support@denz.ovh');
         self::assertEmailAddressContains($messages[0], 'to', 'me@example.com');
         self::assertEmailTextBodyContains($messages[0], 'This link will expire in 1 hour.');

@@ -9,7 +9,11 @@
 
         <div class="md:flex md:gap-2">
             <div id="user-avatar" class="img">
-                <img src="{{ '/uploads/images/avatar/' ~ user.avatar }}" alt="Avatar of user" class="object-cover rounded-md size-40" />
+                {% if user.avatar %}
+                    <img src="{{ '/uploads/images/avatar/' ~ user.avatar }}" loading="lazy" alt="Avatar of user" class="object-cover rounded-md size-40" />
+                    {% else %}
+                        <img src="https://placehold.net/avatar.svg" alt="Placeholder image" loading="lazy" class="aspect-square object-cover rounded-md size-40">
+                {% endif %}
             </div>
             <div id="user-infos-displayed" class="flex flex-col flex-1">
                 <div>

@@ -1,3 +1,156 @@
-<footer class="flex items-center justify-center w-full h-[60px] bg-header text-white">
-    <p class="text-center">&copy; 2026 HardWarehouse</p>
+<footer id="footer" class="flex flex-col items-center justify-evenly w-full bg-primary text-paragraph">
+    <div id="infos" class="flex flex-col gap-2 md:flex-row w-full p-2">
+
+        {# === Logo & Description === #}
+        <section class="p-4 md:flex-1">
+            <div class="flex items-center gap-3 mb-3">
+                <img loading="lazy" src="{{ asset('carton-80x80.webp') }}" alt="HardWareHouse" class="w-8 h-8">
+                <span class="font-bold text-lg">HardWareHouse</span>
+            </div>
+            <p class="text-sm text-paragraph leading-relaxed">
+                {{ 'footer.description'|trans }}
+            </p>
+        </section>
+
+        {# === Contact === #}
+        <section class="md:flex-1">
+            <details class="md:hidden group">
+                <summary class="font-bold text-base cursor-pointer list-none flex bg-secondary p-4 rounded-md justify-between items-center">
+                    {{ 'footer.contact.title'|trans }}
+                    <span class="transition-transform group-open:rotate-180">▾</span>
+                </summary>
+                <ul class="p-4 space-y-1 text-blue-100">
+                    <li><span class="text-white font-medium">{{ 'footer.contact.address'|trans }} :</span> 1 rue Raymond Zimmermann</li>
+                    <li><span class="text-white font-medium">{{ 'footer.contact.city'|trans }} :</span> Mulhouse</li>
+                    <li><span class="text-white font-medium">{{ 'footer.contact.zip'|trans }} :</span> 68200</li>
+                    <li><span class="text-white font-medium">{{ 'footer.contact.country'|trans }} :</span> France</li>
+                    <li><span class="text-white font-medium">{{ 'footer.contact.email'|trans }} :</span> <a href="mailto:grischko.kevin@gmail.com" class="text-blue-300 hover:text-white transition-colors">grischko.kevin@gmail.com</a></li>
+                    <li><span class="text-white font-medium">{{ 'footer.contact.phone'|trans }} :</span> <a href="tel:+33783452375" class="text-blue-300 hover:text-white transition-colors">+33 07 83 45 23 75</a></li>
+                </ul>
+            </details>
+            <div class="hidden md:block p-4">
+                <h3 class="font-bold text-lg font-title text-paragraph mb-4">{{ 'footer.contact.title'|trans }}</h3>
+                <ul class="space-y-1 text-sm text-blue-100">
+                    <li><span class="text-white font-medium">{{ 'footer.contact.address'|trans }} :</span> 1 rue Raymond Zimmermann</li>
+                    <li><span class="text-white font-medium">{{ 'footer.contact.city'|trans }} :</span> Mulhouse</li>
+                    <li><span class="text-white font-medium">{{ 'footer.contact.zip'|trans }} :</span> 68200</li>
+                    <li><span class="text-white font-medium">{{ 'footer.contact.country'|trans }} :</span> France</li>
+                    <li><span class="text-white font-medium">{{ 'footer.contact.email'|trans }} :</span> <a href="mailto:grischko.kevin@gmail.com" class="text-blue-300 hover:text-white transition-colors">grischko.kevin@gmail.com</a></li>
+                    <li><span class="text-white font-medium">{{ 'footer.contact.phone'|trans }} :</span> <a href="tel:+33783452375" class="text-blue-300 hover:text-white transition-colors">+33 07 83 45 23 75</a></li>
+                </ul>
+            </div>
+        </section>
+
+        {# === Information === #}
+        <section class="md:flex-1">
+            <details class="md:hidden group">
+                <summary class="font-bold text-base cursor-pointer list-none flex bg-secondary p-4 rounded-md justify-between items-center">
+                    {{ 'footer.information.title'|trans }}
+                    <span class="transition-transform group-open:rotate-180">▾</span>
+                </summary>
+                <ul class="p-4 space-y-2">
+                    <li><a href="" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.information.about'|trans }}</a></li>
+                    <li><a href="" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.information.contact'|trans }}</a></li>
+                    <li><a href="" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.information.shipping'|trans }}</a></li>
+                    <li><a href="" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.information.returns'|trans }}</a></li>
+                    <li><a href="" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.information.privacy'|trans }}</a></li>
+                    <li><a href="" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.information.terms'|trans }}</a></li>
+                    <li><a href="" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.information.sales_terms'|trans }}</a></li>
+                </ul>
+            </details>
+            <div class="hidden md:block p-4">
+                <h3 class="font-bold text-lg font-title text-paragraph mb-4">{{ 'footer.information.title'|trans }}</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.information.about'|trans }}</a></li>
+                    <li><a href="" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.information.contact'|trans }}</a></li>
+                    <li><a href="" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.information.shipping'|trans }}</a></li>
+                    <li><a href="" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.information.returns'|trans }}</a></li>
+                    <li><a href="" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.information.privacy'|trans }}</a></li>
+                    <li><a href="" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.information.terms'|trans }}</a></li>
+                    <li><a href="" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.information.sales_terms'|trans }}</a></li>
+                </ul>
+            </div>
+        </section>
+
+        {# === Navigation === #}
+        <section class="md:flex-1">
+            <details class="md:hidden group">
+                <summary class="font-bold text-base cursor-pointer list-none flex bg-secondary p-4 rounded-md justify-between items-center">
+                    {{ 'footer.navigation.title'|trans }}
+                    <span class="transition-transform group-open:rotate-180">▾</span>
+                </summary>
+                <ul class="p-4 space-y-2">
+                    {% if app.user %}
+                        <li><a href="{{ path('profile.index') }}" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.navigation.account'|trans }}</a></li>
+                        <li><a href="{{ path('address.index') }}" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.navigation.addresses'|trans }}</a></li>
+                    {% else %}
+                        <li><a href="{{ path('app.login') }}" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.navigation.connect'|trans }}</a></li>
+                        <li><a href="{{ path('app.register') }}" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.navigation.register'|trans }}</a></li>
+                    {% endif %}
+                    <li><a href="{{ path('brand.index') }}" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.navigation.brands'|trans }}</a></li>
+                    <li><a href="{{ path('category.index') }}" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.navigation.categories'|trans }}</a></li>
+                </ul>
+            </details>
+            <div class="hidden md:block p-4">
+                <h3 class="font-bold text-lg font-title text-paragraph mb-4">{{ 'footer.navigation.title'|trans }}</h3>
+                <ul class="space-y-2 text-sm">
+                    {% if app.user %}
+                        <li><a href="{{ path('profile.index') }}" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.navigation.account'|trans }}</a></li>
+                        <li><a href="{{ path('address.index') }}" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.navigation.addresses'|trans }}</a></li>
+                    {% else %}
+                        <li><a href="{{ path('app.login') }}" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.navigation.connect'|trans }}</a></li>
+                        <li><a href="{{ path('app.register') }}" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.navigation.register'|trans }}</a></li>
+                    {% endif %}
+                    <li><a href="{{ path('brand.index') }}" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.navigation.brands'|trans }}</a></li>
+                    <li><a href="{{ path('category.index') }}" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.navigation.categories'|trans }}</a></li>
+                </ul>
+            </div>
+        </section>
+
+        {# === Newsletter === #}
+        <section class="md:flex-1">
+            <details class="md:hidden group">
+                <summary class="font-bold text-base cursor-pointer list-none flex bg-secondary p-4 rounded-md justify-between items-center">
+                    {{ 'footer.newsletter.title'|trans }}
+                    <span class="transition-transform group-open:rotate-180">▾</span>
+                </summary>
+                <div class="p-4">
+                    <p class="text-blue-200 mb-3">{{ 'footer.newsletter.subtitle'|trans }}</p>
+                    <input type="email" placeholder="{{ 'footer.newsletter.placeholder'|trans }}" class="w-full px-3 py-2 text-sm text-gray-800 bg-white rounded mb-2 outline-none focus:ring-2 focus:ring-blue-400">
+                    <button class="w-full bg-gray-900 hover:bg-gray-700 text-white font-medium py-2 rounded transition-colors">
+                        {{ 'footer.newsletter.submit'|trans }}
+                    </button>
+                </div>
+            </details>
+            <div class="hidden md:block p-4">
+                <h3 class="font-bold text-lg font-title text-paragraph mb-4">{{ 'footer.newsletter.title'|trans }}</h3>
+                <p class="text-sm text-blue-200 mb-3">{{ 'footer.newsletter.subtitle'|trans }}</p>
+                <input type="email" placeholder="{{ 'footer.newsletter.placeholder'|trans }}" class="w-full px-3 py-2 text-sm text-gray-800 bg-white rounded mb-2 outline-none focus:ring-2 focus:ring-blue-400">
+                <button class="w-full bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium py-2 rounded transition-colors">
+                    {{ 'footer.newsletter.submit'|trans }}
+                </button>
+            </div>
+        </section>
+
+    </div>
+
+    <div id="bottom" class="flex flex-col md:flex-row gap-2 w-full items-center justify-between p-2 border-t border-paragraph">
+        <div id="payment" class="flex gap-2">
+            <img class="rounded" loading="lazy" src="{{ asset('images/payment-icons/mastercard-id-check_50px.svg') }}" alt="{{ 'footer.payment.mastercard.alt.message'|trans }}">
+            <img class="rounded" loading="lazy" src="{{ asset('images/payment-icons/cb_50px.svg') }}" alt="{{ 'footer.payment.cb.alt.message'|trans }}">
+            <img class="rounded" loading="lazy" src="{{ asset('images/payment-icons/paypal_50px.svg') }}" alt="{{ 'footer.payment.paypal.alt.message'|trans }}">
+        </div>
+        <p class="text-center text-sm">&copy; 2026 - HardWareHouse</p>
+        <div id="socials" class="flex gap-1 items-center">
+            <a href="#">
+                {{ ux_icon('mdi:facebook', {class: 'size-8 text-blue-300 hover:text-white transition-colors cursor-pointer'}) }}
+            </a>
+            <a href="#">
+                {{ ux_icon('mdi:instagram', {class: 'size-8 text-blue-300 hover:text-white transition-colors cursor-pointer'}) }}
+            </a>
+            <a href="#">
+                {{ ux_icon('mdi:youtube', {class: 'size-8 text-blue-300 hover:text-white transition-colors cursor-pointer'}) }}
+            </a>
+        </div>
+    </div>
 </footer>

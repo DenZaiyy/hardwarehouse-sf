@@ -22,4 +22,5 @@ return [
     Symfony\UX\Dropzone\DropzoneBundle::class => ['all' => true],
     Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle::class => ['dev' => true, 'test' => true],
     Presta\SitemapBundle\PrestaSitemapBundle::class => ['all' => true],
+    Karser\Recaptcha3Bundle\KarserRecaptcha3Bundle::class => ['all' => true],
 ];

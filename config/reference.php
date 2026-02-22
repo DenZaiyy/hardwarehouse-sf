@@ -1525,6 +1525,13 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         i18n?: "symfony"|"jms"|Param, // Strategy used to create your i18n routes. // Default: "symfony"
  *     },
  * }
+ * @psalm-type KarserRecaptcha3Config = array{
+ *     site_key: scalar|null|Param,
+ *     secret_key: scalar|null|Param,
+ *     score_threshold?: float|Param, // Default: 0.5
+ *     host?: scalar|null|Param, // Default host is "www.google.com", if it is not reachable then use "www.recaptcha.net" instead. // Default: "www.google.com"
+ *     enabled?: bool|Param, // Default: true
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
@@ -1545,6 +1552,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     symfonycasts_reset_password?: SymfonycastsResetPasswordConfig,
  *     ux_icons?: UxIconsConfig,
  *     presta_sitemap?: PrestaSitemapConfig,
+ *     karser_recaptcha3?: KarserRecaptcha3Config,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -1568,6 +1576,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         symfonycasts_reset_password?: SymfonycastsResetPasswordConfig,
  *         ux_icons?: UxIconsConfig,
  *         presta_sitemap?: PrestaSitemapConfig,
+ *         karser_recaptcha3?: KarserRecaptcha3Config,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -1589,6 +1598,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         symfonycasts_reset_password?: SymfonycastsResetPasswordConfig,
  *         ux_icons?: UxIconsConfig,
  *         presta_sitemap?: PrestaSitemapConfig,
+ *         karser_recaptcha3?: KarserRecaptcha3Config,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -1611,6 +1621,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         symfonycasts_reset_password?: SymfonycastsResetPasswordConfig,
  *         ux_icons?: UxIconsConfig,
  *         presta_sitemap?: PrestaSitemapConfig,
+ *         karser_recaptcha3?: KarserRecaptcha3Config,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,

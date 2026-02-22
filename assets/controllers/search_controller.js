@@ -60,6 +60,10 @@ export default class extends Controller {
         }
     }
 
+    getOverlay() {
+        return document.getElementById('overlay')
+    }
+
     displayResults(products) {
         if (products.length === 0) {
             this.resultsTarget.innerHTML = '<div class="p-4 text-gray-500 text-sm">Aucun produit trouvé</div>'
@@ -82,10 +86,21 @@ export default class extends Controller {
 
     showResults() {
         this.resultsTarget.classList.remove('hidden')
+        const overlay = document.getElementById('overlay')
+
+        if (!this.resultsTarget.classList.contains('hidden')) {
+            overlay.classList.remove('hidden')
+        }
     }
 
     hideResults() {
         this.resultsTarget.classList.add('hidden')
+        const overlay = document.getElementById('overlay')
+
+
+        if (this.resultsTarget.classList.contains('hidden')) {
+            overlay.classList.add('hidden')
+        }
     }
 
     handleOutsideClick(event) {
