@@ -1,0 +1,47 @@
+<div class="flex flex-col gap-2 md:gap-4 bg-secondary text-paragraph rounded p-4 md:max-h-max md:max-w-1/2 w-full">
+    <div class="hidden md:grid space-y-2 text-paragraph grid-flow-row border-b pb-2 text-sm">
+        <div class="flex justify-between gap-2">
+            <span class="w-1/4 text-center font-bold">Nom:</span>
+            <span class="w-1/4 text-center font-bold">Quantité:</span>
+            <span class="w-1/4 text-center font-bold">Prix HT:</span>
+            <span class="w-1/4 text-center font-bold">Prix TTC:</span>
+        </div>
+        {% for item in cart %}
+            <div class="flex justify-between gap-2">
+                <span class="truncate w-1/4 text-center">{{ item.name }}</span>
+                <span class="w-1/4 text-center">{{ item.quantity }}</span>
+                <span class="w-1/4 text-center">{{ item.price_ht|format_currency('EUR') }}</span>
+                <span class="w-1/4 text-center">{{ item.price_ttc|format_currency('EUR') }}</span>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="space-y-2 text-sm text-paragraph grow">
+        <div class="flex justify-between">
+            <span>Sous-total HT</span>
+            <span>{{ totals.subtotal|format_currency('EUR') }}</span>
+        </div>
+        <div class="flex justify-between">
+            <span>TVA ({{ (totals.vat_rate * 100)|round }}%)</span>
+            <span>{{ totals.vat_amount|format_currency('EUR') }}</span>
+        </div>
+        <div class="flex justify-between font-bold text-base border-t pt-2 mt-2">
+            <span>Total TTC</span>
+            <span>{{ totals.total|format_currency('EUR') }}</span>
+        </div>
+    </div>
+
+    <div class="flex gap-4 justify-between items-center mt-6">
+        <form data-turbo-stream="" action="{{ path('cart.clear') }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir vider le panier ?')">
+            <button
+                type="submit"
+                class="bg-red-600 text-paragraph hover:bg-red-700 text-sm px-4 py-2 rounded"
+            >
+                Vider le panier
+            </button>
+        </form>
+
+        <a href="#" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+            {{ 'header.cart.checkout.label'|trans }}
+        </a>
+    </div>
+</div>
