@@ -4,6 +4,8 @@ namespace App\Form;
 
 use App\Entity\User;
 use App\EventSubscriber\HoneypotSubscriber;
+use Karser\Recaptcha3Bundle\Form\Recaptcha3Type;
+use Karser\Recaptcha3Bundle\Validator\Constraints\Recaptcha3;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -106,6 +108,11 @@ class RegistrationFormType extends AbstractType
                         message: 'user.registration.agree_terms.is_true',
                     ),
                 ],
+            ])
+            ->add('captcha', Recaptcha3Type::class, [
+                'constraints' => new Recaptcha3(message: 'There were problems with your captcha. Please try again or contact with support and provide following code(s): {{ errorCodes }}'),
+                'action_name' => 'homepage',
+                'locale' => 'fr',
             ])
             ->addEventSubscriber(new HoneypotSubscriber())
         ;
