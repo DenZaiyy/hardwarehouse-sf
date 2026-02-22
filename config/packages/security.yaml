@@ -34,6 +34,9 @@ security:
                 secret: '%kernel.secret%'
                 lifetime: 604800 # 1 week in seconds
 
+            login_throttling:
+                max_attempts: 5
+                interval: '1 minute'
             # Activate different ways to authenticate:
             # https://symfony.com/doc/current/security.html#the-firewall
 

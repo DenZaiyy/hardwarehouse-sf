@@ -1,0 +1,26 @@
+framework:
+    rate_limiter:
+        # Inscription : 5 tentatives par heure par IP
+        register_form:
+            policy: 'sliding_window'
+            limit: 5
+            interval: '1 hour'
+
+        # Contact : 2 par minute ET 5 par heure (compound)
+        contact_form_minute:
+            policy: 'fixed_window'
+            limit: 2
+            interval: '1 minute'
+        contact_form_hour:
+            policy: 'fixed_window'
+            limit: 5
+            interval: '1 hour'
+        contact_form:
+            policy: 'compound'
+            limiters: [contact_form_minute, contact_form_hour]
+
+        # Newsletter : 3 soumissions par heure par IP
+        newsletter_form:
+            policy: 'sliding_window'
+            limit: 3
+            interval: '1 hour'
