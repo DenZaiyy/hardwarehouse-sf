@@ -231,3 +231,5 @@ user:
 "Format d'adresse invalide":
     ' Ex: 12 rue de la Paix': "__Format d'adresse invalide. Ex: 12 rue de la Paix"
 'Le code postal doit contenir 5 chiffres.': '__Le code postal doit contenir 5 chiffres.'
+'There were problems with your captcha':
+    ' Please try again or contact with support and provide following code(s): {{ errorCodes }}': '__There were problems with your captcha. Please try again or contact with support and provide following code(s): {{ errorCodes }}'
