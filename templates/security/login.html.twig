@@ -13,7 +13,7 @@
 
     <form method="post" class="mx-auto flex flex-col p-4 gap-4 rounded border md:max-w-7xl">
         {% if error %}
-            <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+            <div class="flash-message flash-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
         {% endif %}
 
         <h1>{{ 'user.login.title'|trans }}</h1>

@@ -1,6 +1,5 @@
 <footer id="footer" class="flex flex-col items-center justify-evenly w-full bg-primary text-paragraph">
     <div id="infos" class="flex flex-col gap-2 md:flex-row w-full p-2">
-
         {# === Logo & Description === #}
         <section class="p-4 md:flex-1">
             <div class="flex items-center gap-3 mb-3">
@@ -50,7 +49,7 @@
                 </summary>
                 <ul class="p-4 space-y-2">
                     <li><a href="" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.information.about'|trans }}</a></li>
-                    <li><a href="" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.information.contact'|trans }}</a></li>
+                    <li><a href="{{ path('app.contact') }}" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.information.contact'|trans }}</a></li>
                     <li><a href="" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.information.shipping'|trans }}</a></li>
                     <li><a href="" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.information.returns'|trans }}</a></li>
                     <li><a href="" class="text-blue-300 underline hover:text-white transition-colors">{{ 'footer.information.privacy'|trans }}</a></li>
@@ -62,7 +61,7 @@
                 <h3 class="font-bold text-lg font-title text-paragraph mb-4">{{ 'footer.information.title'|trans }}</h3>
                 <ul class="space-y-2 text-sm">
                     <li><a href="" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.information.about'|trans }}</a></li>
-                    <li><a href="" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.information.contact'|trans }}</a></li>
+                    <li><a href="{{ path('app.contact') }}" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.information.contact'|trans }}</a></li>
                     <li><a href="" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.information.shipping'|trans }}</a></li>
                     <li><a href="" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.information.returns'|trans }}</a></li>
                     <li><a href="" class="text-blue-300 hover:text-white transition-colors">{{ 'footer.information.privacy'|trans }}</a></li>
@@ -131,7 +130,6 @@
                 </button>
             </div>
         </section>
-
     </div>
 
     <div id="bottom" class="flex flex-col md:flex-row gap-2 w-full items-center justify-between p-2 border-t border-paragraph">

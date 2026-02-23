@@ -7,6 +7,7 @@ use App\Form\RegistrationFormType;
 use App\Security\EmailVerifier;
 use App\Service\ImageUploadService;
 use App\Service\MailerService;
+use App\Service\RateLimiterService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -17,6 +18,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
@@ -28,14 +30,22 @@ class RegistrationController extends AbstractController
         private readonly MailerService $mailerService,
         private readonly EntityManagerInterface $em,
         private readonly ImageUploadService $uploadService,
+        private readonly RateLimiterService $rateLimiter,
     ) {
     }
 
     #[Route(path: ['en' => '/register', 'fr' => '/inscription'], name: 'app.register', options: ['sitemap' => true])]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, TranslatorInterface $translator): Response
+    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, TranslatorInterface $translator, RateLimiterFactoryInterface $registerFormLimiter): Response
     {
         if ($this->isGranted('ROLE_USER')) {
             return $this->redirectToRoute('homepage');
+        }
+
+        if (!$this->rateLimiter->checkRegister()) {
+            $retryAfter = $this->rateLimiter->getRetryAfter();
+            $this->addFlash('danger', "Trop de tentatives. Réessayez dans $retryAfter secondes.");
+
+            return $this->redirectToRoute('app.register');
         }
 
         $user = new User();

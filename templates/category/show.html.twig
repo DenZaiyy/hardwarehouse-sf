@@ -3,8 +3,6 @@
 {% block title %}{{ category.name }} - HardWareHouse{% endblock %}
 
 {% block body %}
-
-
     <div class="relative flex flex-col md:flex-row gap-10">
         <div class="basis-1/4 relative">
             {% include '_partials/filters/_filters.html.twig' %}
@@ -12,7 +10,7 @@
         <div class="basis-3/4">
             <h1>Liste des produits - {{ category.name }}</h1>
             {% if products is not null %}
-                <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
+                <div class="mt-5 grid gap-6 grid-cols-auto-fit-210">
                     {% for product in products %}
                         {% include '_partials/_product_card.html.twig' with {product: product} %}
                     {% endfor %}

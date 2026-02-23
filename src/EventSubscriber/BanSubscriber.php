@@ -12,11 +12,11 @@ use Symfony\Component\Routing\RouterInterface;
 
 class BanSubscriber implements EventSubscriberInterface
 {
-
     public function __construct(
-        private Security $security,
-        private RouterInterface $router
-    ) {}
+        private readonly Security $security,
+        private readonly RouterInterface $router,
+    ) {
+    }
 
     public static function getSubscribedEvents(): array
     {
