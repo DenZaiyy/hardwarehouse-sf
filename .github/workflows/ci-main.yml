@@ -66,7 +66,6 @@ jobs:
                   port: ${{ secrets.PORT }}
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
                   passphrase: ${{ secrets.SSH_PASSPHRASE }}
-                  password: ${{ secrets.SSH_PASSWORD }}
                   timeout: 300s
                   script_stop: true
                   script: |
@@ -75,18 +74,18 @@ jobs:
 
                       # Variables
                       PROJECT_PATH="${{ secrets.PROJECT_PATH }}"
-                      BACKUP_DIR="/var/backups/hardwarehouse"
+                      BACKUP_DIR="$HOME/backups/hardwarehouse"
                       TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
                       # Backup current version
                       echo "📦 Creating backup..."
-                      sudo mkdir -p $BACKUP_DIR
-                      sudo cp -r $PROJECT_PATH $BACKUP_DIR/backup-$TIMESTAMP || true
+                      mkdir -p $BACKUP_DIR
+                      cp -r $PROJECT_PATH $BACKUP_DIR/backup-$TIMESTAMP || true
 
                       # Navigate to project
                       cd $PROJECT_PATH
 
-                      # Maintenance mode (optional)
+                      # Maintenance mode
                       echo "🔧 Enabling maintenance mode..."
                       touch var/maintenance.flag || true
 
@@ -95,36 +94,9 @@ jobs:
                       git fetch origin --prune
                       git reset --hard origin/main
 
-                      # Install dependencies with optimizations
-                      echo "📦 Installing dependencies..."
-                      composer install --no-dev --optimize-autoloader --no-interaction --classmap-authoritative
-
-                      # Build assets with caching
-                      echo "🎨 Building assets..."
-                      php bin/console asset-map:compile
-                      php bin/console importmap:install
-                      php bin/console tailwind:build --minify
-
-                      # Database operations
-                      echo "🗃️ Updating database..."
-                      php bin/console doctrine:database:create --if-not-exists --env=prod
-                      php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration --env=prod
-
-                      # Clear and warm cache
-                      echo "🧹 Clearing cache..."
-                      php bin/console cache:clear --env=prod --no-warmup
-                      php bin/console cache:warmup --env=prod
-
-                      # Set proper permissions
-                      echo "🔐 Setting permissions..."
-                      sudo chown -R www-data:www-data var/ public/
-                      sudo chmod -R 775 var/
-                      sudo chmod -R 755 public/
-
-                      # Restart services
-                      echo "🔄 Restarting services..."
-                      sudo systemctl reload php8.4-fpm || sudo service php8.4-fpm reload
-                      sudo nginx -t && sudo systemctl reload nginx || true
+                      # Build, install and deploy
+                      echo "📦 Running production build..."
+                      make prod
 
                       # Disable maintenance mode
                       echo "✅ Disabling maintenance mode..."
