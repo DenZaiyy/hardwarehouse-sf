@@ -10,7 +10,7 @@
         <div class="basis-3/4">
             <h1>Products list</h1>
             {% if products is not null %}
-                <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 items-stretch">
+                <div class="mt-5 grid gap-6 grid-cols-auto-fit-210">
                     {% for product in products %}
                         {% include '_partials/_product_card.html.twig' with {product: product} %}
                     {% endfor %}
