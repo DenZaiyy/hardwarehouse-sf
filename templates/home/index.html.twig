@@ -3,6 +3,19 @@
 {% block title %}{{ 'home.title'|trans(domain = "title") }} - HardWareHouse{% endblock %}
 
 {% block body %}
+    <header class="relative">
+        <figure class="relative">
+            <img class="w-full h-100 aspect-video object-cover" src="{{ asset('images/header_50.webp') }}" alt="Exemple de configuration PC Haut de gamme">
+            <figcaption class="absolute bottom-0 w-full bg-gray-500/60 text-white text-xl p-2 text-center">GPU, CPU, cartes mères, RAM, SSD — sélectionnés pour la performance et la compatibilité.</figcaption>
+        </figure>
+        <div class="ctas absolute bottom-15 right-5 flex gap-4">
+            <a href="#" class="rounded-full py-2 px-4 bg-secondary text-white font-display">Explorer les composants</a>
+            <a href="#" class="rounded-full py-2 px-4 bg-secondary text-white font-display">Voir les builds recommandés</a>
+        </div>
+    </header>
+    <section class="newsletter">
+
+    </section>
     <h1>{{ 'home.main.title'|trans(domain = "homepage") }}</h1>
     <p>{% if app.user is not null %}{{ app.user.username }}{% endif %}</p>
 {% endblock %}
