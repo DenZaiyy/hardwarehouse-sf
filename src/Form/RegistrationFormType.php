@@ -4,6 +4,8 @@ namespace App\Form;
 
 use App\Entity\User;
 use App\EventSubscriber\HoneypotSubscriber;
+use Karser\Recaptcha3Bundle\Form\Recaptcha3Type;
+use Karser\Recaptcha3Bundle\Validator\Constraints\Recaptcha3;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -28,40 +30,40 @@ class RegistrationFormType extends AbstractType
                 'attr' => [
                     'autocomplete' => 'email',
                     'autofocus' => true,
-                    'class' => 'w-full'
+                    'class' => 'w-full',
                 ],
                 'constraints' => [
-                    new NotBlank()
-                ]
+                    new NotBlank(),
+                ],
             ])
             ->add('username', TextType::class, [
                 'label' => 'user.registration.username.label',
                 'attr' => [
                     'autocomplete' => 'username',
-                    'class' => 'w-full'
+                    'class' => 'w-full',
                 ],
                 'constraints' => [
-                    new NotBlank()
-                ]
+                    new NotBlank(),
+                ],
             ])
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'mapped' => false,
                 'attr' => [
-                    'autocomplete' => 'new-password'
+                    'autocomplete' => 'new-password',
                 ],
                 'first_options' => [
                     'label' => 'user.registration.password.label',
                     'attr' => [
-                        'class' => 'w-full'
+                        'class' => 'w-full',
                     ],
-                    'toggle' => true
+                    'toggle' => true,
                 ],
                 'second_options' => [
                     'label' => 'user.registration.password.confirm.label',
                     'attr' => [
-                        'class' => 'w-full'
-                    ]
+                        'class' => 'w-full',
+                    ],
                 ],
                 'constraints' => [
                     new NotBlank(
@@ -74,16 +76,16 @@ class RegistrationFormType extends AbstractType
                     ),
                     new Regex(
                         pattern: '/^(?=.*\d)(?=.*[!-\/:-@[-`{-~À-ÿ§µ²°£])(?=.*[a-z])(?=.*[A-Z])(?=.*[A-Za-z]).{12,32}$/',
-                        message: "Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.",
+                        message: 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.',
                         match: true,
-                    )
+                    ),
                 ],
             ])
             ->add('avatar', DropzoneType::class, [
                 'label' => 'user.registration.avatar.label',
                 'attr' => [
                     'placeholder' => 'user.registration.avatar.placeholder',
-                    'class' => 'w-full'
+                    'class' => 'w-full',
                 ],
                 'required' => false,
             ])
@@ -92,20 +94,25 @@ class RegistrationFormType extends AbstractType
                 'required' => false,
                 'label' => false,
                 'attr' => [
-                    'style' => 'display:none'
-                ]
+                    'style' => 'display:none',
+                ],
             ])
             ->add('agreeTerms', CheckboxType::class, [
                 'mapped' => false,
                 'label' => 'user.registration.agree_terms.label',
                 'label_attr' => [
-                    'class' => 'mb-0'
+                    'class' => 'mb-0',
                 ],
                 'constraints' => [
                     new IsTrue(
                         message: 'user.registration.agree_terms.is_true',
                     ),
                 ],
+            ])
+            ->add('captcha', Recaptcha3Type::class, [
+                'constraints' => new Recaptcha3(message: 'There were problems with your captcha. Please try again or contact with support and provide following code(s): {{ errorCodes }}'),
+                'action_name' => 'homepage',
+                'locale' => 'fr',
             ])
             ->addEventSubscriber(new HoneypotSubscriber())
         ;

@@ -1,17 +1,28 @@
-<a href="{{ path('product.show', {slug: product.slug}) }}" class="group md:hover:scale-105 flex flex-col py-2 px-4 relative bg-paragraph overflow-hidden rounded-md md:max-w-75 w-full transition-all duuration-200 drop-shadow-md cursor-pointer">
-    <div id="product-like-{{ product.id }}" class="absolute top-2 right-2 z-50">
+<div class="group md:hover:scale-102 flex flex-col h-full p-2 relative bg-paragraph overflow-hidden rounded-md md:max-w-75 w-full transition-all duuration-200 drop-shadow-md">
+    <div id="product-like-{{ product.id }}" class="absolute top-2 right-2 z-50 drop-shadow-sm">
         {{ ux_icon('heroicons-solid:heart', {class: 'size-7 text-secondary hover:text-red-500 hover:scale-110 hover:animate-wiggle cursor-pointer duration-200 transition-all ease-in-out drop-shadow-sm'}) }}
     </div>
 
-    <div class="duration-200 transition-all ease-in-out relative overflow-hidden w-full size-70">
-        <img src="{{ product.thumbnail }}" alt="{{ product.name }} preview" class="object-cover object-center w-full" />
-    </div>
-
-    <div class="flex flex-col gap-4">
-        <div class="flex flex-col gap-2.5 items-center text-center">
-            <h2>{{ product.name }}</h2>
-            <p class="truncate">{{ product.shortDescription }}</p>
+    <a href="{{ path('product.show', {slug: product.slug}) }}" class="flex flex-col flex-grow cursor-pointer no-underline">
+        <div class="aspect-square relative overflow-hidden">
+            <img src="{{ product.thumbnail }}" alt="{{ product.name }} preview" loading="lazy" class="object-cover object-center w-full h-full rounded" />
         </div>
-    </div>
 
-</a>
+        <div class="flex flex-col flex-grow gap-2">
+            <h2 class="text-center">{{ product.name }}</h2>
+            <p class="text-ellipsis md:text-clip leading-none text-center flex-grow">{{ product.shortDescription }}</p>
+            <p class="text-black font-bold text-center text-lg lg:text-xl">{{ product.price|format_currency('EUR') }}</p>
+        </div>
+    </a>
+
+    <div class="mt-2">
+        <form data-turbo-stream="" action="{{ path('cart.add') }}" method="POST">
+            <input type="hidden" name="slug" value="{{ product.slug }}">
+            <input type="hidden" name="quantity" value="1">
+            <input type="hidden" name="_turbo_stream" value="1">
+            <button type="submit" class="w-full text-center text-paragraph rounded-md bg-primary font-title py-2 text-sm hover:bg-primary-dark transition-colors">
+                {{ 'listing.product.button.add_to_cart'|trans }}
+            </button>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,72 @@
+{% if pagination.totalPages > 1 %}
+    {% set routeParams = app.request.attributes.get('_route_params')|merge(app.request.query.all)|merge({_locale: app.request.locale}) %}
+
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8">
+        <span class="text-sm text-headline/60">
+            Affichage {{ pagination.start }}-{{ pagination.end }} de {{ pagination.total }} article(s)
+        </span>
+
+        <nav class="flex items-center gap-1">
+            {# Première page #}
+            {% if pagination.hasPrev %}
+                <a href="{{ path(app.request.attributes.get('_route'), routeParams|merge({page: 1})) }}"
+                   class="size-10 flex items-center justify-center rounded-lg bg-secondary/10 text-secondary hover:bg-primary hover:text-white transition-colors">
+                    &laquo;
+                </a>
+                <a href="{{ path(app.request.attributes.get('_route'), routeParams|merge({page: pagination.page - 1})) }}"
+                   class="size-10 flex items-center justify-center rounded-lg bg-secondary/10 text-secondary hover:bg-primary hover:text-white transition-colors">
+                    &lsaquo;
+                </a>
+            {% else %}
+                <span class="size-10 flex items-center justify-center rounded-lg bg-gray-100 text-gray-300 cursor-not-allowed">&laquo;</span>
+                <span class="size-10 flex items-center justify-center rounded-lg bg-gray-100 text-gray-300 cursor-not-allowed">&lsaquo;</span>
+            {% endif %}
+
+            {% set startPage = max(1, pagination.page - 2) %}
+            {% set endPage = min(pagination.totalPages, pagination.page + 2) %}
+
+            {# Page 1 + ellipsis si nécessaire #}
+            {% if startPage > 1 %}
+                <a href="{{ path(app.request.attributes.get('_route'), routeParams|merge({page: 1})) }}"
+                   class="size-10 flex items-center justify-center rounded-lg bg-secondary/10 text-secondary hover:bg-primary hover:text-white transition-colors font-medium">1</a>
+                {% if startPage > 2 %}
+                    <span class="size-10 flex items-center justify-center text-headline/40">...</span>
+                {% endif %}
+            {% endif %}
+
+            {# Pages numérotées #}
+            {% for p in startPage..endPage %}
+                {% if p == pagination.page %}
+                    <span class="size-10 flex items-center justify-center rounded-lg bg-primary text-white font-bold shadow-md">{{ p }}</span>
+                {% else %}
+                    <a href="{{ path(app.request.attributes.get('_route'), routeParams|merge({page: p})) }}"
+                       class="size-10 flex items-center justify-center rounded-lg bg-secondary/10 text-secondary hover:bg-primary hover:text-white transition-colors font-medium">{{ p }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {# Ellipsis + dernière page si nécessaire #}
+            {% if endPage < pagination.totalPages %}
+                {% if endPage < pagination.totalPages - 1 %}
+                    <span class="size-10 flex items-center justify-center text-headline/40">...</span>
+                {% endif %}
+                <a href="{{ path(app.request.attributes.get('_route'), routeParams|merge({page: pagination.totalPages})) }}"
+                   class="size-10 flex items-center justify-center rounded-lg bg-secondary/10 text-secondary hover:bg-primary hover:text-white transition-colors font-medium">{{ pagination.totalPages }}</a>
+            {% endif %}
+
+            {# Page suivante + dernière #}
+            {% if pagination.hasNext %}
+                <a href="{{ path(app.request.attributes.get('_route'), routeParams|merge({page: pagination.page + 1})) }}"
+                   class="size-10 flex items-center justify-center rounded-lg bg-secondary/10 text-secondary hover:bg-primary hover:text-white transition-colors">
+                    &rsaquo;
+                </a>
+                <a href="{{ path(app.request.attributes.get('_route'), routeParams|merge({page: pagination.totalPages})) }}"
+                   class="size-10 flex items-center justify-center rounded-lg bg-secondary/10 text-secondary hover:bg-primary hover:text-white transition-colors">
+                    &raquo;
+                </a>
+            {% else %}
+                <span class="size-10 flex items-center justify-center rounded-lg bg-gray-100 text-gray-300 cursor-not-allowed">&rsaquo;</span>
+                <span class="size-10 flex items-center justify-center rounded-lg bg-gray-100 text-gray-300 cursor-not-allowed">&raquo;</span>
+            {% endif %}
+        </nav>
+    </div>
+{% endif %}

@@ -21,7 +21,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class ChangePasswordFormType extends AbstractType
 {
     public function __construct(
-        private readonly TranslatorInterface $translator
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -32,7 +32,7 @@ class ChangePasswordFormType extends AbstractType
                 'constraints' => [
                     new NotBlank(
                         message: $this->translator->trans('user.changePassword.current.constraint.not_blank')
-                    )
+                    ),
                 ],
                 'attr' => [
                     'autocomplete' => 'current-password',
@@ -40,7 +40,7 @@ class ChangePasswordFormType extends AbstractType
                 'label' => $this->translator->trans('user.update.changePassword.current.label'),
                 'help' => $this->translator->trans('user.update.changePassword.current.help'),
                 'required' => true,
-                'toggle' => true
+                'toggle' => true,
             ])
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
@@ -64,10 +64,10 @@ class ChangePasswordFormType extends AbstractType
                         new NotCompromisedPassword(),
                         new Regex(
                             pattern: '/^(?=.*\d)(?=.*[!-\/:-@[-`{-~À-ÿ§µ²°£])(?=.*[a-z])(?=.*[A-Z])(?=.*[A-Za-z]).{12,32}$/',
-                            message: "Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.",
+                            message: 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.',
                             match: true,
-                        )
-                    ]
+                        ),
+                    ],
                 ],
                 'second_options' => [
                     'label' => $this->translator->trans('user.update.changePassword.new.second.label'),
@@ -75,15 +75,15 @@ class ChangePasswordFormType extends AbstractType
                     'attr' => [
                         'autocomplete' => 'new-password',
                     ],
-                    'toggle' => true
+                    'toggle' => true,
                 ],
                 'invalid_message' => $this->translator->trans('user.update.changePassword.new.invalid.message'),
             ])
             ->add('submit', SubmitType::class, [
                 'label' => $this->translator->trans('user.update.changePassword.submit.label'),
                 'attr' => [
-                    'class' => 'w-full'
-                ]
+                    'class' => 'w-full',
+                ],
             ])
             ->addEventListener(FormEvents::POST_SUBMIT, $this->attachTimestamps(...))
         ;
@@ -93,7 +93,7 @@ class ChangePasswordFormType extends AbstractType
     {
         $data = $event->getData();
 
-        if (!($data instanceof User)) {
+        if (!$data instanceof User) {
             return;
         }
 
@@ -106,7 +106,7 @@ class ChangePasswordFormType extends AbstractType
             'data_class' => User::class,
             'attr' => [
                 'class' => 'flex flex-col gap-4',
-            ]
+            ],
         ]);
     }
 }

@@ -7,10 +7,10 @@ use Symplify\EasyCodingStandard\Config\ECSConfig;
 
 return ECSConfig::configure()
     ->withPaths([
-        __DIR__ . '/src',
-        __DIR__ . '/tests'
+        __DIR__.'/src',
+        __DIR__.'/tests',
     ])
     ->withPreparedSets(true)
     ->withSkip([
-        ConcatSpaceFixer::class
+        ConcatSpaceFixer::class,
     ]);

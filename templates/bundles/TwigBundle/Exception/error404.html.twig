@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Une erreur est survenue - HardWareHouse{% endblock %}
+
+{% block body %}
+    <div class="flex flex-col gap-5 flex-grow max-w-1/2 text-center mx-auto">
+        <h1 class="text-4xl">Page not found</h1>
+
+        <p class="text-xl">
+            The requested page couldn't be located. Checkout for any URL
+            misspelling or <a href="{{ path('homepage') }}">return to the homepage</a>.
+        </p>
+    </div>
+{% endblock %}

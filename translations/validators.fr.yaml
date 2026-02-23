@@ -228,3 +228,8 @@ user:
         password: { not_blank: 'Le mot de passe doit être renseigné', min_length: __user.assert.password.min_length }
 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.': '__Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.'
 'There is already an account with this email': '__There is already an account with this email'
+"Format d'adresse invalide":
+    ' Ex: 12 rue de la Paix': "__Format d'adresse invalide. Ex: 12 rue de la Paix"
+'Le code postal doit contenir 5 chiffres.': '__Le code postal doit contenir 5 chiffres.'
+'There were problems with your captcha':
+    ' Please try again or contact with support and provide following code(s): {{ errorCodes }}': '__There were problems with your captcha. Please try again or contact with support and provide following code(s): {{ errorCodes }}'

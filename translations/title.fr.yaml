@@ -8,5 +8,5 @@ user:
     profile:
         title: Profil
     address:
-        form: { title: Ajouter une adresse }
-        home: { title: Mes adresses }
+        form: { title: 'Ajouter une adresse' }
+        home: { title: 'Mes adresses' }

@@ -65,6 +65,16 @@ install: ## Install composer dependencies
 	$(call banner,$(INFO),Installing dependencies...)
 	composer install --optimize-autoloader
 
+.PHONY: assets
+assets: ## Command to building assets
+	$(call banner,$(INFO),Building assets...)
+	php bin/console asset-map:compile
+
+.PHONY: imports
+imports: ## Command to install importmap
+	$(call banner,$(INFO),Installing importmap...)
+	php bin/console importmap:install
+
 .PHONY: cache
 cache: ## Clear the cache of symfony app
 	$(call banner,$(INFO),Clearing cache...)
@@ -90,8 +100,15 @@ translate-EN: ## Dump translations for english language
 	$(call banner,$(INFO),Dump and extract translations keys for english language...)
 	php bin/console translation:extract --force --format=yaml --as-tree=3 en
 
+.PHONY: sitemap
+sitemap: ## Dump sitemap files
+	$(call banner,$(INFO),Dump all sitemap files...)
+	php bin/console presta:sitemaps:dump
+
 .PHONY: quality
-quality: ## Running quality code check using Rector, ECS and PHPStan
+quality: ## Running quality code check using Rector, ECS PHP-CS and PHPStan
+	$(call banner,$(INFO),Running PHP-CS with autofix...)
+	php ./vendor/bin/php-cs-fixer fix
 	$(call banner,$(INFO),Running ECS with autofix...)
 	php ./vendor/bin/ecs check --fix
 	$(call banner,$(INFO),Running rector with autofix...)
@@ -119,4 +136,4 @@ tests: ## Running tests using PHPUnit
 	$(call banner,$(INFO),Clearing cache...)
 	php bin/console --env=test cache:clear
 	$(call banner,$(INFO),Running tests...)
-	php bin/phpunit
+	XDEBUG_MODE=coverage php bin/phpunit

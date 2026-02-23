@@ -1,20 +1,55 @@
-<div class="dropdown group relative" tabindex="0" role="button" aria-haspopup="true">
-    <div class="flex flex-col items-center text-xs cursor-pointer">
+<div class="dropdown group relative z-50" tabindex="0" role="button" aria-haspopup="true">
+    <div class="flex flex-col items-center text-normal cursor-pointer relative">
         {{ ux_icon('heroicons-solid:shopping-cart', {class: 'size-7'}) }}
-        <span>{{ 'header.cart.label'|trans }}</span>
+        <div id="cart_count">
+            {% set cartCount = cart_count() %}
+            {% if cartCount > 0 %}
+                <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{{ cartCount }}</span>
+            {% endif %}
+        </div>
+        <span class="font-title font-medium text-sm md:text-base">{{ 'header.cart.label'|trans }}</span>
     </div>
 
     <div
         class="
         p-2
-        absolute right-0 mt-3 w-48
-        rounded-lg bg-paragraph shadow-lg
+        absolute right-0 mt-3 shrink min-w-max
+        rounded-lg bg-paragraph text-primary shadow-lg
         opacity-0 scale-95 pointer-events-none
         transition-all duration-200 ease-out
         origin-top-right
         group-focus-within:opacity-100 group-focus-within:scale-100 group-focus-within:pointer-events-auto
     "
     >
-        {{ component('cart') }}
+        {% set cartData = cart_data() %}
+        {% set totals = cartData.totals %}
+        {% if cartData.cart is not empty %}
+            <ul>
+                {% for item in cartData.cart %}
+                    <li class="text-primary">
+                        <span class="font-bold">{{ item.quantity }}x</span> {{ item.name }}
+                    </li>
+                {% endfor %}
+            </ul>
+            <div class="text-gray-500 mt-4 pt-2 border-t">
+                <div class="flex justify-between">
+                    <span class="font-medium">{{ 'header.cart.subtotal.label'|trans }} HT</span>
+                    <span>{{ totals.subtotal|format_currency('EUR') }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>{{ 'header.cart.vat.label'|trans }} ({{ (totals.vat_rate * 100)|round }}%)</span>
+                    <span>{{ totals.vat_amount|format_currency('EUR') }}</span>
+                </div>
+                <div class="flex justify-between font-bold text-base border-t pt-2 mt-2">
+                    <span>Total TTC</span>
+                    <span>{{ totals.total|format_currency('EUR') }}</span>
+                </div>
+            </div>
+            <div class="flex gap-2 mt-2">
+                <a href="{{ path('cart.index') }}" class="p-2 rounded bg-primary text-white w-full text-center">{{ 'header.cart.'|trans }}Voir le panier</a>
+            </div>
+        {% else %}
+            <p>{{ 'header.cart.empty.label'|trans }}</p>
+        {% endif %}
     </div>
 </div>

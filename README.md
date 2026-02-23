@@ -1,0 +1,5 @@
+[![GitHub license](https://img.shields.io/github/license/denzaiyy/hardwarehouse-sf)](https://github.com/DenZaiyy/hardwarehouse-sf/blob/main/LICENSE)
+[![GitHub latest commit](https://badgen.net/github/last-commit/DenZaiyy/hardwarehouse-sf)](https://gitHub.com/DenZaiyy/hardwarehouse-sf/commit/main/)
+[![Website hardwarehouse.fr](https://img.shields.io/website-up-down-green-red/http/hardwarehouse.fr)](https://hardwarehouse.fr/)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/DenZaiyy/hardwarehouse-sf/ci-main.yml?label=deploy)
+![GitHub Created At](https://img.shields.io/github/created-at/denzaiyy/hardwarehouse-sf)

@@ -1,0 +1,25 @@
+<turbo-stream action="update" target="flash-messages">
+    <template>
+        {% include '_partials/_flash_messages.html.twig' %}
+    </template>
+</turbo-stream>
+
+<turbo-stream action="replace" target="address_list">
+    <template>
+        {% include 'user/address/_list.html.twig' %}
+    </template>
+</turbo-stream>
+
+<turbo-stream action="update" target="modal_content">
+    <template></template>
+</turbo-stream>
+
+<turbo-stream action="append" target="body">
+    <template>
+        <script>
+            setTimeout(() => {
+                window.dispatchEvent(new Event('modal:close'))
+            }, 100)
+        </script>
+    </template>
+</turbo-stream>

@@ -4,17 +4,21 @@
     </template>
 </turbo-stream>
 
-<turbo-stream action="replace" target="user-infos">
+<turbo-stream action="update" target="modal_content">
+    <template></template>
+</turbo-stream>
+
+<turbo-stream action="replace" target="user-avatar">
     <template>
-        <turbo-frame id="user-infos">
-            <a href="{{ path('profile.infos') }}">Modifier mes informations</a>
-        </turbo-frame>
+        <div id="user-avatar" class="img">
+            <img src="{{ '/uploads/images/avatar/' ~ user.avatar }}" alt="Avatar of user" class="object-cover rounded-md size-40" />
+        </div>
     </template>
 </turbo-stream>
 
 <turbo-stream action="replace" target="user-infos-displayed">
     <template>
-        <div id="user-infos-displayed" class="flex flex-col">
+        <div id="user-infos-displayed" class="flex flex-col flex-1">
             <div>
                 {{ 'user.profile.informations.email.label'|trans }} : <span id="email-text">{{ user.email }}</span>
             </div>
@@ -22,7 +26,27 @@
                 {{ 'user.profile.informations.username.label'|trans }} : <span id="username-text">{{ user.username }}</span>
             </div>
 
+            {% if defaultAddress is not empty %}
+                <div>
+                    {{ 'user.profile.informations.addresses.label'|trans }} : <span id="addresses-text"><a href="{{ path('address.edit', {id: defaultAddress.id }) }}">{{ defaultAddress.label }}</a></span>
+                </div>
+            {% endif %}
+
+            <div class="w-full">
+                <a href="{{ path('profile.password') }}" data-turbo-frame="modal_content">{{ 'user.profile.informations.password.edit.label'|trans }}</a>
+            </div>
+            <div class="w-full">
+                <a href="{{ path('profile.infos') }}" data-turbo-frame="modal_content">{{ 'user.profile.informations.infos.edit.label'|trans }}</a>
+            </div>
         </div>
+    </template>
+</turbo-stream>
+
+<turbo-stream action="append" target="body">
+    <template>
+        <script>
+            window.dispatchEvent(new Event('modal:close'))
+        </script>
     </template>
 </turbo-stream>
 

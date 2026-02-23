@@ -17,18 +17,19 @@ user:
         remember: { label: 'Remember me' }
         submit: { label: Login }
     profile:
-        title: __user.profile.title
+        title: 'My profile'
+        informations: { title: 'My information', email: { label: 'Email address' }, username: { label: Nickname }, addresses: { label: 'Default address' }, password: { edit: { label: 'Change password' } }, infos: { edit: { label: 'Edit my information' } } }
+        addresses: { label: 'Address list', add: { label: 'Add an address' }, address: { label: Title }, empty: { label: 'No addresses saved' } }
     update:
-        infos: {
-            email: { label: __user.update.infos.email.label },
-            username: { label: __user.update.infos.username.label },
-            avatar: { label: __user.update.infos.avatar.label }
-        }
-        changePassword: {
-            current: { label: __user.update.changePassword.current.label, help: __user.update.changePassword.current.help },
-            new: { first: { label: __user.update.changePassword.new.first.label, help: __user.update.changePassword.new.first.help }, constraint: { not_blank: __user.update.changePassword.new.constraint.not_blank, length: { minMessage: __user.update.changePassword.new.constraint.length.minMessage } }, second: { label: __user.update.changePassword.new.second.label, help: __user.update.changePassword.new.second.help }, invalid: { message: __user.update.changePassword.new.invalid.message } },
-            submit: { label: __user.update.changePassword.submit.label }
-        }
+        infos: { email: { label: 'Email address', already_exists: 'The email address you entered is already being used by another user.' }, username: { label: Nickname }, avatar: { label: Avatar }, submit: { label: Update }, not_logged: { message: __user.update.infos.not_logged.message }, success: __user.update.infos.success }
+        changePassword: { current: { label: Password, help: 'Enter your current password' }, new: { first: { label: 'New password', help: 'Enter the new password' }, constraint: { not_blank: 'The new password cannot be blank.', length: { minMessage: 'Your password must contain at least 12 characters.' } }, second: { label: 'Repeat the password', help: 'Repeat your new password' }, invalid: { message: 'Your password is invalid.' } }, submit: { label: Update } }
+    changePassword:
+        current: { constraint: { not_blank: __user.changePassword.current.constraint.not_blank } }
+    address:
+        home: { title: 'My addresses', table: { label: { label: Title }, firstname: { label: 'First name' }, lastname: { label: __user.address.home.table.lastname.label }, address: { label: __user.address.home.table.address.label }, cp: { label: __user.address.home.table.cp.label }, city: { label: __user.address.home.table.city.label }, country: { label: __user.address.home.table.country.label }, default: { label: __user.address.home.table.default.label }, actions: { label: __user.address.home.table.actions.label } }, no_items: { message: __user.address.home.no_items.message }, button: { add: { label: __user.address.home.button.add.label } } }
+        form: { label: { label: 'My addresses' }, firstname: { label: 'First name' }, lastname: { label: __user.address.form.lastname.label }, address: { label: __user.address.form.address.label }, cp: { label: __user.address.form.cp.label }, city: { label: __user.address.form.city.label }, country: { label: __user.address.form.country.label }, is_default: { label: __user.address.form.is_default.label } }
+        delete: { success: __user.address.delete.success }
+        save: { success: __user.address.save.success }
 seo:
     description:
         default: 'Discover our selection of PC components: graphics cards, processors, motherboards, RAM and storage. Fast delivery and dedicated technical support.'
@@ -37,8 +38,88 @@ header:
         label: User
     cart:
         label: Cart
+        item: { delete: { label: Remove } }
+        subtotal: { label: 'Subtotal excluding tax' }
+        vat: { label: VAT }
+        totalttc: { label: 'Total including tax' }
+        checkout: { label: 'Proceed to checkout' }
+        empty: { label: 'Empty cart' }
     nav:
         profile: { label: Profil }
         logout: { label: Logout }
         login: { label: Login }
         register: { label: Register }
+        addresses: { label: 'My addresses' }
+    locale:
+        label: Languages
+country:
+    french:
+        label: France
+    english:
+        label: 'United States'
+    german:
+        label: Germany
+    spanish:
+        label: Spanish
+    italian:
+        label: Italian
+listing:
+    product:
+        button: { add_to_cart: 'Add to cart' }
+form:
+    delete:
+        confirm: { message: __form.delete.confirm.message }
+app:
+    locale:
+        en: English
+        fr: French
+category:
+    configuration-pc: 'PC Configuration'
+    marques: Brands
+    pc: PC
+    ecrans: Screens
+    peripheriques: Peripherals
+    alimentations: 'Power supplies'
+    boitiers: Case
+    ssd: SSD
+    disques-durs: 'Hard drives'
+    cartes-graphiques: 'Graphics cards'
+    memoire-ram: 'RAM memory'
+    cartes-meres: Motherboards
+    processeurs: Processors
+footer:
+    description: __footer.description
+    contact:
+        title: __footer.contact.title
+        address: __footer.contact.address
+        city: __footer.contact.city
+        zip: __footer.contact.zip
+        country: __footer.contact.country
+        email: __footer.contact.email
+        phone: __footer.contact.phone
+    information:
+        title: __footer.information.title
+        about: __footer.information.about
+        contact: __footer.information.contact
+        shipping: __footer.information.shipping
+        returns: __footer.information.returns
+        privacy: __footer.information.privacy
+        terms: __footer.information.terms
+        sales_terms: __footer.information.sales_terms
+    navigation:
+        title: __footer.navigation.title
+        account: __footer.navigation.account
+        addresses: __footer.navigation.addresses
+        connect: __footer.navigation.connect
+        register: __footer.navigation.register
+        brands: __footer.navigation.brands
+        categories: __footer.navigation.categories
+    newsletter:
+        title: __footer.newsletter.title
+        subtitle: __footer.newsletter.subtitle
+        placeholder: __footer.newsletter.placeholder
+        submit: __footer.newsletter.submit
+    payment:
+        mastercard: { alt: { message: __footer.payment.mastercard.alt.message } }
+        cb: { alt: { message: __footer.payment.cb.alt.message } }
+        paypal: { alt: { message: __footer.payment.paypal.alt.message } }

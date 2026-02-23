@@ -7,7 +7,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
@@ -16,7 +16,7 @@ jobs:
                   tools: composer:v2
 
             - name: Cache Composer dependencies
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: /tmp/composer-cache
                   key: ${{ runner.os }}-composer-quality-${{ hashFiles('**/composer.lock') }}
@@ -30,42 +30,70 @@ jobs:
             - name: Install dependencies
               run: |
                   composer config cache-dir /tmp/composer-cache
-                  composer install --prefer-dist --no-interaction --no-progress --optimize-autoloader
+                  composer install --no-interaction --no-progress --optimize-autoloader
 
             - name: Quality Analysis
               run: |
                   # Créer dossiers pour rapports
                   mkdir -p /tmp/quality-reports
-                  
-                  # Exécuter ECS avec rapport
+
+                  # Variables pour tracking des erreurs
+                  ERRORS=0
+
+                  # Exécuter ECS avec rapport (continue si échec)
                   echo "🔍 Running ECS..." | tee -a /tmp/quality-reports/quality-output.log
-                  php ./vendor/bin/ecs check --fix --output-format=json > /tmp/quality-reports/ecs-report.json 2>&1 || true
-                  
-                  # Exécuter Rector avec rapport
-                  echo "🔧 Running Rector..." | tee -a /tmp/quality-reports/quality-output.log  
-                  php ./vendor/bin/rector --dry-run --output-format=json > /tmp/quality-reports/rector-report.json 2>&1 || true
-                  
-                  # Lint YAML
+                  if ! php ./vendor/bin/ecs check --fix --output-format=json > /tmp/quality-reports/ecs-report.json 2>&1; then
+                      echo "❌ ECS failed" | tee -a /tmp/quality-reports/quality-output.log
+                      ERRORS=$((ERRORS + 1))
+                  fi
+
+                  # Exécuter Rector avec rapport (continue si échec)
+                  echo "🔧 Running Rector..." | tee -a /tmp/quality-reports/quality-output.log
+                  if ! php ./vendor/bin/rector --dry-run --output-format=json > /tmp/quality-reports/rector-report.json 2>&1; then
+                      echo "❌ Rector failed" | tee -a /tmp/quality-reports/quality-output.log
+                      ERRORS=$((ERRORS + 1))
+                  fi
+
+                  # Lint YAML (continue si échec)
                   echo "📝 Linting YAML..." | tee -a /tmp/quality-reports/quality-output.log
-                  php bin/console lint:yaml config --parse-tags 2>&1 | tee -a /tmp/quality-reports/yaml-lint.log || true
-                  
-                  # Lint Twig  
+                  if ! php bin/console lint:yaml config --parse-tags 2>&1 | tee -a /tmp/quality-reports/yaml-lint.log; then
+                      echo "❌ YAML lint failed" | tee -a /tmp/quality-reports/quality-output.log
+                      ERRORS=$((ERRORS + 1))
+                  fi
+
+                  # Lint Twig (continue si échec)
                   echo "🎨 Linting Twig..." | tee -a /tmp/quality-reports/quality-output.log
-                  php bin/console lint:twig templates 2>&1 | tee -a /tmp/quality-reports/twig-lint.log || true
-                  
-                  # Lint Container
+                  if ! php bin/console lint:twig templates 2>&1 | tee -a /tmp/quality-reports/twig-lint.log; then
+                      echo "❌ Twig lint failed" | tee -a /tmp/quality-reports/quality-output.log
+                      ERRORS=$((ERRORS + 1))
+                  fi
+
+                  # Lint Container (continue si échec)
                   echo "🏗️ Linting Container..." | tee -a /tmp/quality-reports/quality-output.log
-                  php bin/console lint:container 2>&1 | tee -a /tmp/quality-reports/container-lint.log || true
-                  
-                  # PHPStan avec rapport JSON
+                  if ! php bin/console lint:container 2>&1 | tee -a /tmp/quality-reports/container-lint.log; then
+                      echo "❌ Container lint failed" | tee -a /tmp/quality-reports/quality-output.log
+                      ERRORS=$((ERRORS + 1))
+                  fi
+
+                  # PHPStan avec rapport JSON (continue si échec)
                   echo "🧪 Running PHPStan..." | tee -a /tmp/quality-reports/quality-output.log
-                  php ./vendor/bin/phpstan analyse --memory-limit=-1 --level max --error-format=json > /tmp/quality-reports/phpstan-report.json 2>&1 || true
-                  
-                  # Rapport final
-                  echo "✅ Quality analysis completed" | tee -a /tmp/quality-reports/quality-output.log
+                  if ! php ./vendor/bin/phpstan analyse --memory-limit=-1 --level max --error-format=json > /tmp/quality-reports/phpstan-report.json 2>&1; then
+                      echo "❌ PHPStan failed" | tee -a /tmp/quality-reports/quality-output.log
+                      ERRORS=$((ERRORS + 1))
+                  fi
+
+                  # Rapport final avec codes de sortie
+                  echo "Total errors found: $ERRORS" | tee -a /tmp/quality-reports/quality-output.log
+
+                  if [ $ERRORS -gt 0 ]; then
+                      echo "❌ Quality analysis completed with $ERRORS error(s)" | tee -a /tmp/quality-reports/quality-output.log
+                      exit 1
+                  else
+                      echo "✅ Quality analysis completed successfully" | tee -a /tmp/quality-reports/quality-output.log
+                  fi
 
             - name: Upload quality reports
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v6
               if: always()
               with:
                   name: quality-reports-${{ github.run_number }}
@@ -74,7 +102,7 @@ jobs:
                   retention-days: 30
 
             - name: Upload PHPStan cache (for analysis)
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v6
               if: always()
               with:
                   name: phpstan-cache-${{ github.run_number }}

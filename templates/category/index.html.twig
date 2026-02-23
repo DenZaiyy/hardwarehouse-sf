@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello CategoryController!{% endblock %}
+{% block title %}Catégories - HardWareHouse{% endblock %}
 
 {% block body %}
     <h1>Categories list</h1>
@@ -20,7 +20,7 @@
                     <td><a href="{{ path('category.show', {slug: category.slug}) }}">{{ category.id }}</a></td>
                     <td>{{ category.name }}</td>
                     <td>{{ category.slug }}</td>
-                    <td><img src="{{ category.logo }}" alt="logo of {{ category.name }}" class="size-16" /></td>
+                    <td><img src="{{ category.logo }}" alt="logo of {{ category.name }}" class="size-16 rounded" /></td>
                 </tr>
             {% endfor %}
         {% else %}
@@ -31,5 +31,4 @@
 
         </tbody>
     </table>
-
 {% endblock %}

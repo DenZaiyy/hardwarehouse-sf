@@ -14,8 +14,8 @@ readonly class MailerService
         private RequestStack $requestStack,
         private MailerInterface $mailer,
         private LoggerInterface $logger,
-        private string          $adminEmail = "grischko.kevin@gmail.com",
-        private string          $fromEmail = "noreply@denz.ovh"
+        private string $adminEmail = 'grischko.kevin@gmail.com',
+        private string $fromEmail = 'noreply@denz.ovh',
     ) {
     }
 
@@ -32,16 +32,16 @@ readonly class MailerService
 
         $this->sendTemplatedEmail(
             $userEmail,
-            "Bienvenue",
+            'Bienvenue',
             'emails/welcome.html.twig',
             [
                 'userEmail' => $userEmail,
-                'loginUrl' => $this->getBaseDomain() . '/login'
+                'loginUrl' => $this->getBaseDomain().'/login',
             ]
         );
 
         $this->logger->info('Email de bienvenue envoyé', [
-            'recipient' => $userEmail
+            'recipient' => $userEmail,
         ]);
 
         return true;
@@ -63,18 +63,18 @@ readonly class MailerService
 
         $this->sendTemplatedEmail(
             $this->adminEmail,
-            '[ADMIN] ' . $subject,
+            '[ADMIN] '.$subject,
             'emails/admin/notification.html.twig',
             [
                 'message' => $message,
                 'context' => $context,
-                'timestamp' => new \DateTime()
+                'timestamp' => new \DateTime(),
             ]
         );
 
         $this->logger->info('Notification admin envoyé', [
             'subject' => $subject,
-            'context' => $context
+            'context' => $context,
         ]);
 
         return true;
@@ -97,7 +97,7 @@ readonly class MailerService
             $this->logger->error('Erreur lors de l\'envoi de l\'email template', [
                 'error' => $e->getMessage(),
                 'recipient' => $to,
-                'subject' => $subject
+                'subject' => $subject,
             ]);
         }
     }
@@ -105,6 +105,7 @@ readonly class MailerService
     private function validateEmail(string $email): bool
     {
         $pattern = "/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,})$/i";
+
         return (bool) preg_match($pattern, $email);
     }
 

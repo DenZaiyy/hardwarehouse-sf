@@ -5,12 +5,19 @@
     --color-secondary: oklch(0.5579 0.0849 240.94);
     --color-paragraph: oklch(0.9582 0.0131 251.56);
     --color-search: oklch(0.931 0 0);
-    --font-display: "Montserrats", sans-serif;
+    --font-display: "Montserrat", sans-serif;
     --font-title: "Exo 2", sans-serif;
+    --grid-template-columns-auto-fit-210: repeat(auto-fit, minmax(250px, 1fr));
 
     --radius-section: 10px;
 
     --animate-wiggle: wiggle 1s ease-in-out infinite;
+    --animate-fade-in: fade-in 200ms ease-out;
+
+    @keyframes fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
 
     @keyframes wiggle {
         0%,
@@ -41,7 +48,7 @@
     }
 
     p {
-        @apply text-sm leading-relaxed text-slate-700;
+        @apply text-sm leading-relaxed;
     }
 
     body {
@@ -73,7 +80,7 @@
        ========================= */
 
     button {
-        @apply inline-flex items-center justify-center gap-2
+        @apply inline-flex items-center justify-center gap-2 cursor-pointer
         rounded-md font-medium
         px-4 py-2 text-sm
         bg-blue-600 text-white
@@ -200,4 +207,3 @@
         @apply bg-orange-600 text-white px-4 py-2 rounded-lg;
     }
 }
-

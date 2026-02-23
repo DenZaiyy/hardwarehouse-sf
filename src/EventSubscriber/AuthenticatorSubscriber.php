@@ -18,7 +18,7 @@ readonly class AuthenticatorSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         private LoggerInterface $securityLogger,
-        private RequestStack    $requestStack
+        private RequestStack $requestStack,
     ) {
     }
 
@@ -53,7 +53,7 @@ readonly class AuthenticatorSubscriber implements EventSubscriberInterface
                 'ip_address' => $userIP,
                 'user_agent' => $request->headers->get('User-Agent'),
                 'exception_class' => $exception::class,
-                'timestamp' => $this->getCurrentDate()
+                'timestamp' => $this->getCurrentDate(),
             ]
         );
     }
@@ -61,8 +61,8 @@ readonly class AuthenticatorSubscriber implements EventSubscriberInterface
     public function onLoginSuccess(LoginSuccessEvent $event): void
     {
         [
-            "route_name" => $routeName,
-            "user_IP" => $userIP
+            'route_name' => $routeName,
+            'user_IP' => $userIP,
         ] = $this->getRouteNameAndUserIP();
 
         if (empty($event->getAuthenticatedToken()->getRoleNames())) {
@@ -99,6 +99,7 @@ readonly class AuthenticatorSubscriber implements EventSubscriberInterface
         // Depuis le passport (si disponible)
         /** @var UserBadge $userBadge */
         $userBadge = $passport->getBadge(UserBadge::class);
+
         return $userBadge->getUserIdentifier();
     }
 
@@ -109,6 +110,7 @@ readonly class AuthenticatorSubscriber implements EventSubscriberInterface
 
     /**
      * Return the user IP and the name of the route where the user has arrived.
+     *
      * @return array{user_IP: string|null, route_name: string}
      */
     private function getRouteNameAndUserIP(): array
@@ -118,14 +120,14 @@ readonly class AuthenticatorSubscriber implements EventSubscriberInterface
         if (!$request) {
             return [
                 'user_IP' => 'NaN',
-                'route_name' => 'NaN'
+                'route_name' => 'NaN',
             ];
         }
 
         $routeName = $request->attributes->get('_route');
 
         return [
-            'user_IP' => $request->getClientIp() ?? "NaN",
+            'user_IP' => $request->getClientIp() ?? 'NaN',
             'route_name' => is_string($routeName) ? $routeName : 'NaN',
         ];
     }
