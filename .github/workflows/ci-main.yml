@@ -15,11 +15,11 @@ concurrency:
 jobs:
     # Re-teste tout sur main pour sécurité maximale avec cache optimisé
     audit:
-        uses: ./.github/workflows/audit.yml
-        
+        uses: .github/workflows/audit.yml
+
     quality:
         uses: ./.github/workflows/quality.yml
-        
+
     tests:
         uses: ./.github/workflows/test.yml
 
@@ -32,7 +32,7 @@ jobs:
         timeout-minutes: 15
         steps:
             - name: Checkout code
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   fetch-depth: 1
 
@@ -45,7 +45,7 @@ jobs:
                   coverage: none
 
             - name: Cache Composer dependencies
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: /tmp/composer-cache
                   key: ${{ runner.os }}-composer-prod-${{ hashFiles('**/composer.lock') }}
@@ -72,68 +72,68 @@ jobs:
                   script: |
                       set -e
                       echo "🚀 Starting production deployment..."
-                      
+
                       # Variables
                       PROJECT_PATH="${{ secrets.PROJECT_PATH }}"
                       BACKUP_DIR="/var/backups/hardwarehouse"
                       TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-                      
+
                       # Backup current version
                       echo "📦 Creating backup..."
                       sudo mkdir -p $BACKUP_DIR
                       sudo cp -r $PROJECT_PATH $BACKUP_DIR/backup-$TIMESTAMP || true
-                      
+
                       # Navigate to project
                       cd $PROJECT_PATH
-                      
+
                       # Maintenance mode (optional)
                       echo "🔧 Enabling maintenance mode..."
                       touch var/maintenance.flag || true
-                      
+
                       # Update code
                       echo "📥 Fetching latest code..."
                       git fetch origin --prune
                       git reset --hard origin/main
-                      
+
                       # Install dependencies with optimizations
                       echo "📦 Installing dependencies..."
                       composer install --no-dev --optimize-autoloader --no-interaction --classmap-authoritative
-                      
+
                       # Build assets with caching
                       echo "🎨 Building assets..."
                       php bin/console asset-map:compile
                       php bin/console importmap:install
                       php bin/console tailwind:build --minify
-                      
+
                       # Database operations
                       echo "🗃️ Updating database..."
                       php bin/console doctrine:database:create --if-not-exists --env=prod
                       php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration --env=prod
-                      
+
                       # Clear and warm cache
                       echo "🧹 Clearing cache..."
                       php bin/console cache:clear --env=prod --no-warmup
                       php bin/console cache:warmup --env=prod
-                      
+
                       # Set proper permissions
                       echo "🔐 Setting permissions..."
                       sudo chown -R www-data:www-data var/ public/
                       sudo chmod -R 775 var/
                       sudo chmod -R 755 public/
-                      
+
                       # Restart services
                       echo "🔄 Restarting services..."
                       sudo systemctl reload php8.4-fpm || sudo service php8.4-fpm reload
                       sudo nginx -t && sudo systemctl reload nginx || true
-                      
+
                       # Disable maintenance mode
                       echo "✅ Disabling maintenance mode..."
                       rm -f var/maintenance.flag || true
-                      
+
                       # Health check
                       echo "🩺 Running health check..."
                       php bin/console about --env=prod > /dev/null
-                      
+
                       echo "🎉 Production deployment completed successfully!"
                       echo "📋 Backup location: $BACKUP_DIR/backup-$TIMESTAMP"
 
