@@ -15,7 +15,7 @@ concurrency:
 jobs:
     # Re-teste tout sur main pour sécurité maximale avec cache optimisé
     audit:
-        uses: .github/workflows/audit.yml
+        uses: ./.github/workflows/audit.yml
 
     quality:
         uses: ./.github/workflows/quality.yml
@@ -28,7 +28,7 @@ jobs:
         name: Deploy to Production
         needs: [audit, quality, tests]
         runs-on: ubuntu-latest
-        environment: production
+        environment: prod
         timeout-minutes: 15
         steps:
             - name: Checkout code
