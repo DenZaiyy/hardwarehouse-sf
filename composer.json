@@ -1,4 +1,6 @@
 {
+    "name": "denzaiyy/hardwarehouse-sf",
+    "description": "Symfony APP to manage client order and using api created with nextjs",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
