@@ -28,7 +28,7 @@ user:
         current: { constraint: { not_blank: __user.changePassword.current.constraint.not_blank } }
     address:
         home: { title: 'Mes adresses', table: { label: { label: Intitulé }, firstname: { label: Prénom }, lastname: { label: Nom }, address: { label: Adresse }, cp: { label: 'Code postal' }, city: { label: Ville }, country: { label: Pays }, actions: { label: Actions }, default: { label: 'Par défaut' } }, no_items: { message: 'Aucune adresses enregistrés' }, button: { add: { label: 'Ajouter une adresse' } } }
-        form: { label: { label: Intitulé }, firstname: { label: Prénom }, lastname: { label: 'Nom de famille' }, address: { label: Adresse }, cp: { label: 'Code postal' }, city: { label: Ville }, country: { label: Pays }, save: { label: Ajouter }, title: 'Ajouter une nouvelle adresse', is_default: { label: 'Adresse par défaut' } }
+        form: { label: { label: Intitulé }, firstname: { label: Prénom }, lastname: { label: 'Nom de famille' }, address: { label: Adresse }, cp: { label: 'Code postal' }, city: { label: Ville }, country: { label: Pays }, save: { label: Ajouter }, title: 'Ajouter une nouvelle adresse', is_default: { label: 'Adresse par défaut' }, type: { label: "Type d'adresse" } }
         create: { success: 'Votre adresse à été enregistré avec succès' }
         update: { success: 'Votre adresse à été mis à jour avec succès' }
         delete: { success: 'Votre adresse à été supprimé avec succès' }
@@ -47,6 +47,7 @@ header:
         totalttc: { label: 'Total TTC' }
         checkout: { label: 'Passer au paiement' }
         empty: { label: 'Panier vide' }
+        show: __header.cart.show
     nav:
         profile: { label: Profile }
         logout: { label: Déconnexion }
@@ -116,13 +117,45 @@ footer:
         connect: 'Se connecter'
         register: "S'inscrire"
         brands: Marques
-        categories: 'Catégories'
+        categories: Catégories
     newsletter:
-        title: 'Newsletter'
-        subtitle: "Offres exclusives & nouveautés"
+        title: Newsletter
+        subtitle: 'Offres exclusives & nouveautés'
         placeholder: 'Votre adresse email'
         submit: "S'inscrire"
     payment:
         mastercard: { alt: { message: __footer.payment.mastercard.alt.message } }
         cb: { alt: { message: __footer.payment.cb.alt.message } }
         paypal: { alt: { message: __footer.payment.paypal.alt.message } }
+orderStatus:
+    pending:
+        label: 'En attente de paiement'
+    processing:
+        label: 'En cours de traitement'
+    shipped:
+        label: 'Expédié'
+    delivered:
+        label: 'Livré'
+    cancelled:
+        label: 'Annulé'
+carrierType:
+    dhl:
+        label: 'DHL'
+    ups:
+        label: 'UPS'
+    fedex:
+        label: 'FedEx'
+    gls:
+        label: 'GLS'
+    colissimo:
+        label: 'Colissimo'
+    chronopost:
+        label: 'Chronopost'
+addresstype:
+    delivery:
+        label: 'Adresse de livraison'
+    billing:
+        label: 'Facturation'
+contact:
+    page:
+        title: 'Contactez-nous'

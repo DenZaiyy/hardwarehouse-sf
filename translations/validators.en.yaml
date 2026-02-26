@@ -222,14 +222,15 @@ user:
     reset_password:
         email: { not_blank: 'Email field cannot be blank, please enter your email address' }
     registration:
-        password: { not_blank: __user.registration.password.not_blank, min_length: __user.registration.password.min_length }
-        agree_terms: { is_true: __user.registration.agree_terms.is_true }
+        password: { not_blank: 'Password cannot be blank, please enter your password', min_length: 'Your password should be at least {{ limit }} characters' }
+        agree_terms: { is_true: 'You should agree to our terms.' }
     assert:
-        password: { not_blank: __user.assert.password.not_blank, min_length: __user.assert.password.min_length }
+        password: { not_blank: 'Password cannot be blank, please enter your password', min_length: 'Your password should be at least {{ limit }} characters' }
 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.': 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.'
 'There is already an account with this email': 'There is already an account with this email'
 "Format d'adresse invalide":
-    ' Ex: 12 rue de la Paix': "__Format d'adresse invalide. Ex: 12 rue de la Paix"
-'Le code postal doit contenir 5 chiffres.': '__Le code postal doit contenir 5 chiffres.'
+    ' Ex: 12 rue de la Paix': 'Invalid address format. Ex: 12 rue de la Paix'
+'Le code postal doit contenir 5 chiffres.': 'The postal code must contain 5 digits.'
 'There were problems with your captcha':
-    ' Please try again or contact with support and provide following code(s): {{ errorCodes }}': '__There were problems with your captcha. Please try again or contact with support and provide following code(s): {{ errorCodes }}'
+    ' Please try again or contact with support and provide following code(s): {{ errorCodes }}': 'There were problems with your captcha. Please try again or contact with support and provide following code(s): {{ errorCodes }}'
+'La note doit être comprise entre {{ min }} et {{ max }}.': 'The rating must be between {{ min }} and {{ max }}.'
