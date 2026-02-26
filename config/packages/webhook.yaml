@@ -1,0 +1,6 @@
+framework:
+  webhook:
+    routing:
+      stripe:
+        service: App\Webhook\StripeRequestParser
+        secret: your_secret_here
