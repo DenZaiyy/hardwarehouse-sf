@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\AddressType;
 use App\Enum\CountryList;
 use App\Repository\AddressRepository;
 use App\Trait\TimestampTrait;
@@ -63,6 +64,9 @@ class Address
 
     #[ORM\Column]
     private ?bool $is_default = null;
+
+    #[ORM\Column(length: 20, enumType: AddressType::class)]
+    private ?AddressType $type = null;
 
     public function getId(): ?int
     {
@@ -173,6 +177,18 @@ class Address
     public function setIsDefault(bool $is_default): static
     {
         $this->is_default = $is_default;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $this->type = $type;
 
         return $this;
     }
