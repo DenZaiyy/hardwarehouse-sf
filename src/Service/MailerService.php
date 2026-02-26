@@ -4,6 +4,7 @@ namespace App\Service;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
@@ -14,7 +15,9 @@ readonly class MailerService
         private RequestStack $requestStack,
         private MailerInterface $mailer,
         private LoggerInterface $logger,
+        #[Autowire('%env(ADMIN_EMAIL)%')]
         private string $adminEmail = 'grischko.kevin@gmail.com',
+        #[Autowire('%env(FROM_EMAIL)%')]
         private string $fromEmail = 'noreply@denz.ovh',
     ) {
     }
