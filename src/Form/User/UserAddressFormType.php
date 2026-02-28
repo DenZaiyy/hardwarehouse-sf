@@ -3,6 +3,7 @@
 namespace App\Form\User;
 
 use App\Entity\Address;
+use App\Enum\AddressType;
 use App\Enum\CountryList;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Event\PostSubmitEvent;
@@ -26,6 +27,10 @@ class UserAddressFormType extends AbstractType
         $builder
             ->add('label', TextType::class, [
                 'label' => $this->translator->trans('user.address.form.label.label'),
+            ])
+            ->add('type', EnumType::class, [
+                'label' => $this->translator->trans('user.address.form.type.label'),
+                'class' => AddressType::class,
             ])
             ->add('firstname', TextType::class, [
                 'label' => $this->translator->trans('user.address.form.firstname.label'),
