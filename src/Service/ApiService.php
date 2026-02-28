@@ -35,7 +35,7 @@ readonly class ApiService
      */
     public function fetchOne(string $endpoint, string $dtoClass): object
     {
-        $response = $this->apiClient->request('GET', $endpoint);
+        $response = $this->apiClient->request('GET', $endpoint . '?active=true');
 
         /* @var T */
         return $this->serializer->deserialize($response->getContent(), $dtoClass, 'json');
@@ -56,7 +56,7 @@ readonly class ApiService
      */
     public function fetchAll(string $endpoint, string $dtoClass): array
     {
-        $response = $this->apiClient->request('GET', $endpoint);
+        $response = $this->apiClient->request('GET', $endpoint . '?active=true');
 
         /** @var array<T> */
         return $this->serializer->deserialize($response->getContent(), $dtoClass.'[]', 'json');
@@ -80,7 +80,8 @@ readonly class ApiService
      */
     public function fetchPaginated(string $endpoint, string $dtoClass, array $params = []): array
     {
-        $query = http_build_query($params);
+        $newParams = array_merge(['active' => 'true'], $params);
+        $query = http_build_query($newParams);
         $url = $endpoint.($query ? '?'.$query : '');
 
         /** @var array{data: array<T>, meta: array{total: int, page: int, limit: int, totalPages: int, hasNext: bool, hasPrev: bool}} $response */
