@@ -18,7 +18,7 @@ readonly class MailerService
         #[Autowire('%env(ADMIN_EMAIL)%')]
         private string $adminEmail = 'grischko.kevin@gmail.com',
         #[Autowire('%env(FROM_EMAIL)%')]
-        private string $fromEmail = 'noreply@denz.ovh',
+        private string $fromEmail = 'noreply@hardwarehouse.fr',
     ) {
     }
 
@@ -86,7 +86,7 @@ readonly class MailerService
     /**
      * @param array<string, mixed> $context
      */
-    private function sendTemplatedEmail(string $to, string $subject, string $template, array $context = [], ?string $from = null): void
+    public function sendTemplatedEmail(string $to, string $subject, string $template, array $context = [], ?string $from = null): void
     {
         try {
             $email = new TemplatedEmail()
