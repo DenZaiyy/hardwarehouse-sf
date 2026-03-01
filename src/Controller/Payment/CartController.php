@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Payment;
 
 use App\Service\CartService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -41,7 +41,9 @@ class CartController extends AbstractController
         } catch (\RuntimeException $e) {
             $this->addFlash('danger', $e->getMessage());
 
-            return $this->redirectToRoute('cart.index');
+            $referer = $request->headers->get('referer');
+
+            return $this->redirect($referer ?: $this->generateUrl('cart.index'));
         }
     }
 

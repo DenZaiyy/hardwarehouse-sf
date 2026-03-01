@@ -24,6 +24,7 @@ final class TogglePasswordTypeExtension extends AbstractTypeExtension
 
     public function configureOptions(OptionsResolver $resolver): void
     {
+        // TODO: Restyling button for better integration with Tailwind
         $resolver->setDefaults([
             'toggle' => false,
             'hidden_label' => 'Hide',

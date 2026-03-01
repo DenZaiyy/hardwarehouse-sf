@@ -8,4 +8,6 @@ user:
     profile:
         title: Profile
     address:
-        home: { title: __user.address.home.title }
+        home: { title: 'My addresses' }
+contact:
+    title: 'Contact us'

@@ -3,5 +3,11 @@
 {% block title %}{{ 'contact.title'|trans(domain = "title") }}{% endblock %}
 
 {% block body %}
-    <h1>{{ 'contact.page.title'|trans }}</h1>
+    <div class="md:mx-auto md:max-w-4xl">
+        <h1>{{ 'contact.page.title'|trans }}</h1>
+
+        <section class="mt-2 p-2 rounded border border-gray-300">
+            {{ form(form) }}
+        </section>
+    </div>
 {% endblock %}

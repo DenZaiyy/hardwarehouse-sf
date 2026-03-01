@@ -13,6 +13,7 @@ use Doctrine\ORM\Exception\ORMException;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,6 +32,8 @@ class RegistrationController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly ImageUploadService $uploadService,
         private readonly RateLimiterService $rateLimiter,
+        #[Autowire('%env(FROM_EMAIL)')]
+        private readonly string $supportEmail,
     ) {
     }
 
@@ -75,7 +78,7 @@ class RegistrationController extends AbstractController
                 'app_verify_email',
                 $user,
                 new TemplatedEmail()
-                    ->from(new Address('support@denz.ovh', 'HardWareHouse - Support'))
+                    ->from(new Address($this->supportEmail, 'HardWareHouse - Support'))
                     ->to((string) $user->getEmail())
                     ->subject($translator->trans('user.register.email.confirm.subject'))
                     ->htmlTemplate('security/registration/confirmation_email.html.twig')

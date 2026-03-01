@@ -18,7 +18,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\Turbo\TurboBundle;
 
 #[Route('/profile/address', name: 'address.')]
-#[IsGranted('ROLE_USER')]
+#[IsGranted('IS_AUTHENTICATED_FULLY')]
 class AddressController extends AbstractController
 {
     public function __construct(
