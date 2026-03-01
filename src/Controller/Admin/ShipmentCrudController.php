@@ -6,11 +6,14 @@ use App\Entity\Shipment;
 use App\Enum\ShipmentStatus;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
+/**
+ * @extends AbstractCrudController<Shipment>
+ */
 class ShipmentCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
@@ -18,7 +21,7 @@ class ShipmentCrudController extends AbstractCrudController
         return Shipment::class;
     }
 
-
+    #[\Override]
     public function configureFields(string $pageName): iterable
     {
         return [
@@ -34,8 +37,7 @@ class ShipmentCrudController extends AbstractCrudController
                 ->hideOnForm(),
             AssociationField::new('carrier', 'Transporteur')
                 ->onlyOnIndex()
-                ->formatValue(fn ($value, $entity) => $entity->getCarrier()?->getName() ?? '-'),
-
+                ->formatValue(static fn (?string $value, Shipment $entity): string => $entity->getCarrier()?->getName() ?? '-'),
         ];
     }
 }

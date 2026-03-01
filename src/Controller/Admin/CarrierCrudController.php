@@ -9,6 +9,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
+/**
+ * @extends AbstractCrudController<Carrier>
+ */
 class CarrierCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
@@ -16,7 +19,7 @@ class CarrierCrudController extends AbstractCrudController
         return Carrier::class;
     }
 
-
+    #[\Override]
     public function configureFields(string $pageName): iterable
     {
         return [

@@ -5,19 +5,18 @@ namespace App\Controller\Admin;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
-use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[AdminDashboard(routePath: '/admin', routeName: 'admin')]
 #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas accès à cette section.')]
 class DashboardController extends AbstractDashboardController
 {
+    #[\Override]
     public function index(): Response
     {
-        //return parent::index();
+        // return parent::index();
 
         // Option 1. You can make your dashboard redirect to some common page of your backend
         //
@@ -35,17 +34,22 @@ class DashboardController extends AbstractDashboardController
         return $this->render('admin/dashboard.html.twig');
     }
 
+    #[\Override]
     public function configureDashboard(): Dashboard
     {
         return Dashboard::new()
             ->setTitle('HardWareHouse')
+            ->setTranslationDomain('admin')
+            ->setLocales(['fr', 'en'])
         ;
     }
 
+    #[\Override]
     public function configureMenuItems(): iterable
     {
         return [
             MenuItem::linkToDashboard('Dashboard', 'fa fa-home'),
+            MenuItem::linkToUrl('Back to the website', 'fa-solid fa-rotate-left', '/')->setLinkTarget('_blank'),
 
             MenuItem::section('Users'),
             MenuItem::linkTo(UserCrudController::class, 'Users', 'fa-solid fa-users'),
@@ -59,8 +63,6 @@ class DashboardController extends AbstractDashboardController
             MenuItem::section('Shipments'),
             MenuItem::linkTo(CarrierCrudController::class, 'Carriers', 'fa-solid fa-truck'),
             MenuItem::linkTo(ShipmentCrudController::class, 'Shipments', 'fa-solid fa-box'),
-
-
         ];
     }
 }

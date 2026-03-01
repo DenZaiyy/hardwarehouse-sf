@@ -6,6 +6,9 @@ use App\Entity\User;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 
+/**
+ * @extends AbstractCrudController<User>
+ */
 class UserCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
@@ -13,6 +16,7 @@ class UserCrudController extends AbstractCrudController
         return User::class;
     }
 
+    #[\Override]
     public function configureFilters(Filters $filters): Filters
     {
         return $filters
