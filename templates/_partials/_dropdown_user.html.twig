@@ -15,7 +15,14 @@
     "
     >
         <ul class="text-sm">
-            {% if is_granted('ROLE_USER') %}
+            {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_SUPER_ADMIN') %}
+                <li>
+                    <a href="{{ path('admin') }}" target="_blank" class="block px-3 py-2 hover:bg-primary/10 transition">
+                        {{ 'header.nav.admin_dashboard.label'|trans }}
+                    </a>
+                </li>
+            {% endif %}
+            {% if is_granted('ROLE_USER')%}
                 <li>
                     <a href="{{ path('profile.index') }}" class="block px-3 py-2 hover:bg-primary/10 transition">
                         {{ 'header.nav.profile.label'|trans }}
