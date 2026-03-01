@@ -97,7 +97,7 @@ tests: ## Running tests using PHPUnit
 	XDEBUG_MODE=coverage php bin/phpunit
 
 ## —— Production ————————————————————————————————————————————————————————————————
-prod: twb assets imports sitemap ## Execute all commands needed to prod env
+prod: vendor/autoload.php twb assets imports sitemap ## Execute all commands needed to prod env
 	$(call banner,$(INFO),Composer install with no-dev dependencies...)
 	composer install --no-dev --optimize-autoloader --no-interaction --classmap-authoritative
 	$(call banner,$(INFO),Create database if not exists...)
@@ -114,12 +114,16 @@ twb: ## Building tailwind css and minify
 
 assets: ## Command to building assets
 	$(call banner,$(INFO),Building assets...)
-	php bin/console asset-map:compile
+	php bin/console asset-map:compile --env=prod
 
 imports: ## Command to install importmap
 	$(call banner,$(INFO),Installing importmap...)
-	php bin/console importmap:install
+	php bin/console importmap:install --env=prod
 
 sitemap: ## Dump sitemap files
 	$(call banner,$(INFO),Dump all sitemap files...)
-	php bin/console presta:sitemaps:dump
+	php bin/console presta:sitemaps:dump --env=prod
+
+vendor/autoload.php: composer.lock
+	composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+	touch vendor/autoload.php

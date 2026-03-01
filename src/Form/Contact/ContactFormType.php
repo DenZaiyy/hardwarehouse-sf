@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Form\Contact;
 
 use App\Dto\Form\Contact\ContactFormDto;
+use Karser\Recaptcha3Bundle\Form\Recaptcha3Type;
+use Karser\Recaptcha3Bundle\Validator\Constraints\Recaptcha3;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -46,6 +48,11 @@ class ContactFormType extends AbstractType
                     'class' => 'w-full',
                     'rows' => 5,
                 ],
+            ])
+            ->add('captcha', Recaptcha3Type::class, [
+                'constraints' => new Recaptcha3(message: 'There were problems with your captcha. Please try again or contact with support and provide following code(s): {{ errorCodes }}'),
+                'action_name' => 'homepage',
+                'locale' => 'fr',
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'contact.form.submit.label',
