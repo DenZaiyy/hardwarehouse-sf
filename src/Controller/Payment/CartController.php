@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Payment;
 
 use App\Service\CartService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,6 +31,7 @@ class CartController extends AbstractController
     {
         $slug = $request->request->getString('slug');
         $quantity = $request->request->getInt('quantity', 1);
+        $referer = $request->headers->get('referer');
 
         try {
             $this->cartService->addProduct($slug, $quantity);
@@ -41,7 +42,7 @@ class CartController extends AbstractController
         } catch (\RuntimeException $e) {
             $this->addFlash('danger', $e->getMessage());
 
-            return $this->redirectToRoute('cart.index');
+            return $this->redirect($referer);
         }
     }
 
