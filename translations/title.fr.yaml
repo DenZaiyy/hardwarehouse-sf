@@ -11,4 +11,4 @@ user:
         form: { title: 'Ajouter une adresse' }
         home: { title: 'Mes adresses' }
 contact:
-    title: Nous contacter
+    title: 'Nous contacter'
