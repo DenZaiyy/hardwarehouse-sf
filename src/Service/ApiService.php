@@ -35,7 +35,7 @@ readonly class ApiService
      */
     public function fetchOne(string $endpoint, string $dtoClass): object
     {
-        $response = $this->apiClient->request('GET', $endpoint . '?active=true');
+        $response = $this->apiClient->request('GET', $endpoint.'?active=true');
 
         /* @var T */
         return $this->serializer->deserialize($response->getContent(), $dtoClass, 'json');
@@ -56,7 +56,7 @@ readonly class ApiService
      */
     public function fetchAll(string $endpoint, string $dtoClass): array
     {
-        $response = $this->apiClient->request('GET', $endpoint . '?active=true');
+        $response = $this->apiClient->request('GET', $endpoint.'?active=true');
 
         /** @var array<T> */
         return $this->serializer->deserialize($response->getContent(), $dtoClass.'[]', 'json');
