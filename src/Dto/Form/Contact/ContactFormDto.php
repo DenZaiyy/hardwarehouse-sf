@@ -19,5 +19,6 @@ class ContactFormDto
         #[Assert\NotBlank]
         #[Assert\Length(max: 1000)]
         public ?string $message = null,
-    ) { }
+    ) {
+    }
 }

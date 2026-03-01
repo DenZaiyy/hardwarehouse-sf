@@ -17,9 +17,9 @@ final class ContactController extends AbstractController
     public function __construct(
         private readonly RateLimiterService $rateLimiter,
         private readonly MailerService $mailerService,
-        #[Autowire('%env(FROM_EMAIL)%')] private readonly string $adminEmail
-    )
-    {
+        #[Autowire('%env(FROM_EMAIL)%')]
+        private readonly string $adminEmail,
+    ) {
     }
 
     #[Route('/contact', name: 'app.contact')]
@@ -37,10 +37,10 @@ final class ContactController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $email = $form->get('email')->getData();
-            $name = $form->get('name')->getData();
-            $subject = $form->get('subject')->getData();
-            $message = $form->get('message')->getData();
+            $email = $contact->email;
+            $name = $contact->name;
+            $subject = $contact->subject;
+            $message = $contact->message;
 
             try {
                 $this->mailerService->sendTemplatedEmail(
@@ -52,11 +52,10 @@ final class ContactController extends AbstractController
                         'contactEmail' => $email,
                         'subject' => $subject,
                         'message' => $message,
-                        'timestamp' => new \DateTime()
+                        'timestamp' => new \DateTime(),
                     ],
                     $email
                 );
-
             } catch (\Exception $exception) {
                 $msg = $exception->getMessage();
                 $this->addFlash('danger', 'Une erreur est survenue lors de l\'envoi de votre message. Veuillez réessayer plus tard. '.$msg);

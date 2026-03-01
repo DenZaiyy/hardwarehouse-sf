@@ -59,7 +59,7 @@ class ContactFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => ContactFormDto::class
+            'data_class' => ContactFormDto::class,
         ]);
     }
 }
