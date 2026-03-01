@@ -31,7 +31,6 @@ class CartController extends AbstractController
     {
         $slug = $request->request->getString('slug');
         $quantity = $request->request->getInt('quantity', 1);
-        $referer = $request->headers->get('referer');
 
         try {
             $this->cartService->addProduct($slug, $quantity);
@@ -42,7 +41,9 @@ class CartController extends AbstractController
         } catch (\RuntimeException $e) {
             $this->addFlash('danger', $e->getMessage());
 
-            return $this->redirect($referer);
+            $referer = $request->headers->get('referer');
+
+            return $this->redirect($referer ?: $this->generateUrl('cart.index'));
         }
     }
 
