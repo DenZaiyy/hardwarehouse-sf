@@ -9,7 +9,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[AdminDashboard(routePath: '/admin', routeName: 'admin')]
+#[AdminDashboard(routePath: '/{_locale}/admin', routeName: 'admin')]
 #[IsGranted('ROLE_ADMIN', message: 'Vous n\'avez pas accès à cette section.')]
 class DashboardController extends AbstractDashboardController
 {
