@@ -1,6 +1,6 @@
-<div class="flex-1 space-y-2 md:space-y-4">
+<div class="flex-1 sm:space-y-2 md:space-y-4">
     {% for item in cart %}
-        <div class="flex items-center gap-4 {% if not loop.last %}border-b{% endif%} {% if loop.index is even %}bg-secondary/10{% endif%} p-4">
+        <div class="group relative flex items-center gap-4 {% if not loop.last %}border-b{% endif%} {% if loop.index is even %}bg-secondary/10{% endif%} p-4">
             {% if item.imageUrl %}
                 <img src="{{ item.imageUrl }}" alt="{{ item.name }}" loading="lazy" class="w-16 h-16 object-cover rounded">
             {% else %}
@@ -10,7 +10,7 @@
             {% endif %}
 
             <div class="flex-1">
-                <p class="font-semibold">{{ item.name }}</p>
+                <a href="{{ path('product.show', {slug: item.slug}) }}" class="font-semibold text-sm text-black underline hover:no-underline duration-500 transition-all">{{ item.name }}</a>
                 <p class="text-gray-500 text-sm"><strong>{{ item.price_ttc|format_currency('EUR') }}</strong> TTC / unité</p>
                 <p class="text-sm">{{ item.category }}</p>
             </div>
@@ -27,12 +27,12 @@
                 </form>
             </div>
 
-            <form action="{{ path('cart.remove', {productId: item.productId}) }}" method="POST">
+            <form action="{{ path('cart.remove', {productId: item.productId}) }}" method="POST" class="md:opacity-0 md:group-hover:opacity-100 absolute top-0 right-0 md:-top-2 md:-right-2 duration-300 transition-opacity">
                 <button
                     type="submit"
-                    class="bg-red-600 text-white text-sm p-2 rounded hover:bg-red-700"
+                    class="bg-red-600 text-white text-sm p-2 rounded-full hover:bg-red-700"
                 >
-                    {{ ux_icon('heroicons:trash', {class: 'size-5'}) }}
+                    {{ ux_icon('heroicons:x-mark', {class: 'size-3'}) }}
                 </button>
             </form>
         </div>

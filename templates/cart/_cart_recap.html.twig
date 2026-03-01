@@ -1,13 +1,13 @@
 <div class="flex flex-col gap-2 md:gap-4 bg-secondary text-paragraph rounded p-4 md:max-h-max md:max-w-1/2 w-full">
-    <div class="hidden md:grid space-y-2 text-paragraph grid-flow-row border-b pb-2 text-sm">
-        <div class="flex justify-between gap-2">
+    <div class="hidden md:grid space-y-2 grid-flow-row border-b pb-2 text-sm">
+        <div class="flex justify-between gap-2 text-paragraph">
             <span class="w-1/4 text-center font-bold">Nom:</span>
             <span class="w-1/4 text-center font-bold">Quantité:</span>
             <span class="w-1/4 text-center font-bold">Prix HT:</span>
             <span class="w-1/4 text-center font-bold">Prix TTC:</span>
         </div>
         {% for item in cart %}
-            <div class="flex justify-between gap-2">
+            <div class="flex justify-between gap-2 text-gray-300">
                 <span class="truncate w-1/4 text-center">{{ item.name }}</span>
                 <span class="w-1/4 text-center">{{ item.quantity }}</span>
                 <span class="w-1/4 text-center">{{ item.price_ht|format_currency('EUR') }}</span>
