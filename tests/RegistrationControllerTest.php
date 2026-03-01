@@ -74,7 +74,7 @@ class RegistrationControllerTest extends WebTestCase
 
         /** @var TemplatedEmail $verificationEmail */
         $verificationEmail = $sentMessages[0];
-        self::assertEmailAddressContains($verificationEmail, 'from', 'support@denz.ovh');
+        self::assertEmailAddressContains($verificationEmail, 'from', 'support@hardwarehouse.fr');
         self::assertEmailAddressContains($verificationEmail, 'to', 'me@example.com');
         // The expiry text is locale-dependent (e.g. "1 hour" in EN, "1 heure" in FR).
         // Check only the locale-independent prefix.

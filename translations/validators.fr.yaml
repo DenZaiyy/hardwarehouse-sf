@@ -217,7 +217,7 @@ Error: Erreur
 'Please select a valid range.': 'Veuillez sélectionner une plage valide.'
 'Please enter a valid week.': 'Veuillez entrer une semaine valide.'
 'Please enter a password': '__Please enter a password'
-'Your password should be at least {{ limit }} characters': '__Your password should be at least {{ limit }} characters'
+'Your password should be at least {{ limit }} characters': 'Votre mot de passe doit comporter au moins {{ limit }} caractères.'
 user:
     reset_password:
         email: { not_blank: __user.reset_password.email.not_blank }
@@ -226,10 +226,11 @@ user:
         agree_terms: { is_true: __user.registration.agree_terms.is_true }
     assert:
         password: { not_blank: 'Le mot de passe doit être renseigné', min_length: __user.assert.password.min_length }
-'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.': '__Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.'
-'There is already an account with this email': '__There is already an account with this email'
+'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.': 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.'
+'There is already an account with this email': 'Il existe déjà un compte avec cette adresse email.'
 "Format d'adresse invalide":
-    ' Ex: 12 rue de la Paix': "__Format d'adresse invalide. Ex: 12 rue de la Paix"
-'Le code postal doit contenir 5 chiffres.': '__Le code postal doit contenir 5 chiffres.'
+    ' Ex: 12 rue de la Paix': "Format d'adresse invalide. Ex: 12 rue de la Paix"
+'Le code postal doit contenir 5 chiffres.': 'Le code postal doit contenir 5 chiffres.'
 'There were problems with your captcha':
-    ' Please try again or contact with support and provide following code(s): {{ errorCodes }}': '__There were problems with your captcha. Please try again or contact with support and provide following code(s): {{ errorCodes }}'
+    ' Please try again or contact with support and provide following code(s): {{ errorCodes }}': 'Il y a eu des problèmes avec votre captcha. Veuillez réessayer ou contacter le support et fournir le(s) code(s) suivant(s) : {{ errorCodes }}'
+'La note doit être comprise entre {{ min }} et {{ max }}.': 'La note doit être comprise entre {{ min }} et {{ max }}.'

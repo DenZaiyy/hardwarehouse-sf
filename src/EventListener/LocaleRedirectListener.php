@@ -22,7 +22,7 @@ final readonly class LocaleRedirectListener
         $request = $event->getRequest();
         $path = $request->getPathInfo();
 
-        if (str_starts_with($path, '/_') || str_starts_with($path, '/sitemap')) {
+        if (str_starts_with($path, '/_') || str_starts_with($path, '/sitemap') || str_starts_with($path, '/admin')) {
             return;
         }
 

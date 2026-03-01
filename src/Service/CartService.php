@@ -41,12 +41,15 @@ class CartService
         if (isset($cart[$productId])) {
             $cart[$productId]['quantity'] += $quantity;
         } else {
+            // Calculate price TVA included
             $priceTTC = $product->price * self::VAT_RATE;
+            // Add price HT to get price TTC
             $priceTTC += $product->price;
 
             $cart[$productId] = [
                 'productId' => $productId,
                 'quantity' => $quantity,
+                'remaining_stock' => $product->stock,
                 'category' => $category->getName(),
                 'name' => $product->name,
                 'price_ht' => (float) $product->price,

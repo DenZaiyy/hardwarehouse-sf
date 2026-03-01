@@ -5,7 +5,8 @@
 
     <a href="{{ path('product.show', {slug: product.slug}) }}" class="flex flex-col flex-grow cursor-pointer no-underline">
         <div class="aspect-square relative overflow-hidden">
-            <img src="{{ product.thumbnail }}" alt="{{ product.name }} preview" loading="lazy" class="object-cover object-center w-full h-full rounded" />
+{#            <img src="{{ "http://localhost:3000/" ~ product.thumbnail }}" alt="{{ product.name }} preview" loading="lazy" class="object-cover object-center w-full h-full rounded" />#}
+            <img src="{% if product.thumbnail starts with "https://" %}{{ product.thumbnail }}{% else %}{{ "http://localhost:3000/" ~ product.thumbnail }}{% endif %}" alt="{{ product.name }} preview" loading="lazy" class="object-cover object-center w-full h-full rounded" />
         </div>
 
         <div class="flex flex-col flex-grow gap-2">

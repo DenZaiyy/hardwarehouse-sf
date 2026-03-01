@@ -64,6 +64,7 @@ class RegistrationFormType extends AbstractType
                     'attr' => [
                         'class' => 'w-full',
                     ],
+                    'toggle' => true,
                 ],
                 'constraints' => [
                     new NotBlank(

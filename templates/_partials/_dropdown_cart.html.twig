@@ -32,21 +32,21 @@
                 {% endfor %}
             </ul>
             <div class="text-gray-500 mt-4 pt-2 border-t">
-                <div class="flex justify-between">
+                <div class="flex gap-2 justify-between">
                     <span class="font-medium">{{ 'header.cart.subtotal.label'|trans }} HT</span>
                     <span>{{ totals.subtotal|format_currency('EUR') }}</span>
                 </div>
-                <div class="flex justify-between">
+                <div class="flex gap-2 justify-between">
                     <span>{{ 'header.cart.vat.label'|trans }} ({{ (totals.vat_rate * 100)|round }}%)</span>
                     <span>{{ totals.vat_amount|format_currency('EUR') }}</span>
                 </div>
-                <div class="flex justify-between font-bold text-base border-t pt-2 mt-2">
+                <div class="flex gap-2 justify-between font-bold text-base border-t pt-2 mt-2">
                     <span>Total TTC</span>
                     <span>{{ totals.total|format_currency('EUR') }}</span>
                 </div>
             </div>
             <div class="flex gap-2 mt-2">
-                <a href="{{ path('cart.index') }}" class="p-2 rounded bg-primary text-white w-full text-center">{{ 'header.cart.'|trans }}Voir le panier</a>
+                <a href="{{ path('cart.index') }}" class="p-2 rounded bg-primary text-white w-full text-center">{{ 'header.cart.show'|trans }}</a>
             </div>
         {% else %}
             <p>{{ 'header.cart.empty.label'|trans }}</p>
