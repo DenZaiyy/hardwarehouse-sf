@@ -47,13 +47,14 @@ header:
         totalttc: { label: 'Total TTC' }
         checkout: { label: 'Passer au paiement' }
         empty: { label: 'Panier vide' }
-        show: __header.cart.show
+        show: 'Voir le panier'
     nav:
         profile: { label: Profile }
         logout: { label: Déconnexion }
         register: { label: "S'inscrire" }
         login: { label: 'Se connecter' }
         addresses: { label: 'Mes adresses' }
+        admin_dashboard: { label: 'Panel administrateur' }
     locale:
         label: Langues
 country:
@@ -133,29 +134,36 @@ orderStatus:
     processing:
         label: 'En cours de traitement'
     shipped:
-        label: 'Expédié'
+        label: Expédié
     delivered:
-        label: 'Livré'
+        label: Livré
     cancelled:
-        label: 'Annulé'
+        label: Annulé
 carrierType:
     dhl:
-        label: 'DHL'
+        label: DHL
     ups:
-        label: 'UPS'
+        label: UPS
     fedex:
-        label: 'FedEx'
+        label: FedEx
     gls:
-        label: 'GLS'
+        label: GLS
     colissimo:
-        label: 'Colissimo'
+        label: Colissimo
     chronopost:
-        label: 'Chronopost'
+        label: Chronopost
 addresstype:
     delivery:
         label: 'Adresse de livraison'
     billing:
-        label: 'Facturation'
+        label: Facturation
 contact:
     page:
-        title: 'Contactez-nous'
+        title: Contactez-nous
+shipmentStatus:
+    pending:
+        label: En attente de prise en charge
+    inTransit:
+        label: En transit
+    delivered:
+        label: Livré

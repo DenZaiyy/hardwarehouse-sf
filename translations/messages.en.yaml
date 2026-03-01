@@ -27,7 +27,7 @@ user:
         current: { constraint: { not_blank: __user.changePassword.current.constraint.not_blank } }
     address:
         home: { title: 'My addresses', table: { label: { label: Title }, firstname: { label: 'First name' }, lastname: { label: __user.address.home.table.lastname.label }, address: { label: __user.address.home.table.address.label }, cp: { label: __user.address.home.table.cp.label }, city: { label: __user.address.home.table.city.label }, country: { label: __user.address.home.table.country.label }, default: { label: __user.address.home.table.default.label }, actions: { label: __user.address.home.table.actions.label } }, no_items: { message: __user.address.home.no_items.message }, button: { add: { label: __user.address.home.button.add.label } } }
-        form: { label: { label: 'My addresses' }, firstname: { label: 'First name' }, lastname: { label: 'Last name' }, address: { label: 'Address' }, cp: { label: 'Postal code' }, city: { label: 'City' }, country: { label: 'Country' }, is_default: { label: 'Define by default' }, type: { label: 'Address type' } }
+        form: { label: { label: 'My addresses' }, firstname: { label: 'First name' }, lastname: { label: 'Last name' }, address: { label: Address }, cp: { label: 'Postal code' }, city: { label: City }, country: { label: Country }, is_default: { label: 'Define by default' }, type: { label: 'Address type' } }
         delete: { success: __user.address.delete.success }
         save: { success: __user.address.save.success }
 seo:
@@ -51,6 +51,7 @@ header:
         login: { label: Login }
         register: { label: Register }
         addresses: { label: 'My addresses' }
+        admin_dashboard: { label: 'Admin panel' }
     locale:
         label: Languages
 country:
@@ -126,33 +127,40 @@ footer:
         paypal: { alt: { message: __footer.payment.paypal.alt.message } }
 orderStatus:
     pending:
-        label: 'Pending'
+        label: Pending
     processing:
-        label: 'Processing'
+        label: Processing
     shipped:
-        label: 'Shipped'
+        label: Shipped
     delivered:
-        label: 'Delivered'
+        label: Delivered
     cancelled:
-        label: 'Cancelled'
+        label: Cancelled
 carrierType:
     dhl:
-        label: 'DHL'
+        label: DHL
     ups:
-        label: 'UPS'
+        label: UPS
     fedex:
-        label: 'FedEx'
+        label: FedEx
     gls:
-        label: 'GLS'
+        label: GLS
     colissimo:
-        label: 'Colissimo'
+        label: Colissimo
     chronopost:
-        label: "Chronopost"
+        label: Chronopost
 addresstype:
     delivery:
-        label: 'Delivery'
+        label: Delivery
     billing:
-        label: 'Billing'
+        label: Billing
 contact:
     page:
         title: 'Contact us'
+shipmentStatus:
+    pending:
+        label: Waiting for pickup
+    inTransit:
+        label: In transit
+    delivered:
+        label: Delivered
