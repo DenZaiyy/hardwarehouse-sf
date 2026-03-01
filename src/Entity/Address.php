@@ -66,7 +66,7 @@ class Address
     private ?bool $is_default = null;
 
     #[ORM\Column(length: 20, enumType: AddressType::class)]
-    private ?AddressType $type = null;
+    private AddressType $type = AddressType::DELIVERY;
 
     public function getId(): ?int
     {
@@ -181,12 +181,12 @@ class Address
         return $this;
     }
 
-    public function getType(): ?string
+    public function getType(): AddressType
     {
         return $this->type;
     }
 
-    public function setType(string $type): static
+    public function setType(AddressType $type): static
     {
         $this->type = $type;
 

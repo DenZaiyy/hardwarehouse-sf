@@ -37,7 +37,7 @@ class Order
     private Collection $orderLines;
 
     #[ORM\Column(length: 50, enumType: OrderStatus::class)]
-    private ?OrderStatus $status = null;
+    private OrderStatus $status = OrderStatus::PENDING;
 
     #[ORM\OneToOne(mappedBy: 'ordr', cascade: ['persist', 'remove'])]
     private ?Invoice $invoice = null;
@@ -118,12 +118,12 @@ class Order
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): OrderStatus
     {
         return $this->status;
     }
 
-    public function setStatus(string $status): static
+    public function setStatus(OrderStatus $status): static
     {
         $this->status = $status;
 
