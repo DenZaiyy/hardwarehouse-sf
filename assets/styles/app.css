@@ -64,7 +64,7 @@
         sm:text-sm;
     }
 
-    input,
+    input:not([type='checkbox']),
     textarea,
     select {
         @apply w-full rounded-md border border-slate-300 bg-white
