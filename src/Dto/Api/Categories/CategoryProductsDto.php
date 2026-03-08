@@ -11,6 +11,7 @@ readonly class CategoryProductsDto
         public string $id,
         public string $name,
         public string $slug,
+        public ?bool $active,
         public float $price,
         public ?string $shortDescription = null,
         public ?string $thumbnail = null,

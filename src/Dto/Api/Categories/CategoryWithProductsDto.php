@@ -14,6 +14,7 @@ readonly class CategoryWithProductsDto
         public string $id,
         public string $name,
         public string $slug,
+        public ?bool $active,
         public ?string $logo = null,
         public ?\DateTimeImmutable $createdAt = null,
         public ?\DateTimeImmutable $updatedAt = null,
