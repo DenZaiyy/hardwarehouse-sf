@@ -53,13 +53,21 @@ readonly class ApiService
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
+     * @throws DecodingExceptionInterface
      */
     public function fetchAll(string $endpoint, string $dtoClass): array
     {
         $response = $this->apiClient->request('GET', $endpoint.'?active=true');
+        $data = $response->toArray();
+
+        $payload = array_key_exists('data', $data) ? $data['data'] : $data;
 
         /** @var array<T> */
-        return $this->serializer->deserialize($response->getContent(), $dtoClass.'[]', 'json');
+        return $this->serializer->deserialize(
+            json_encode($payload, JSON_THROW_ON_ERROR),
+            $dtoClass . '[]',
+            'json'
+        );
     }
 
     /**
