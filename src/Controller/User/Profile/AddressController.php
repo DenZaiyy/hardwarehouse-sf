@@ -6,6 +6,7 @@ namespace App\Controller\User\Profile;
 
 use App\Entity\Address;
 use App\Entity\User;
+use App\Enum\AddressType;
 use App\Form\User\UserAddressFormType;
 use App\Repository\AddressRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -33,11 +34,13 @@ class AddressController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        $addresses = $repository->findBy(['user_info' => $user]);
+        $deliveryAddresses = $repository->findBy(['user_info' => $user, 'type' => AddressType::DELIVERY]);
+        $billingAddresses = $repository->findBy(['user_info' => $user, 'type' => AddressType::BILLING]);
 
         return $this->render('user/address/index.html.twig', [
             'user' => $user,
-            'addresses' => $addresses,
+            'billingAddresses' => $billingAddresses,
+            'deliveryAddresses' => $deliveryAddresses
         ]);
     }
 
@@ -82,21 +85,29 @@ class AddressController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $default = $form->get('isDefault')->getData();
+            $default = (bool) $form->get('isDefault')->getData();
+            /** @var AddressType $type */
+            $type = $form->get('type')->getData();
 
-            if (true === $default) {
-                $alreadyDefaultAddress = $this->em->getRepository(Address::class)->findOneBy([
-                    'user_info' => $user,
+            if ($default) {
+                $alreadyDefaultSameType = $this->em->getRepository(Address::class)->findOneBy([
+                    'user_info'  => $user,
                     'is_default' => true,
+                    'type'       => $type,
                 ]);
 
-                if ($alreadyDefaultAddress) {
-                    $alreadyDefaultAddress->setIsDefault(false);
-                    $this->em->persist($alreadyDefaultAddress);
+                if ($alreadyDefaultSameType) {
+                    $alreadyDefaultSameType->setIsDefault(false);
+                    $this->em->persist($alreadyDefaultSameType);
+
+                    $this->addFlash('info', $this->translator->trans('user.address.default.replaced'));
                 }
+
+                $address->setIsDefault(true);
             }
 
             $address->setUserInfo($user);
+
             $this->em->persist($address);
             $this->em->flush();
 
@@ -104,14 +115,16 @@ class AddressController extends AbstractController
 
             // Si c'est une requête AJAX/Turbo, renvoyer des streams
             if ($request->isXmlHttpRequest() || $request->headers->has('Turbo-Frame') || TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
-                $addresses = $this->em->getRepository(Address::class)->findBy(['user_info' => $user]);
+                $deliveryAddresses = $this->em->getRepository(Address::class)->findBy(['user_info' => $user, 'type' => AddressType::DELIVERY]);
+                $billingAddresses = $this->em->getRepository(Address::class)->findBy(['user_info' => $user, 'type' => AddressType::BILLING]);
 
                 $response = new Response();
                 $response->headers->set('Content-Type', 'text/vnd.turbo-stream.html');
 
                 return $this->render('user/address/success.stream.html.twig', [
                     'address' => $address,
-                    'addresses' => $addresses,
+                    'deliveryAddresses' => $deliveryAddresses,
+                    'billingAddresses' => $billingAddresses
                 ], $response);
             }
 
