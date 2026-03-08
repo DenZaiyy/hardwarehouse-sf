@@ -6,6 +6,7 @@ namespace App\Controller\User\Profile;
 
 use App\Entity\Address;
 use App\Entity\User;
+use App\Enum\AddressType;
 use App\Form\User\ChangePasswordFormType;
 use App\Form\User\UpdateInfosFormType;
 use App\Service\ImageUploadService;
@@ -38,11 +39,13 @@ class ProfileController extends AbstractController
     {
         $user = $this->checkCurrentUser($this->getUser());
 
-        $defaultAddress = $this->em->getRepository(Address::class)->findOneBy(['user_info' => $user, 'is_default' => true]);
+        $deliveryDefaultAddress = $this->em->getRepository(Address::class)->findOneBy(['user_info' => $user, 'is_default' => true, 'type' => AddressType::DELIVERY]);
+        $billingDefaultAddress = $this->em->getRepository(Address::class)->findOneBy(['user_info' => $user, 'is_default' => true, 'type' => AddressType::BILLING]);
 
         return $this->render('user/profile/index.html.twig', [
             'user' => $user,
-            'defaultAddress' => $defaultAddress,
+            'deliveryDefaultAddress' => $deliveryDefaultAddress,
+            'billingDefaultAddress' => $billingDefaultAddress,
         ]);
     }
 
