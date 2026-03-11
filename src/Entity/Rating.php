@@ -6,9 +6,12 @@ use App\Repository\RatingRepository;
 use App\Trait\TimestampTrait;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: RatingRepository::class)]
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_PRODUCTID', fields: ['productId'])]
+#[UniqueEntity(fields: ['productId'], message: 'There is already a product with this reference')]
 class Rating
 {
     use TimestampTrait;
@@ -30,7 +33,10 @@ class Rating
     private ?string $comment = null;
 
     #[ORM\ManyToOne(inversedBy: 'ratings')]
-    private ?User $usr = null;
+    private ?User $user = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $productId = null;
 
     public function getId(): ?int
     {
@@ -61,14 +67,26 @@ class Rating
         return $this;
     }
 
-    public function getUsr(): ?User
+    public function getUser(): ?User
     {
-        return $this->usr;
+        return $this->user;
     }
 
-    public function setUsr(?User $usr): static
+    public function setUser(?User $user): static
     {
-        $this->usr = $usr;
+        $this->user = $user;
+
+        return $this;
+    }
+
+    public function getProductId(): ?string
+    {
+        return $this->productId;
+    }
+
+    public function setProductId(string $productId): static
+    {
+        $this->productId = $productId;
 
         return $this;
     }

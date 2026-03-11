@@ -7,8 +7,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: CarrierRepository::class)]
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_NAME_CARRIER', fields: ['name'])]
+#[UniqueEntity(fields: ['name'], message: 'There is already a carrier with this name')]
 class Carrier
 {
     #[ORM\Id]
