@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Dto\Api\PaginationMeta;
+use App\DTO\Api\PaginationMeta;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;

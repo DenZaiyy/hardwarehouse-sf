@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller\Page;
 
-use App\Dto\Api\Brands\BrandDto;
-use App\Dto\Api\Categories\CategoryDto;
+use App\DTO\Api\Brands\BrandDto;
+use App\DTO\Api\Categories\CategoryDto;
 use App\Service\ApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;

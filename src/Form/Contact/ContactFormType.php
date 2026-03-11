@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Form\Contact;
 
-use App\Dto\Form\Contact\ContactFormDto;
+use App\DTO\Form\Contact\ContactFormDto;
 use Karser\Recaptcha3Bundle\Form\Recaptcha3Type;
 use Karser\Recaptcha3Bundle\Validator\Constraints\Recaptcha3;
 use Symfony\Component\Form\AbstractType;
