@@ -1,9 +1,15 @@
 <?php
 
-namespace App\Dto\Api\Brands;
+namespace App\DTO\Api\Categories;
 
-readonly class BrandDto
+use App\DTO\Api\Products\ProductDto;
+use Symfony\Component\Serializer\Attribute\SerializedName;
+
+readonly class CategoryWithProductsDto
 {
+    /**
+     * @param ProductDto[] $products
+     */
     public function __construct(
         public string $id,
         public string $name,
@@ -12,21 +18,8 @@ readonly class BrandDto
         public ?string $logo = null,
         public ?\DateTimeImmutable $createdAt = null,
         public ?\DateTimeImmutable $updatedAt = null,
+        #[SerializedName('Products')]
+        public array $products = [],
     ) {
-    }
-
-    public function getId(): string
-    {
-        return $this->id;
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function getSlug(): string
-    {
-        return $this->slug;
     }
 }

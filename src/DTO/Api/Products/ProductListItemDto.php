@@ -1,10 +1,8 @@
 <?php
 
-namespace App\Dto\Api\Brands;
+namespace App\DTO\Api\Products;
 
-use App\Dto\Api\Products\ProductStockDto;
-
-readonly class BrandsProductsDto
+readonly class ProductListItemDto
 {
     public function __construct(
         public string $id,
@@ -13,8 +11,6 @@ readonly class BrandsProductsDto
         public float $price,
         public ?string $shortDescription = null,
         public ?string $thumbnail = null,
-        public ?BrandDto $brand = null,
-        public ?ProductStockDto $stock = null,
     ) {
     }
 }

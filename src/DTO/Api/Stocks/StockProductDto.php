@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Dto\Api\Stocks;
+namespace App\DTO\Api\Stocks;
 
 readonly class StockProductDto
 {

@@ -1,17 +1,15 @@
 <?php
 
-namespace App\Dto\Api\Categories;
+namespace App\DTO\Api\Brands;
 
-use App\Dto\Api\Brands\BrandDto;
-use App\Dto\Api\Products\ProductStockDto;
+use App\DTO\Api\Products\ProductStockDto;
 
-readonly class CategoryProductsDto
+readonly class BrandsProductsDto
 {
     public function __construct(
         public string $id,
         public string $name,
         public string $slug,
-        public ?bool $active,
         public float $price,
         public ?string $shortDescription = null,
         public ?string $thumbnail = null,

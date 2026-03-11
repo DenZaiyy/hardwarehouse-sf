@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Dto\Api\Products;
+namespace App\DTO\Api\Products;
 
 class ProductAttributeDto
 {

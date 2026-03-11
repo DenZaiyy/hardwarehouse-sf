@@ -1,15 +1,14 @@
 <?php
 
-namespace App\Dto\Api\Categories;
+namespace App\DTO\Api\Brands;
 
-readonly class CategoryDto
+readonly class BrandDto
 {
     public function __construct(
         public string $id,
         public string $name,
         public string $slug,
         public ?bool $active,
-        public ?int $productsCount,
         public ?string $logo = null,
         public ?\DateTimeImmutable $createdAt = null,
         public ?\DateTimeImmutable $updatedAt = null,

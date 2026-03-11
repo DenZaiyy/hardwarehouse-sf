@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Dto\Api\Products;
+namespace App\DTO\Api\Products;
 
-use App\Dto\Api\Attributes\ProductAttributeValueDto;
-use App\Dto\Api\Brands\BrandDto;
-use App\Dto\Api\Categories\CategoryDto;
+use App\DTO\Api\Attributes\ProductAttributeValueDto;
+use App\DTO\Api\Brands\BrandDto;
+use App\DTO\Api\Categories\CategoryDto;
 
 readonly class ProductDto
 {

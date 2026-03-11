@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Dto\Api;
+namespace App\DTO\Api;
 
 readonly class PaginationMeta
 {

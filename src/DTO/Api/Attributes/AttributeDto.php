@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Dto\Api\Attributes;
+namespace App\DTO\Api\Attributes;
 
 use App\Enum\AttributeType;
 
