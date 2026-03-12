@@ -26,6 +26,8 @@ final readonly class CheckoutIdentityManager
         $state->identity = [
             'username' => $user->getUsername(),
             'email' => $user->getEmail(),
+            'firstName' => null,
+            'lastName' => null,
         ];
         $state->identityCompleted = true;
 

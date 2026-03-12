@@ -61,7 +61,7 @@ final class CheckoutComponent
     }
 
     /**
-     * @return array<int, array<string, mixed>>
+     * @return list<array{id: int|null, label: string|null, firstName: string|null, lastName: string|null, address1: string|null, postcode: string|null, city: string|null, country: string|null, isDefault: bool|null}>
      */
     public function getSavedDeliveryAddresses(): array
     {
@@ -73,7 +73,7 @@ final class CheckoutComponent
 
         $addresses = $this->addressManager->getUserAddressesByType($user, AddressType::DELIVERY);
 
-        return array_map(static fn($address): array => [
+        return array_values(array_map(static fn ($address): array => [
             'id' => $address->getId(),
             'label' => $address->getLabel(),
             'firstName' => $address->getFirstName(),
@@ -83,7 +83,7 @@ final class CheckoutComponent
             'city' => $address->getCity(),
             'country' => $address->getCountry()?->value,
             'isDefault' => $address->isDefault(),
-        ], $addresses);
+        ], $addresses));
     }
 
     public function shouldShowAddressSelection(): bool
@@ -115,24 +115,28 @@ final class CheckoutComponent
         $state = $this->getState();
 
         if (1 === $state->currentStep && 'guest' === $state->identityMode) {
+            $identity = $state->identity;
             $data = new GuestIdentityData();
-            $data->title = $state->identity['title'] ?? null;
-            $data->firstName = $state->identity['firstName'] ?? null;
-            $data->lastName = $state->identity['lastName'] ?? null;
-            $data->email = $state->identity['email'] ?? null;
+            $data->title = $identity['title'] ?? null;
+            $data->firstName = $identity['firstName'] ?? null;
+            $data->lastName = $identity['lastName'] ?? null;
+            $data->email = $identity['email'] ?? null;
 
             return $this->formFactory->create(GuestIdentityType::class, $data);
         }
 
         if (2 === $state->currentStep) {
+            $identity = $state->identity;
+            $deliveryAddress = $state->deliveryAddress;
+
             $data = new AddressData();
-            $data->label = $state->deliveryAddress['label'] ?? 'Domicile';
-            $data->firstName = $state->deliveryAddress['firstName'] ?? ($state->identity['firstName'] ?? null);
-            $data->lastName = $state->deliveryAddress['lastName'] ?? ($state->identity['lastName'] ?? null);
-            $data->address1 = $state->deliveryAddress['address1'] ?? null;
-            $data->postcode = $state->deliveryAddress['postcode'] ?? null;
-            $data->city = $state->deliveryAddress['city'] ?? null;
-            $data->country = $state->deliveryAddress['country'] ?? 'FR';
+            $data->label = $deliveryAddress['label'] ?? 'Domicile';
+            $data->firstName = $deliveryAddress['firstName'] ?? ($identity['firstName'] ?? null);
+            $data->lastName = $deliveryAddress['lastName'] ?? ($identity['lastName'] ?? null);
+            $data->address1 = $deliveryAddress['address1'] ?? null;
+            $data->postcode = $deliveryAddress['postcode'] ?? null;
+            $data->city = $deliveryAddress['city'] ?? null;
+            $data->country = $deliveryAddress['country'] ?? 'FR';
 
             return $this->formFactory->create(CheckoutAddressType::class, $data);
         }
@@ -189,8 +193,8 @@ final class CheckoutComponent
 
         /** @var GuestIdentityData $data */
         $data = $this->getForm()->getData();
-
         $state = $this->identityManager->saveGuestIdentity($this->getState(), $data);
+
         $this->stateManager->saveState($state);
     }
 
@@ -201,7 +205,6 @@ final class CheckoutComponent
 
         /** @var AddressData $data */
         $data = $this->getForm()->getData();
-
         $state = $this->getState();
         $user = $this->getUser();
 
@@ -226,6 +229,7 @@ final class CheckoutComponent
     {
         $state = $this->getState();
         $state->deliveryAddressId = null;
+
         $this->stateManager->saveState($state);
     }
 
@@ -236,8 +240,8 @@ final class CheckoutComponent
 
         /** @var DeliveryChoiceData $data */
         $data = $this->getForm()->getData();
-
         $state = $this->deliveryManager->saveCarrier($this->getState(), (int) $data->carrierId);
+
         $this->stateManager->saveState($state);
     }
 

@@ -12,9 +12,11 @@ final class DeliveryChoiceType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        /** @var array<int, array{id: int, label: string}> $carriers */
+        $carriers = $options['carriers'];
         $choices = [];
 
-        foreach ($options['carriers'] as $carrier) {
+        foreach ($carriers as $carrier) {
             $choices[$carrier['label']] = $carrier['id'];
         }
 
@@ -31,5 +33,7 @@ final class DeliveryChoiceType extends AbstractType
             'data_class' => DeliveryChoiceData::class,
             'carriers' => [],
         ]);
+
+        $resolver->setAllowedTypes('carriers', 'array');
     }
 }

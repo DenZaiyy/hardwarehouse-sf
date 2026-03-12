@@ -27,6 +27,9 @@ final class CheckoutAddressType extends AbstractType
         ;
     }
 
+    /**
+     * @return array<string, string>
+     */
     private function getCountryChoices(): array
     {
         $choices = [];

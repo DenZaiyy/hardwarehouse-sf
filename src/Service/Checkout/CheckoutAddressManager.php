@@ -39,7 +39,7 @@ final readonly class CheckoutAddressManager
     public function getDefaultUserAddressByType(User $user, AddressType $type): ?Address
     {
         return $this->addressRepository->findOneBy([
-            'user_info' => $user,
+            'user' => $user,
             'type' => $type,
             'is_default' => true,
         ]);
@@ -49,7 +49,7 @@ final readonly class CheckoutAddressManager
     {
         return $this->addressRepository->findOneBy([
             'id' => $addressId,
-            'user_info' => $user,
+            'user' => $user,
             'type' => $type,
         ]);
     }
@@ -79,6 +79,18 @@ final readonly class CheckoutAddressManager
         AddressData $data,
         bool $setAsDefault = false,
     ): CheckoutState {
+        if (
+            null === $data->label
+            || null === $data->firstName
+            || null === $data->lastName
+            || null === $data->address1
+            || null === $data->postcode
+            || null === $data->city
+            || null === $data->country
+        ) {
+            throw new \InvalidArgumentException('All address fields are required to create a delivery address.');
+        }
+
         $address = new Address();
         $address
             ->setLabel($data->label)

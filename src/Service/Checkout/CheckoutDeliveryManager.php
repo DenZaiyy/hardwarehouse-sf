@@ -3,15 +3,12 @@
 namespace App\Service\Checkout;
 
 use App\DTO\Checkout\CheckoutState;
-use App\Repository\CarrierRepository;
 
 final readonly class CheckoutDeliveryManager
 {
-    public function __construct(
-        private CarrierRepository $carrierRepository,
-    ) {
-    }
-
+    /**
+     * @return array<int, array{id: int, label: string}>
+     */
     public function getCarriers(CheckoutState $state): array
     {
         return [
