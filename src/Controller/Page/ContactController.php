@@ -2,7 +2,7 @@
 
 namespace App\Controller\Page;
 
-use App\Dto\Form\Contact\ContactFormDto;
+use App\DTO\Form\Contact\ContactFormDto;
 use App\Form\Contact\ContactFormType;
 use App\Service\MailerService;
 use App\Service\RateLimiterService;

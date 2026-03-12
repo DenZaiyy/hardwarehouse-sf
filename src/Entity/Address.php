@@ -21,26 +21,21 @@ class Address
 
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank]
-    #[Assert\Length(max: 50)]
-    #[Assert\GreaterThanOrEqual(value: 3)]
+    #[Assert\Length(min: 3, max: 50)]
     private ?string $label = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
     #[Assert\Length(max: 100)]
-    private ?string $firstname = null;
+    private ?string $firstName = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
     #[Assert\Length(max: 100)]
-    private ?string $lastname = null;
+    private ?string $lastName = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
-    #[Assert\Regex(
-        pattern: '/^\d{1,4}(?:\s?(?:bis|ter|quater))?\s+(?:rue|avenue|boulevard|place|impasse|allée|chemin|route|passage|square|cours|quai|voie|résidence|lotissement|hameau)\s+.{2,}$/iu',
-        message: 'Format d\'adresse invalide. Ex: 12 rue de la Paix'
-    )]
     private ?string $address = null;
 
     #[ORM\Column(length: 10)]
@@ -49,7 +44,7 @@ class Address
         pattern: '/^\d{5}$/',
         message: 'Le code postal doit contenir 5 chiffres.'
     )]
-    private ?string $cp = null;
+    private ?string $postalCode = null;
 
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank]
@@ -57,7 +52,7 @@ class Address
 
     #[ORM\ManyToOne(inversedBy: 'addresses')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    private ?User $user_info = null;
+    private ?User $user = null;
 
     #[ORM\Column(type: 'string', enumType: CountryList::class)]
     private ?CountryList $country = null;
@@ -85,26 +80,26 @@ class Address
         return $this;
     }
 
-    public function getFirstname(): ?string
+    public function getFirstName(): ?string
     {
-        return $this->firstname;
+        return $this->firstName;
     }
 
-    public function setFirstname(string $firstname): static
+    public function setFirstName(string $firstName): static
     {
-        $this->firstname = $firstname;
+        $this->firstName = $firstName;
 
         return $this;
     }
 
-    public function getLastname(): ?string
+    public function getLastName(): ?string
     {
-        return $this->lastname;
+        return $this->lastName;
     }
 
-    public function setLastname(string $lastname): static
+    public function setLastName(string $lastName): static
     {
-        $this->lastname = $lastname;
+        $this->lastName = $lastName;
 
         return $this;
     }
@@ -121,14 +116,14 @@ class Address
         return $this;
     }
 
-    public function getCp(): ?string
+    public function getPostalCode(): ?string
     {
-        return $this->cp;
+        return $this->postalCode;
     }
 
-    public function setCp(string $cp): static
+    public function setPostalCode(string $postalCode): static
     {
-        $this->cp = $cp;
+        $this->postalCode = $postalCode;
 
         return $this;
     }
@@ -145,14 +140,14 @@ class Address
         return $this;
     }
 
-    public function getUserInfo(): ?User
+    public function getUser(): ?User
     {
-        return $this->user_info;
+        return $this->user;
     }
 
-    public function setUserInfo(?User $user_info): static
+    public function setUser(?User $user): static
     {
-        $this->user_info = $user_info;
+        $this->user = $user;
 
         return $this;
     }

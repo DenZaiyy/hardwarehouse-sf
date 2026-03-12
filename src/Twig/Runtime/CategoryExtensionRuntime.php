@@ -2,7 +2,7 @@
 
 namespace App\Twig\Runtime;
 
-use App\Dto\Api\Categories\CategoryDto;
+use App\DTO\Api\Categories\CategoryDto;
 use App\Service\ApiService;
 use Twig\Extension\RuntimeExtensionInterface;
 

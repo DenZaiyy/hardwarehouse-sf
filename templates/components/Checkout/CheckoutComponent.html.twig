@@ -1,0 +1,43 @@
+<div {{ attributes }} class="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
+    {% set state = this.state %}
+
+    <div class="space-y-4">
+        {% include 'components/Checkout/steps/_step_identity.html.twig' with {
+            state: state,
+            form: form,
+            loginError: this.loginError,
+            lastUsername: this.lastUsername,
+            isAuthenticatedStepSkipped: this.authenticatedStepSkipped
+        } only %}
+
+        {% include 'components/Checkout/steps/_step_address.html.twig' with {
+            state: state,
+            form: form,
+            shouldShowAddressSelection: this.shouldShowAddressSelection,
+            savedDeliveryAddresses: this.savedDeliveryAddresses
+        } only %}
+
+        {% include 'components/Checkout/steps/_step_delivery.html.twig' with {
+            state: state,
+            form: form,
+            selectedCarrierLabel: this.selectedCarrierLabel
+        } only %}
+
+        {% include 'components/Checkout/steps/_step_payment.html.twig' with {
+            state: state,
+            selectedCarrierLabel: this.selectedCarrierLabel
+        } only %}
+    </div>
+
+    <div class="space-y-2 text-sm">
+        <div>Étape courante : {{ state.currentStep }}</div>
+        <div>Mode identité : {{ state.identityMode }}</div>
+        <div>Identité validée : {{ state.identityCompleted ? 'Oui' : 'Non' }}</div>
+        <div>Adresse validée : {{ state.addressCompleted ? 'Oui' : 'Non' }}</div>
+        <div>Livraison validée : {{ state.deliveryCompleted ? 'Oui' : 'Non' }}</div>
+        <div>Paiement validé : {{ state.paymentCompleted ? 'Oui' : 'Non' }}</div>
+        <form action="{{ path('checkout.reset') }}" method="POST">
+            <button type="submit">Reset</button>
+        </form>
+    </div>
+</div>

@@ -2,8 +2,8 @@
 
 namespace App\Controller\Api;
 
-use App\Dto\Api\Brands\BrandDto;
-use App\Dto\Api\Brands\BrandsProductsDto;
+use App\DTO\Api\Brands\BrandDto;
+use App\DTO\Api\Brands\BrandsProductsDto;
 use App\Service\ApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;

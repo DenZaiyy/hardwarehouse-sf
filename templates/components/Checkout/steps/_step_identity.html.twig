@@ -1,0 +1,116 @@
+<section class="rounded-lg border p-4 space-y-4">
+    <h2 class="text-lg font-semibold">1. Informations personnelles</h2>
+
+    {% if state.identityCompleted and state.currentStep != 1 %}
+        <div class="flex items-center justify-between gap-4">
+            <div class="text-sm">
+                <div class="font-medium">
+                    {{ state.identity.firstName ?? '' }} {{ state.identity.lastName ?? '' }}
+                </div>
+                <div>{{ state.identity.email ?? '' }}</div>
+                {% if isAuthenticatedStepSkipped %}
+                    <div class="text-xs text-green-600">Connecté</div>
+                {% endif %}
+            </div>
+
+            {% if not isAuthenticatedStepSkipped %}
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="editIdentity"
+                    class="rounded border px-4 py-2"
+                >
+                    Modifier
+                </button>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="flex items-center gap-3 text-sm">
+            <button
+                type="button"
+                data-action="live#action"
+                data-live-action-param="chooseGuest"
+                class="{{ state.identityMode == 'guest' ? 'font-semibold underline' : '' }}"
+            >
+                Commander en tant qu'invité
+            </button>
+
+            <span>|</span>
+
+            <button
+                type="button"
+                data-action="live#action"
+                data-live-action-param="chooseLogin"
+                class="{{ state.identityMode == 'login' ? 'font-semibold underline' : '' }}"
+            >
+                Connexion
+            </button>
+        </div>
+
+        {% if state.identityMode == 'guest' %}
+            {{ form_start(form, {
+                attr: {
+                    'data-model': 'on(change)|*',
+                    'data-action': 'live#action:prevent',
+                    'data-live-action-param': 'saveGuest'
+                }
+            }) }}
+            <div class="grid gap-4 md:grid-cols-2">
+                {{ form_row(form.title) }}
+                <div></div>
+                {{ form_row(form.firstName) }}
+                {{ form_row(form.lastName) }}
+                {{ form_row(form.email) }}
+                {{ form_row(form.password) }}
+            </div>
+
+            <button type="submit" class="mt-4 rounded border px-4 py-2">
+                Continuer
+            </button>
+            {{ form_end(form) }}
+
+        {% elseif state.identityMode == 'login' %}
+            {% if loginError %}
+                <div class="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">
+                    {{ loginError|trans([], 'security') }}
+                </div>
+            {% endif %}
+
+            <form action="{{ path('app.login') }}" method="post" class="space-y-4">
+                <div>
+                    <label for="checkout_login_email" class="mb-1 block text-sm font-medium">E-mail</label>
+                    <input
+                        id="checkout_login_email"
+                        type="email"
+                        name="_username"
+                        value="{{ lastUsername }}"
+                        class="w-full rounded border px-3 py-2"
+                        autocomplete="email"
+                    >
+                </div>
+
+                <div>
+                    <label for="checkout_login_password" class="mb-1 block text-sm font-medium">Mot de passe</label>
+                    <input
+                        id="checkout_login_password"
+                        type="password"
+                        name="_password"
+                        class="w-full rounded border px-3 py-2"
+                        autocomplete="current-password"
+                    >
+                </div>
+
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                <input type="hidden" name="_target_path" value="{{ path('app_checkout_index') }}">
+
+                <button type="submit" class="rounded border px-4 py-2">
+                    Se connecter
+                </button>
+            </form>
+        {% else %}
+            <div class="text-sm text-gray-500">
+                Choisis un mode pour continuer.
+            </div>
+        {% endif %}
+    {% endif %}
+</section>

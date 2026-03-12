@@ -32,7 +32,7 @@ class RegistrationController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly ImageUploadService $uploadService,
         private readonly RateLimiterService $rateLimiter,
-        #[Autowire('%env(FROM_EMAIL)')]
+        #[Autowire('%env(FROM_EMAIL)%')]
         private readonly string $supportEmail,
     ) {
     }

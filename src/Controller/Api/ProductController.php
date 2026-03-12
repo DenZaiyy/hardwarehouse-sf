@@ -2,7 +2,7 @@
 
 namespace App\Controller\Api;
 
-use App\Dto\Api\Products\ProductDto;
+use App\DTO\Api\Products\ProductDto;
 use App\Service\ApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;

@@ -2,9 +2,9 @@
 
 namespace App\EventListener;
 
-use App\Dto\Api\Brands\BrandDto;
-use App\Dto\Api\Categories\CategoryDto;
-use App\Dto\Api\Products\ProductDto;
+use App\DTO\Api\Brands\BrandDto;
+use App\DTO\Api\Categories\CategoryDto;
+use App\DTO\Api\Products\ProductDto;
 use App\Service\ApiService;
 use Presta\SitemapBundle\Event\SitemapPopulateEvent;
 use Presta\SitemapBundle\Service\UrlContainerInterface;
