@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Checkout - HardWareHouse{% endblock %}
+
+{% block body %}
+    <div class="md:container md:mx-auto md:px-4 md:py-8">
+        <h1>Récapitulatif de commande</h1>
+
+        <div class="container py-8">
+            {{ component('Checkout:CheckoutComponent') }}
+        </div>
+    </div>
+{% endblock %}

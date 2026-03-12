@@ -2,8 +2,8 @@
 
 namespace App\Service;
 
-use App\Dto\Api\Categories\CategoryDto;
-use App\Dto\Api\Products\ProductDto;
+use App\DTO\Api\Categories\CategoryDto;
+use App\DTO\Api\Products\ProductDto;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;

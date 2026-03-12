@@ -1,0 +1,106 @@
+<section class="rounded-lg border p-4 space-y-4">
+    <h2 class="text-lg font-semibold">2. Adresse</h2>
+
+    {% if not state.identityCompleted %}
+        <div class="text-sm text-gray-500">
+            Complète d'abord l'étape des informations personnelles.
+        </div>
+
+    {% elseif state.addressCompleted and state.currentStep != 2 %}
+        <div class="flex items-center justify-between gap-4">
+            <div class="text-sm">
+                <div class="font-medium">
+                    {{ state.deliveryAddress.firstName ?? '' }} {{ state.deliveryAddress.lastName ?? '' }}
+                </div>
+                <div>{{ state.deliveryAddress.address1 ?? '' }}</div>
+                <div>{{ state.deliveryAddress.postcode ?? '' }} {{ state.deliveryAddress.city ?? '' }}</div>
+                <div>{{ state.deliveryAddress.country ?? '' }}</div>
+            </div>
+
+            <button
+                type="button"
+                data-action="live#action"
+                data-live-action-param="editAddress"
+                class="rounded border px-4 py-2"
+            >
+                Modifier
+            </button>
+        </div>
+
+    {% elseif state.currentStep == 2 %}
+        {% if shouldShowAddressSelection %}
+            <div class="grid gap-4 md:grid-cols-2">
+                {% for address in savedDeliveryAddresses %}
+                    <button
+                        type="button"
+                        class="block rounded-lg border p-4 text-left hover:border-black"
+                        data-action="live#action"
+                        data-live-action-param="selectDeliveryAddress"
+                        data-live-address-id-param="{{ address.id }}"
+                    >
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="font-medium">{{ address.label }}</div>
+                            {% if address.isDefault %}
+                                <span class="text-xs rounded border px-2 py-1">Par défaut</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="mt-3 text-sm">
+                            <div>{{ address.firstName }} {{ address.lastName }}</div>
+                            <div>{{ address.address1 }}</div>
+                            <div>{{ address.postcode }} {{ address.city }}</div>
+                            <div>{{ address.country }}</div>
+                        </div>
+                    </button>
+                {% endfor %}
+            </div>
+
+            <div>
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="useNewAddressForm"
+                    class="rounded border px-4 py-2"
+                >
+                    Ajouter une nouvelle adresse
+                </button>
+            </div>
+
+            {# Optionnel : afficher aussi le form en dessous si tu veux un mode mixte #}
+            {{ form_start(form, {
+                attr: {
+                    'data-model': 'on(change)|*',
+                    'data-action': 'live#action:prevent',
+                    'data-live-action-param': 'saveAddress',
+                    'class': 'hidden'
+                }
+            }) }}
+            {{ form_widget(form) }}
+            {{ form_end(form) }}
+
+        {% else %}
+            {{ form_start(form, {
+                attr: {
+                    'data-model': 'on(change)|*',
+                    'data-action': 'live#action:prevent',
+                    'data-live-action-param': 'saveAddress'
+                }
+            }) }}
+            <div class="grid gap-4 md:grid-cols-2">
+                {{ form_row(form.label) }}
+                <div></div>
+                {{ form_row(form.firstName) }}
+                {{ form_row(form.lastName) }}
+                {{ form_row(form.address1) }}
+                {{ form_row(form.postcode) }}
+                {{ form_row(form.city) }}
+                {{ form_row(form.country) }}
+            </div>
+
+            <button type="submit" class="mt-4 rounded border px-4 py-2">
+                Enregistrer l'adresse
+            </button>
+            {{ form_end(form) }}
+        {% endif %}
+    {% endif %}
+</section>

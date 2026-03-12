@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\OrderLineRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OrderLineRepository::class)]
@@ -13,34 +14,34 @@ class OrderLine
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $product_id = null;
-
     #[ORM\Column]
     private ?int $quantity = null;
 
-    #[ORM\Column]
-    private ?float $unit_price = null;
-
     #[ORM\ManyToOne(inversedBy: 'orderLines')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Order $orderId = null;
+    private ?Order $order = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $productSlug = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $productName = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $productId = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: 2)]
+    private ?string $unitPrice = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
+    private ?string $taxRate = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: 2)]
+    private ?string $lineTotal = null;
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getProductId(): ?string
-    {
-        return $this->product_id;
-    }
-
-    public function setProductId(string $product_id): static
-    {
-        $this->product_id = $product_id;
-
-        return $this;
     }
 
     public function getQuantity(): ?int
@@ -55,26 +56,86 @@ class OrderLine
         return $this;
     }
 
-    public function getUnitPrice(): ?float
+    public function getOrder(): ?Order
     {
-        return $this->unit_price;
+        return $this->order;
     }
 
-    public function setUnitPrice(float $unit_price): static
+    public function setOrder(?Order $order): static
     {
-        $this->unit_price = $unit_price;
+        $this->order = $order;
 
         return $this;
     }
 
-    public function getOrderId(): ?Order
+    public function getProductSlug(): ?string
     {
-        return $this->orderId;
+        return $this->productSlug;
     }
 
-    public function setOrderId(?Order $orderId): static
+    public function setProductSlug(string $productSlug): static
     {
-        $this->orderId = $orderId;
+        $this->productSlug = $productSlug;
+
+        return $this;
+    }
+
+    public function getProductName(): ?string
+    {
+        return $this->productName;
+    }
+
+    public function setProductName(string $productName): static
+    {
+        $this->productName = $productName;
+
+        return $this;
+    }
+
+    public function getProductId(): ?string
+    {
+        return $this->productId;
+    }
+
+    public function setProductId(string $productId): static
+    {
+        $this->productId = $productId;
+
+        return $this;
+    }
+
+    public function getUnitPrice(): ?string
+    {
+        return $this->unitPrice;
+    }
+
+    public function setUnitPrice(string $unitPrice): static
+    {
+        $this->unitPrice = $unitPrice;
+
+        return $this;
+    }
+
+    public function getTaxRate(): ?string
+    {
+        return $this->taxRate;
+    }
+
+    public function setTaxRate(string $taxRate): static
+    {
+        $this->taxRate = $taxRate;
+
+        return $this;
+    }
+
+    public function getLineTotal(): ?string
+    {
+        return $this->lineTotal;
+    }
+
+    public function setLineTotal(string $lineTotal): static
+    {
+        $this->lineTotal = $lineTotal;
 
         return $this;
     }

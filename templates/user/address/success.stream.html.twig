@@ -4,9 +4,15 @@
     </template>
 </turbo-stream>
 
-<turbo-stream action="replace" target="address_list">
+<turbo-stream action="replace" target="address_list_delivery">
     <template>
-        {% include 'user/address/_list.html.twig' %}
+        {% include 'user/address/_list.html.twig' with { addresses: deliveryAddresses } %}
+    </template>
+</turbo-stream>
+
+<turbo-stream action="replace" target="address_list_billing">
+    <template>
+        {% include 'user/address/_list.html.twig' with { addresses: billingAddresses } %}
     </template>
 </turbo-stream>
 

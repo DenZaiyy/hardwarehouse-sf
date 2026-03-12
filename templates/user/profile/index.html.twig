@@ -3,7 +3,7 @@
 {% block title %}{{ 'user.profile.title'|trans(domain = "title") }} - HardWareHouse{% endblock %}
 
 {% block body %}
-    <div class="md:mx-auto md:max-w-6xl">
+    <div class="md:mx-auto md:container">
         <h1>{{ 'user.profile.title'|trans }}</h1>
             <h2>{{ 'user.profile.informations.title'|trans }}</h2>
 
@@ -23,9 +23,15 @@
                     {{ 'user.profile.informations.username.label'|trans }} : <span id="username-text">{{ user.username }}</span>
                 </div>
 
-                {% if defaultAddress is not empty %}
+                {% if deliveryDefaultAddress is not empty %}
                     <div>
-                        {{ 'user.profile.informations.addresses.label'|trans }} : <span id="addresses-text"><a href="{{ path('address.edit', {id: defaultAddress.id }) }}">{{ defaultAddress.label }}</a></span>
+                        {{ 'user.profile.informations.addresses.default.delivery.label'|trans }} : <span id="addresses-text"><a href="{{ path('address.edit', {id: deliveryDefaultAddress.id }) }}" data-turbo-frame="modal_content">{{ deliveryDefaultAddress.label }}</a></span>
+                    </div>
+                {% endif %}
+
+                {% if billingDefaultAddress is not empty %}
+                    <div>
+                        {{ 'user.profile.informations.addresses.default.billing.label'|trans }} : <span id="addresses-text"><a href="{{ path('address.edit', {id: billingDefaultAddress.id }) }}" data-turbo-frame="modal_content">{{ billingDefaultAddress.label }}</a></span>
                     </div>
                 {% endif %}
 
@@ -49,7 +55,7 @@
                         {% for address in user.addresses %}
                             <li class="flex gap-2 items-center">
                                 <a href="{{ path('address.edit', {id: address.id}) }}" data-turbo-frame="modal_content">{{ ux_icon('heroicons-solid:pencil-square', {class: 'size-6'}) }}</a>
-                                <span>{{ 'user.profile.addresses.address.label'|trans }}: {{ address.label }}</span>
+                                <span>{{ 'user.profile.addresses.address.label'|trans }}: {{ address.label }} ({{ address.type|trans }})</span>
                             </li>
                         {% endfor %}
                         {% else %}

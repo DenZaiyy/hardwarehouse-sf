@@ -32,13 +32,13 @@ class UserAddressFormType extends AbstractType
                 'label' => $this->translator->trans('user.address.form.type.label'),
                 'class' => AddressType::class,
             ])
-            ->add('firstname', TextType::class, [
+            ->add('firstName', TextType::class, [
                 'label' => $this->translator->trans('user.address.form.firstname.label'),
                 'attr' => [
                     'autocomplete' => 'given-name',
                 ],
             ])
-            ->add('lastname', TextType::class, [
+            ->add('lastName', TextType::class, [
                 'label' => $this->translator->trans('user.address.form.lastname.label'),
                 'attr' => [
                     'autocomplete' => 'family-name',
@@ -50,7 +50,7 @@ class UserAddressFormType extends AbstractType
                     'autocomplete' => 'address-line1',
                 ],
             ])
-            ->add('cp', TextType::class, [
+            ->add('postalCode', TextType::class, [
                 'label' => $this->translator->trans('user.address.form.cp.label'),
                 'attr' => [
                     'autocomplete' => 'postal-code',
@@ -72,6 +72,9 @@ class UserAddressFormType extends AbstractType
             ->add('isDefault', CheckboxType::class, [
                 'label' => $this->translator->trans('user.address.form.is_default.label'),
                 'required' => false,
+                'attr' => [
+                    'class' => 'size-5',
+                ],
             ])
             ->addEventListener(FormEvents::POST_SUBMIT, $this->attachTimestamps(...))
         ;

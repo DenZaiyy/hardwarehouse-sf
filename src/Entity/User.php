@@ -53,7 +53,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 3, max: 20)]
-    private ?string $username = null;
+    private ?string $userName = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $avatar = null;
@@ -67,19 +67,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Address>
      */
-    #[ORM\OneToMany(targetEntity: Address::class, mappedBy: 'user_info', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Address::class, mappedBy: 'user', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $addresses;
 
     /**
      * @var Collection<int, Order>
      */
-    #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'userId')]
+    #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'user')]
     private Collection $orders;
 
     /**
      * @var Collection<int, Rating>
      */
-    #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'usr')]
+    #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'user')]
     private Collection $ratings;
 
     public function __construct()
@@ -170,12 +170,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUsername(): ?string
     {
-        return $this->username;
+        return $this->userName;
     }
 
     public function setUsername(string $username): static
     {
-        $this->username = $username;
+        $this->userName = $username;
 
         return $this;
     }
@@ -228,7 +228,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->addresses->contains($address)) {
             $this->addresses->add($address);
-            $address->setUserInfo($this);
+            $address->setUser($this);
         }
 
         return $this;
@@ -238,8 +238,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->addresses->removeElement($address)) {
             // set the owning side to null (unless already changed)
-            if ($address->getUserInfo() === $this) {
-                $address->setUserInfo(null);
+            if ($address->getUser() === $this) {
+                $address->setUser(null);
             }
         }
 
@@ -258,7 +258,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->orders->contains($order)) {
             $this->orders->add($order);
-            $order->setUserId($this);
+            $order->setUser($this);
         }
 
         return $this;
@@ -268,8 +268,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->orders->removeElement($order)) {
             // set the owning side to null (unless already changed)
-            if ($order->getUserId() === $this) {
-                $order->setUserId(null);
+            if ($order->getUser() === $this) {
+                $order->setUser(null);
             }
         }
 
@@ -288,7 +288,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->ratings->contains($rating)) {
             $this->ratings->add($rating);
-            $rating->setUsr($this);
+            $rating->setUser($this);
         }
 
         return $this;
@@ -298,8 +298,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->ratings->removeElement($rating)) {
             // set the owning side to null (unless already changed)
-            if ($rating->getUsr() === $this) {
-                $rating->setUsr(null);
+            if ($rating->getUser() === $this) {
+                $rating->setUser(null);
             }
         }
 

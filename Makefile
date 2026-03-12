@@ -12,6 +12,14 @@ endef
 .DEFAULT_GOAL := help
 .PHONY: help
 
+# Common
+APP_ENV ?= dev
+APP_DEBUG ?= 1
+CONSOLE = php bin/console --env=$(APP_ENV)
+
+.PHONY: install start stop tw cache up down migration migrate translate-FR translate-EN quality tests \
+	prod cache-prod twb assets imports sitemap vendor-prod migrate-prod
+
 help: ## Show this help
 	$(call banner,$(INFO),Available targets:)
 	@grep -E '(^[a-zA-Z0-9\./_-]+:.*?##.*$$)|(^##)' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}{printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}' | sed -e 's/\[32m##/[33m/'
@@ -53,7 +61,7 @@ migration: ## Make new migration about current changes
 
 migrate: ## Migrate last migration in database
 	$(call banner,$(INFO),Migrate last migration on database...)
-	php bin/console doctrine:migration:migrate --no-interaction
+	php bin/console doctrine:migrations:migrate --no-interaction
 
 ## —— Translations ————————————————————————————————————————————————————————————————
 translate-FR: ## Dump translations for french language
@@ -97,33 +105,42 @@ tests: ## Running tests using PHPUnit
 	XDEBUG_MODE=coverage php bin/phpunit
 
 ## —— Production ————————————————————————————————————————————————————————————————
-prod: vendor/autoload.php twb assets imports sitemap ## Execute all commands needed to prod env
-	$(call banner,$(INFO),Composer install with no-dev dependencies...)
-	composer install --no-dev --optimize-autoloader --no-interaction --classmap-authoritative
-	$(call banner,$(INFO),Create database if not exists...)
-	php bin/console doctrine:database:create --if-not-exists --env=prod
-	$(call banner,$(INFO),Launch migration without interaction...)
-	php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration --env=prod
-	$(call banner,$(INFO),Clearing and warming cache for production...)
-	php bin/console cache:clear --env=prod --no-warmup
-	php bin/console cache:warmup --env=prod
+prod: APP_ENV=prod
+prod: APP_DEBUG=0
+prod: vendor-prod assets cache-prod migrate-prod sitemap ## Execute all commands needed to prod env
 
+cache-prod: APP_ENV=prod
+cache-prod: APP_DEBUG=0
+cache-prod: ## Clear and warmup cache for production
+	$(call banner,$(INFO),Clearing and warming cache for production...)
+	$(CONSOLE) cache:clear --no-warmup --no-debug
+	$(CONSOLE) cache:warmup --no-debug
+
+twb: APP_ENV=prod
+twb: APP_DEBUG=0
 twb: ## Building tailwind css and minify
 	$(call banner,$(INFO),Starting minify build for tailwind css...)
-	php bin/console tailwind:build --minify
+	$(CONSOLE) tailwind:build --minify --no-debug
 
-assets: ## Command to building assets
+assets: APP_ENV=prod
+assets: APP_DEBUG=0
+assets: twb ## Command to build assets
 	$(call banner,$(INFO),Building assets...)
-	php bin/console asset-map:compile --env=prod
+	$(CONSOLE) asset-map:compile --no-debug
 
-imports: ## Command to install importmap
-	$(call banner,$(INFO),Installing importmap...)
-	php bin/console importmap:install --env=prod
-
+sitemap: APP_ENV=prod
+sitemap: APP_DEBUG=0
 sitemap: ## Dump sitemap files
 	$(call banner,$(INFO),Dump all sitemap files...)
-	php bin/console presta:sitemaps:dump --env=prod
+	$(CONSOLE) presta:sitemaps:dump --no-debug
 
-vendor/autoload.php: composer.lock
-	composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
-	touch vendor/autoload.php
+migrate-prod: APP_ENV=prod
+migrate-prod: APP_DEBUG=0
+migrate-prod: ## Create DB (if needed) and run migrations
+	$(call banner,$(INFO),Create database if not exists...)
+	$(CONSOLE) doctrine:database:create --if-not-exists --no-debug
+	$(call banner,$(INFO),Launch migration without interaction...)
+	$(CONSOLE) doctrine:migrations:migrate --no-interaction --allow-no-migration --no-debug
+
+vendor-prod: ## Install composer dependencies for production
+	composer install --no-dev --optimize-autoloader --classmap-authoritative --no-interaction --prefer-dist

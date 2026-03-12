@@ -46,7 +46,7 @@ class ResetPasswordControllerTest extends WebTestCase
     public function testResetPasswordController(): void
     {
         // Create a test user
-        $user = (new User())
+        $user = new User()
             ->setUsername('me')
             ->setEmail('me@example.com')
             ->setPassword('a-test-password-that-will-be-changed-later')
@@ -72,8 +72,8 @@ class ResetPasswordControllerTest extends WebTestCase
         // With Symfony Mailer + Messenger, each send produces 2 MessageEvents: queued=true (dispatched to bus)
         // and queued=false (actually delivered). Use only delivered events to access the rendered HTML body.
         $sentMessages = array_values(array_map(
-            fn (MessageEvent $e) => $e->getMessage(),
-            array_filter(self::getMailerEvents(), fn (MessageEvent $e) => !$e->isQueued())
+            static fn (MessageEvent $e) => $e->getMessage(),
+            array_filter(self::getMailerEvents(), static fn (MessageEvent $e) => !$e->isQueued())
         ));
         self::assertCount(1, $sentMessages);
 

@@ -1,0 +1,27 @@
+<section class="rounded-lg border p-4 space-y-4">
+    <h2 class="text-lg font-semibold">4. Paiement</h2>
+
+    {% if not state.deliveryCompleted %}
+        <div class="text-sm text-gray-500">
+            Complète d'abord la livraison.
+        </div>
+    {% elseif state.paymentCompleted %}
+        <div class="text-sm font-medium text-green-600">
+            Commande finalisée.
+        </div>
+    {% elseif state.currentStep == 4 %}
+        <div class="rounded border p-3 text-sm">
+            <div class="font-medium">Prêt pour le paiement</div>
+            <div class="mt-1">Transporteur : {{ selectedCarrierLabel ?? 'Non défini' }}</div>
+        </div>
+
+        <button
+            type="button"
+            data-action="live#action"
+            data-live-action-param="finalizePayment"
+            class="rounded border px-4 py-2"
+        >
+            Finaliser la commande
+        </button>
+    {% endif %}
+</section>

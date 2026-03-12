@@ -19,7 +19,7 @@ user:
         submit: { label: 'Se connecter' }
     profile:
         title: 'Mon profil'
-        informations: { title: 'Mes informations', email: { label: 'Adresse email' }, username: { label: Pseudo }, addresses: { label: 'Adresse par défaut' }, password: { edit: { label: 'Modifier le mot de passe' } }, infos: { edit: { label: 'Modifier mes informations' } } }
+        informations: { title: 'Mes informations', email: { label: 'Adresse email' }, username: { label: Pseudo }, addresses: { label: 'Adresse par défaut', default: { delivery: { label: Adresse de livraison par défaut }, billing: { label: Adresse de facturation par défaut } } }, password: { edit: { label: 'Modifier le mot de passe' } }, infos: { edit: { label: 'Modifier mes informations' } } }
         addresses: { label: "Liste d'adresses", add: { label: 'Ajouter une adresse' }, address: { label: Intitulé }, empty: { label: 'Aucune adresses enregistrés' } }
     update:
         infos: { email: { label: 'Adresse email', already_exists: "L'adresse email renseigné est déjà utiliser par un autre utilisateur." }, username: { label: Pseudo }, avatar: { label: Avatar }, submit: { label: 'Mettre à jour' }, not_logged: { message: "Veuillez vous connectez avant d'accéder à votre profile" }, success: __user.update.infos.success }
@@ -27,12 +27,13 @@ user:
     changePassword:
         current: { constraint: { not_blank: __user.changePassword.current.constraint.not_blank } }
     address:
-        home: { title: 'Mes adresses', table: { label: { label: Intitulé }, firstname: { label: Prénom }, lastname: { label: Nom }, address: { label: Adresse }, cp: { label: 'Code postal' }, city: { label: Ville }, country: { label: Pays }, actions: { label: Actions }, default: { label: 'Par défaut' } }, no_items: { message: 'Aucune adresses enregistrés' }, button: { add: { label: 'Ajouter une adresse' } } }
+        home: { title: 'Mes adresses', table: { label: { label: Intitulé }, firstname: { label: Prénom }, lastname: { label: Nom }, address: { label: Adresse }, cp: { label: 'Code postal' }, city: { label: Ville }, country: { label: Pays }, actions: { label: Actions }, default: { label: 'Par défaut' } }, no_items: { message: 'Aucune adresses enregistrés' }, button: { add: { label: 'Ajouter une adresse' } }, delivery: { label: 'Adresses de livraison' }, billing: { label: 'Adresses de facturation' } }
         form: { label: { label: Intitulé }, firstname: { label: Prénom }, lastname: { label: 'Nom de famille' }, address: { label: Adresse }, cp: { label: 'Code postal' }, city: { label: Ville }, country: { label: Pays }, save: { label: Ajouter }, title: 'Ajouter une nouvelle adresse', is_default: { label: 'Adresse par défaut' }, type: { label: "Type d'adresse" } }
         create: { success: 'Votre adresse à été enregistré avec succès' }
         update: { success: 'Votre adresse à été mis à jour avec succès' }
         delete: { success: 'Votre adresse à été supprimé avec succès' }
         save: { success: __user.address.save.success }
+        default: { replaced: __user.address.default.replaced }
 seo:
     description:
         default: 'Découvrez notre sélection de composants PC : cartes graphiques, processeurs, cartes mères, mémoire RAM et stockage. Livraison rapide.'
@@ -162,8 +163,8 @@ contact:
         title: Contactez-nous
 shipmentStatus:
     pending:
-        label: En attente de prise en charge
+        label: 'En attente de prise en charge'
     inTransit:
-        label: En transit
+        label: 'En transit'
     delivered:
         label: Livré

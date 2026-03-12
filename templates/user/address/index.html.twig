@@ -3,8 +3,9 @@
 {% block title %}{{ 'user.address.home.title'|trans(domain = "title") }} - HardWareHouse{% endblock %}
 
 {% block body %}
-    <div class="md:flex md:gap-2 md:items-center md:mb-4">
-        <h1>{{ 'user.address.home.title'|trans }}</h1>
+    <div class="container mx-auto">
+        <div class="md:flex md:gap-2 md:items-center md:mb-4">
+            <h1>{{ 'user.address.home.title'|trans }}</h1>
 
             <a
                 href="{{ path('address.new') }}"
@@ -13,13 +14,28 @@
             >
                 {{ 'user.address.home.button.add.label'|trans }}
             </a>
+        </div>
 
-        {#        <a href="{{ path('address.add') }}">{{ 'user.address.home.button.add.label'|trans }}</a>#}
+        <div class="space-y-4">
+            {% if deliveryAddresses is not empty %}
+                <section>
+                    <h2>{{ 'user.address.home.delivery.label'|trans }}</h2>
+                    <turbo-frame id="address_list_delivery">
+                        {% include 'user/address/_list.html.twig' with { addresses: deliveryAddresses }  %}
+                    </turbo-frame>
+                </section>
+            {% endif %}
+
+            {% if billingAddresses is not empty %}
+                <section>
+                    <h2>{{ 'user.address.home.billing.label'|trans }}</h2>
+
+                    <turbo-frame id="address_list_billing">
+                        {% include 'user/address/_list.html.twig' with { addresses: billingAddresses } %}
+                    </turbo-frame>
+                </section>
+            {% endif %}
+        </div>
     </div>
-
-    <turbo-frame id="address_list">
-        {% include 'user/address/_list.html.twig' %}
-    </turbo-frame>
-
     {% include '_partials/_modal.html.twig' %}
 {% endblock %}

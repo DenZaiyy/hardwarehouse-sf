@@ -5,8 +5,11 @@ namespace App\Entity;
 use App\Repository\InvoiceRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: InvoiceRepository::class)]
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_REFERENCE_INVOICE', fields: ['reference'])]
+#[UniqueEntity(fields: ['reference'], message: 'There is already an order with this reference')]
 class Invoice
 {
     #[ORM\Id]
@@ -18,14 +21,14 @@ class Invoice
     private ?string $reference = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $invoice = null;
+    private ?string $filePath = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;
 
     #[ORM\OneToOne(inversedBy: 'invoice', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Order $ordr = null;
+    private ?Order $order = null;
 
     public function getId(): ?int
     {
@@ -44,14 +47,14 @@ class Invoice
         return $this;
     }
 
-    public function getInvoice(): ?string
+    public function getFilePath(): ?string
     {
-        return $this->invoice;
+        return $this->filePath;
     }
 
-    public function setInvoice(string $invoice): static
+    public function setFilePath(string $filePath): static
     {
-        $this->invoice = $invoice;
+        $this->filePath = $filePath;
 
         return $this;
     }
@@ -68,14 +71,14 @@ class Invoice
         return $this;
     }
 
-    public function getOrdr(): ?Order
+    public function getOrder(): ?Order
     {
-        return $this->ordr;
+        return $this->order;
     }
 
-    public function setOrdr(Order $ordr): static
+    public function setOrder(Order $order): static
     {
-        $this->ordr = $ordr;
+        $this->order = $order;
 
         return $this;
     }
