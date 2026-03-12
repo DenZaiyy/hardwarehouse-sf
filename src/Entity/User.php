@@ -82,6 +82,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'user')]
     private Collection $ratings;
 
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?Cart $cart = null;
+
     public function __construct()
     {
         $this->addresses = new ArrayCollection();
@@ -302,6 +305,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $rating->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCart(): ?Cart
+    {
+        return $this->cart;
+    }
+
+    public function setCart(?Cart $cart): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($cart === null && $this->cart !== null) {
+            $this->cart->setUser(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($cart !== null && $cart->getUser() !== $this) {
+            $cart->setUser($this);
+        }
+
+        $this->cart = $cart;
 
         return $this;
     }
