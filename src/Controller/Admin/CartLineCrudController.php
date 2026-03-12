@@ -2,29 +2,17 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\OrderLine;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
+use App\Entity\CartLine;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
-/**
- * @extends AbstractCrudController<OrderLine>
- */
-class OrderLineCrudController extends AbstractCrudController
+class CartLineCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
     {
-        return OrderLine::class;
-    }
-
-    #[\Override]
-    public function configureFilters(Filters $filters): Filters
-    {
-        return $filters
-            ->add('order')
-        ;
+        return CartLine::class;
     }
 
     /*
