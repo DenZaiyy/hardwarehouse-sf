@@ -67,8 +67,8 @@ class RegistrationControllerTest extends WebTestCase
 
         // Use only the delivered (non-queued) events to access rendered HTML bodies.
         $sentMessages = array_values(array_map(
-            fn (MessageEvent $e) => $e->getMessage(),
-            array_filter(self::getMailerEvents(), fn (MessageEvent $e) => !$e->isQueued())
+            static fn (MessageEvent $e) => $e->getMessage(),
+            array_filter(self::getMailerEvents(), static fn (MessageEvent $e) => !$e->isQueued())
         ));
         self::assertCount(2, $sentMessages);
 
