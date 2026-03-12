@@ -34,8 +34,8 @@ class AddressController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        $deliveryAddresses = $repository->findBy(['user_info' => $user, 'type' => AddressType::DELIVERY]);
-        $billingAddresses = $repository->findBy(['user_info' => $user, 'type' => AddressType::BILLING]);
+        $deliveryAddresses = $repository->findBy(['user' => $user, 'type' => AddressType::DELIVERY]);
+        $billingAddresses = $repository->findBy(['user' => $user, 'type' => AddressType::BILLING]);
 
         return $this->render('user/address/index.html.twig', [
             'user' => $user,
@@ -91,7 +91,7 @@ class AddressController extends AbstractController
 
             if ($default) {
                 $alreadyDefaultSameType = $this->em->getRepository(Address::class)->findOneBy([
-                    'user_info' => $user,
+                    'user' => $user,
                     'is_default' => true,
                     'type' => $type,
                 ]);
@@ -106,7 +106,7 @@ class AddressController extends AbstractController
                 $address->setIsDefault(true);
             }
 
-            $address->setUserInfo($user);
+            $address->setUser($user);
 
             $this->em->persist($address);
             $this->em->flush();
@@ -115,8 +115,8 @@ class AddressController extends AbstractController
 
             // Si c'est une requête AJAX/Turbo, renvoyer des streams
             if ($request->isXmlHttpRequest() || $request->headers->has('Turbo-Frame') || TurboBundle::STREAM_FORMAT === $request->getPreferredFormat()) {
-                $deliveryAddresses = $this->em->getRepository(Address::class)->findBy(['user_info' => $user, 'type' => AddressType::DELIVERY]);
-                $billingAddresses = $this->em->getRepository(Address::class)->findBy(['user_info' => $user, 'type' => AddressType::BILLING]);
+                $deliveryAddresses = $this->em->getRepository(Address::class)->findBy(['user' => $user, 'type' => AddressType::DELIVERY]);
+                $billingAddresses = $this->em->getRepository(Address::class)->findBy(['user' => $user, 'type' => AddressType::BILLING]);
 
                 $response = new Response();
                 $response->headers->set('Content-Type', 'text/vnd.turbo-stream.html');

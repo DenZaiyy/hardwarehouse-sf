@@ -39,8 +39,8 @@ class ProfileController extends AbstractController
     {
         $user = $this->checkCurrentUser($this->getUser());
 
-        $deliveryDefaultAddress = $this->em->getRepository(Address::class)->findOneBy(['user_info' => $user, 'is_default' => true, 'type' => AddressType::DELIVERY]);
-        $billingDefaultAddress = $this->em->getRepository(Address::class)->findOneBy(['user_info' => $user, 'is_default' => true, 'type' => AddressType::BILLING]);
+        $deliveryDefaultAddress = $this->em->getRepository(Address::class)->findOneBy(['user' => $user, 'is_default' => true, 'type' => AddressType::DELIVERY]);
+        $billingDefaultAddress = $this->em->getRepository(Address::class)->findOneBy(['user' => $user, 'is_default' => true, 'type' => AddressType::BILLING]);
 
         return $this->render('user/profile/index.html.twig', [
             'user' => $user,
@@ -87,7 +87,7 @@ class ProfileController extends AbstractController
 
             // Si requête Turbo, retourne des streams
             if ($request->headers->has('Turbo-Frame') || 'turbo_stream' === $request->getPreferredFormat()) {
-                $defaultAddress = $this->em->getRepository(Address::class)->findOneBy(['user_info' => $user, 'is_default' => true]);
+                $defaultAddress = $this->em->getRepository(Address::class)->findOneBy(['user' => $user, 'is_default' => true]);
 
                 return $this->render('user/profile/_infos_stream.html.twig', [
                     'user' => $user,
@@ -129,7 +129,7 @@ class ProfileController extends AbstractController
 
                 // Si requête Turbo, retourne des streams
                 if ($request->headers->has('Turbo-Frame') || 'turbo_stream' === $request->getPreferredFormat()) {
-                    $defaultAddress = $this->em->getRepository(Address::class)->findOneBy(['user_info' => $user, 'is_default' => true]);
+                    $defaultAddress = $this->em->getRepository(Address::class)->findOneBy(['user' => $user, 'is_default' => true]);
 
                     return $this->render('user/profile/_infos_stream.html.twig', [
                         'user' => $user,
