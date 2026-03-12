@@ -123,7 +123,7 @@ class Order
     {
         if (!$this->orderLines->contains($orderLine)) {
             $this->orderLines->add($orderLine);
-            $orderLine->setOrderId($this);
+            $orderLine->setOrder($this);
         }
 
         return $this;
@@ -133,8 +133,8 @@ class Order
     {
         if ($this->orderLines->removeElement($orderLine)) {
             // set the owning side to null (unless already changed)
-            if ($orderLine->getOrderId() === $this) {
-                $orderLine->setOrderId(null);
+            if ($orderLine->getOrder() === $this) {
+                $orderLine->setOrder(null);
             }
         }
 
@@ -161,8 +161,8 @@ class Order
     public function setInvoice(Invoice $invoice): static
     {
         // set the owning side of the relation if necessary
-        if ($invoice->getOrdr() !== $this) {
-            $invoice->setOrdr($this);
+        if ($invoice->getOrder() !== $this) {
+            $invoice->setOrder($this);
         }
 
         $this->invoice = $invoice;
@@ -266,7 +266,7 @@ class Order
     {
         if (!$this->shipment->contains($shipment)) {
             $this->shipment->add($shipment);
-            $shipment->setOrderr($this);
+            $shipment->setOrder($this);
         }
 
         return $this;
@@ -276,8 +276,8 @@ class Order
     {
         if ($this->shipment->removeElement($shipment)) {
             // set the owning side to null (unless already changed)
-            if ($shipment->getOrderr() === $this) {
-                $shipment->setOrderr(null);
+            if ($shipment->getOrder() === $this) {
+                $shipment->setOrder(null);
             }
         }
 
@@ -296,7 +296,7 @@ class Order
     {
         if (!$this->orderAddresses->contains($orderAddress)) {
             $this->orderAddresses->add($orderAddress);
-            $orderAddress->setOrdr($this);
+            $orderAddress->setOrder($this);
         }
 
         return $this;
@@ -306,8 +306,8 @@ class Order
     {
         if ($this->orderAddresses->removeElement($orderAddress)) {
             // set the owning side to null (unless already changed)
-            if ($orderAddress->getOrdr() === $this) {
-                $orderAddress->setOrdr(null);
+            if ($orderAddress->getOrder() === $this) {
+                $orderAddress->setOrder(null);
             }
         }
 
