@@ -4,14 +4,12 @@ namespace App\Service\Checkout;
 
 use App\DTO\Checkout\CheckoutState;
 use App\Repository\CarrierRepository;
-use Doctrine\ORM\EntityManagerInterface;
 
-final class CheckoutDeliveryManager
+final readonly class CheckoutDeliveryManager
 {
     public function __construct(
-        private readonly CarrierRepository $carrierRepository,
-    )
-    {
+        private CarrierRepository $carrierRepository,
+    ) {
     }
 
     public function getCarriers(CheckoutState $state): array

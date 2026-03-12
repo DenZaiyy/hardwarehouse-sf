@@ -5,12 +5,12 @@ namespace App\Service\Checkout;
 use App\DTO\Checkout\CheckoutState;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-final class CheckoutStateManager
+final readonly class CheckoutStateManager
 {
     private const string SESSION_KEY = 'checkout_state';
 
     public function __construct(
-        private readonly RequestStack $requestStack,
+        private RequestStack $requestStack,
     ) {
     }
 

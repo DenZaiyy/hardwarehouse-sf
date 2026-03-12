@@ -6,6 +6,8 @@ use App\DTO\Checkout\AddressData;
 use App\DTO\Checkout\CheckoutState;
 use App\DTO\Checkout\DeliveryChoiceData;
 use App\DTO\Checkout\GuestIdentityData;
+use App\Entity\User;
+use App\Enum\AddressType;
 use App\Form\Checkout\CheckoutAddressType;
 use App\Form\Checkout\DeliveryChoiceType;
 use App\Form\Checkout\GuestIdentityType;
@@ -13,17 +15,15 @@ use App\Service\Checkout\CheckoutAddressManager;
 use App\Service\Checkout\CheckoutDeliveryManager;
 use App\Service\Checkout\CheckoutIdentityManager;
 use App\Service\Checkout\CheckoutStateManager;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
+use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\ComponentWithFormTrait;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
-use App\Entity\User;
-use App\Enum\AddressType;
-use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\UX\LiveComponent\Attribute\LiveArg;
 
 #[AsLiveComponent('Checkout:CheckoutComponent')]
 final class CheckoutComponent
@@ -73,24 +73,22 @@ final class CheckoutComponent
 
         $addresses = $this->addressManager->getUserAddressesByType($user, AddressType::DELIVERY);
 
-        return array_map(static function ($address): array {
-            return [
-                'id' => $address->getId(),
-                'label' => $address->getLabel(),
-                'firstName' => $address->getFirstName(),
-                'lastName' => $address->getLastName(),
-                'address1' => $address->getAddress(),
-                'postcode' => $address->getPostalCode(),
-                'city' => $address->getCity(),
-                'country' => $address->getCountry()?->value,
-                'isDefault' => $address->isDefault(),
-            ];
-        }, $addresses);
+        return array_map(static fn($address): array => [
+            'id' => $address->getId(),
+            'label' => $address->getLabel(),
+            'firstName' => $address->getFirstName(),
+            'lastName' => $address->getLastName(),
+            'address1' => $address->getAddress(),
+            'postcode' => $address->getPostalCode(),
+            'city' => $address->getCity(),
+            'country' => $address->getCountry()?->value,
+            'isDefault' => $address->isDefault(),
+        ], $addresses);
     }
 
     public function shouldShowAddressSelection(): bool
     {
-        return $this->getState()->currentStep === 2
+        return 2 === $this->getState()->currentStep
             && $this->getUser() instanceof User
             && $this->hasSavedDeliveryAddresses();
     }
@@ -116,7 +114,7 @@ final class CheckoutComponent
     {
         $state = $this->getState();
 
-        if ($state->currentStep === 1 && $state->identityMode === 'guest') {
+        if (1 === $state->currentStep && 'guest' === $state->identityMode) {
             $data = new GuestIdentityData();
             $data->title = $state->identity['title'] ?? null;
             $data->firstName = $state->identity['firstName'] ?? null;
@@ -126,7 +124,7 @@ final class CheckoutComponent
             return $this->formFactory->create(GuestIdentityType::class, $data);
         }
 
-        if ($state->currentStep === 2) {
+        if (2 === $state->currentStep) {
             $data = new AddressData();
             $data->label = $state->deliveryAddress['label'] ?? 'Domicile';
             $data->firstName = $state->deliveryAddress['firstName'] ?? ($state->identity['firstName'] ?? null);
@@ -139,7 +137,7 @@ final class CheckoutComponent
             return $this->formFactory->create(CheckoutAddressType::class, $data);
         }
 
-        if ($state->currentStep === 3) {
+        if (3 === $state->currentStep) {
             $data = new DeliveryChoiceData();
             $data->carrierId = $state->carrierId;
 
@@ -268,7 +266,7 @@ final class CheckoutComponent
         $state = $this->getState();
         $state->currentStep = 1;
 
-        if ($state->identityMode === 'authenticated') {
+        if ('authenticated' === $state->identityMode) {
             return;
         }
 
@@ -327,6 +325,6 @@ final class CheckoutComponent
 
     public function isAuthenticatedStepSkipped(): bool
     {
-        return $this->getState()->identityMode === 'authenticated';
+        return 'authenticated' === $this->getState()->identityMode;
     }
 }

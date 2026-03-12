@@ -40,7 +40,7 @@ class AddressController extends AbstractController
         return $this->render('user/address/index.html.twig', [
             'user' => $user,
             'billingAddresses' => $billingAddresses,
-            'deliveryAddresses' => $deliveryAddresses
+            'deliveryAddresses' => $deliveryAddresses,
         ]);
     }
 
@@ -91,9 +91,9 @@ class AddressController extends AbstractController
 
             if ($default) {
                 $alreadyDefaultSameType = $this->em->getRepository(Address::class)->findOneBy([
-                    'user_info'  => $user,
+                    'user_info' => $user,
                     'is_default' => true,
-                    'type'       => $type,
+                    'type' => $type,
                 ]);
 
                 if ($alreadyDefaultSameType) {
@@ -124,7 +124,7 @@ class AddressController extends AbstractController
                 return $this->render('user/address/success.stream.html.twig', [
                     'address' => $address,
                     'deliveryAddresses' => $deliveryAddresses,
-                    'billingAddresses' => $billingAddresses
+                    'billingAddresses' => $billingAddresses,
                 ], $response);
             }
 

@@ -7,10 +7,10 @@ use App\DTO\Checkout\GuestIdentityData;
 use App\Entity\User;
 use Symfony\Bundle\SecurityBundle\Security;
 
-final class CheckoutIdentityManager
+final readonly class CheckoutIdentityManager
 {
     public function __construct(
-        private readonly Security $security,
+        private Security $security,
     ) {
     }
 

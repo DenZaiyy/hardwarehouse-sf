@@ -65,7 +65,7 @@ readonly class ApiService
         /** @var array<T> */
         return $this->serializer->deserialize(
             json_encode($payload, JSON_THROW_ON_ERROR),
-            $dtoClass . '[]',
+            $dtoClass.'[]',
             'json'
         );
     }

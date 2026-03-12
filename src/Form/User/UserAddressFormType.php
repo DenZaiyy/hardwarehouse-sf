@@ -73,8 +73,8 @@ class UserAddressFormType extends AbstractType
                 'label' => $this->translator->trans('user.address.form.is_default.label'),
                 'required' => false,
                 'attr' => [
-                    'class' => 'size-5'
-                ]
+                    'class' => 'size-5',
+                ],
             ])
             ->addEventListener(FormEvents::POST_SUBMIT, $this->attachTimestamps(...))
         ;

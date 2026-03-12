@@ -11,11 +11,11 @@ use App\Enum\CountryList;
 use App\Repository\AddressRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-final class CheckoutAddressManager
+final readonly class CheckoutAddressManager
 {
     public function __construct(
-        private readonly AddressRepository $addressRepository,
-        private readonly EntityManagerInterface $entityManager,
+        private AddressRepository $addressRepository,
+        private EntityManagerInterface $entityManager,
     ) {
     }
 
