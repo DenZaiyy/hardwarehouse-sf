@@ -1,0 +1,40 @@
+<section class="rounded-lg border p-4 space-y-4">
+    <h2 class="text-lg font-semibold">3. Livraison</h2>
+
+    {% if not state.addressCompleted %}
+        <div class="text-sm text-gray-500">
+            Complète d'abord l'adresse.
+        </div>
+    {% elseif state.deliveryCompleted and state.currentStep != 3 %}
+        <div class="flex items-center justify-between gap-4">
+            <div class="text-sm">
+                {{ selectedCarrierLabel ?? 'Mode de livraison sélectionné' }}
+            </div>
+
+            <button
+                type="button"
+                data-action="live#action"
+                data-live-action-param="editDelivery"
+                class="rounded border px-4 py-2"
+            >
+                Modifier
+            </button>
+        </div>
+    {% elseif state.currentStep == 3 %}
+        {{ form_start(form, {
+            attr: {
+                'data-model': 'on(change)|*',
+                'data-action': 'live#action:prevent',
+                'data-live-action-param': 'saveDeliveryChoice'
+            }
+        }) }}
+        <div class="space-y-3">
+            {{ form_row(form.carrierId) }}
+        </div>
+
+        <button type="submit" class="mt-4 rounded border px-4 py-2">
+            Choisir ce mode de livraison
+        </button>
+        {{ form_end(form) }}
+    {% endif %}
+</section>

@@ -6,14 +6,8 @@
     <div class="md:container md:mx-auto md:px-4 md:py-8">
         <h1>Récapitulatif de commande</h1>
 
-        <section class="rounded bg-secondary text-white">
-            <div class="flex gap-2 items-center rounded-lg">
-                <div class="rounded text-white bg-black px-2 py-2">
-                    {{ ux_icon('heroicons:check', {class: app.user ? 'size-6 text-green-500' : 'size-6 text-white'}) }}
-                </div>
-                <h2 class="text-white">Informations personnelles</h2>
-            </div>
-            <div class="hidden"></div>
-        </section>
+        <div class="container py-8">
+            {{ component('Checkout:CheckoutComponent') }}
+        </div>
     </div>
 {% endblock %}
