@@ -11,13 +11,18 @@ use App\Enum\AddressType;
 use App\Form\Checkout\CheckoutAddressType;
 use App\Form\Checkout\DeliveryChoiceType;
 use App\Form\Checkout\GuestIdentityType;
+use App\Service\CartService;
 use App\Service\Checkout\CheckoutAddressManager;
 use App\Service\Checkout\CheckoutDeliveryManager;
 use App\Service\Checkout\CheckoutIdentityManager;
 use App\Service\Checkout\CheckoutStateManager;
+use App\Service\OrderService;
+use App\Service\StripeService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveAction;
@@ -36,6 +41,10 @@ final class CheckoutComponent
         private readonly CheckoutIdentityManager $identityManager,
         private readonly CheckoutAddressManager $addressManager,
         private readonly CheckoutDeliveryManager $deliveryManager,
+        private readonly CartService $cartService,
+        private readonly OrderService $orderService,
+        private readonly StripeService $stripeService,
+        private readonly UrlGeneratorInterface $urlGenerator,
         private readonly FormFactoryInterface $formFactory,
         private readonly AuthenticationUtils $authenticationUtils,
         private readonly Security $security,
@@ -330,5 +339,103 @@ final class CheckoutComponent
     public function isAuthenticatedStepSkipped(): bool
     {
         return 'authenticated' === $this->getState()->identityMode;
+    }
+
+    /**
+     * @return array<string, array{productId: string, quantity: int, remaining_stock: int, category: string, name: string, price_ht: float, price_ttc: float, imageUrl: string, slug: string}>
+     */
+    public function getCartItems(): array
+    {
+        return $this->cartService->getCart();
+    }
+
+    public function getCartCount(): int
+    {
+        return $this->cartService->getCount();
+    }
+
+    /**
+     * Get cart totals including carrier costs
+     * @return array{subtotal: float, vat_rate: float, vat_amount: float, carrier_cost: float, total: float}
+     */
+    public function getOrderTotals(): array
+    {
+        $cartTotals = $this->cartService->computeTotals();
+        $carrierCost = $this->getCarrierCost();
+
+        $totalWithCarrier = $cartTotals['total'] + $carrierCost;
+
+        return [
+            'subtotal' => $cartTotals['subtotal'],
+            'vat_rate' => $cartTotals['vat_rate'],
+            'vat_amount' => $cartTotals['vat_amount'],
+            'carrier_cost' => $carrierCost,
+            'total' => $totalWithCarrier,
+        ];
+    }
+
+    private function getCarrierCost(): float
+    {
+        $state = $this->getState();
+
+        if (!$state->carrierId) {
+            return 0.0;
+        }
+
+        // Find selected carrier cost
+        $carriers = $this->deliveryManager->getCarriers($state);
+
+        foreach ($carriers as $carrier) {
+            if ($carrier['id'] === $state->carrierId) {
+                // Extract price from label (format: "Name - X,XX €")
+                if (preg_match('/(\d+,\d+)\s*€/', $carrier['label'], $matches)) {
+                    return (float) str_replace(',', '.', $matches[1]);
+                }
+            }
+        }
+
+        return 0.0;
+    }
+
+    #[LiveAction]
+    public function processPayment(): RedirectResponse
+    {
+        $state = $this->getState();
+
+        // Verify checkout is complete
+        if (!$state->identityCompleted || !$state->addressCompleted || !$state->deliveryCompleted) {
+            throw new \LogicException('Checkout is not complete');
+        }
+
+        // Verify cart is not empty
+        $cartItems = $this->getCartItems();
+        if (empty($cartItems)) {
+            throw new \LogicException('Cart is empty');
+        }
+
+        // Create order with PENDING status before payment
+        $user = $this->getUser();
+        $order = $this->orderService->createOrderFromCartAndCheckout(
+            $state,
+            $user instanceof User ? $user : null
+        );
+
+        // Create Stripe checkout session with order reference
+        $orderTotals = $this->getOrderTotals();
+        $carrierLabel = $this->getSelectedCarrierLabel();
+
+        $successUrl = $this->urlGenerator->generate('payment.success', ['reference' => $order->getReference()], UrlGeneratorInterface::ABSOLUTE_URL);
+        $cancelUrl = $this->urlGenerator->generate('checkout.index', [], UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $session = $this->stripeService->createCheckoutSession(
+            $orderTotals,
+            $cartItems,
+            $carrierLabel,
+            $successUrl,
+            $cancelUrl,
+            $order->getReference()
+        );
+
+        return new RedirectResponse($session->url);
     }
 }
