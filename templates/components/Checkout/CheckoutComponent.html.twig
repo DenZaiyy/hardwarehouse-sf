@@ -29,15 +29,27 @@
         } only %}
     </div>
 
-    <div class="space-y-2 text-sm">
-        <div>Étape courante : {{ state.currentStep }}</div>
-        <div>Mode identité : {{ state.identityMode }}</div>
-        <div>Identité validée : {{ state.identityCompleted ? 'Oui' : 'Non' }}</div>
-        <div>Adresse validée : {{ state.addressCompleted ? 'Oui' : 'Non' }}</div>
-        <div>Livraison validée : {{ state.deliveryCompleted ? 'Oui' : 'Non' }}</div>
-        <div>Paiement validé : {{ state.paymentCompleted ? 'Oui' : 'Non' }}</div>
-        <form action="{{ path('checkout.reset') }}" method="POST">
-            <button type="submit">Reset</button>
-        </form>
+    <div class="space-y-6">
+        {% include 'components/Checkout/_cart_summary.html.twig' with {
+            state: state,
+            cartItems: this.cartItems,
+            cartCount: this.cartCount,
+            totals: this.orderTotals
+        } only %}
+
+        {% if app.environment == 'dev' %}
+            <div class="space-y-2 text-sm bg-gray-100 p-3 rounded">
+                <div><strong>Debug Info:</strong></div>
+                <div>Étape courante : {{ state.currentStep }}</div>
+                <div>Mode identité : {{ state.identityMode }}</div>
+                <div>Identité validée : {{ state.identityCompleted ? 'Oui' : 'Non' }}</div>
+                <div>Adresse validée : {{ state.addressCompleted ? 'Oui' : 'Non' }}</div>
+                <div>Livraison validée : {{ state.deliveryCompleted ? 'Oui' : 'Non' }}</div>
+                <div>Paiement validé : {{ state.paymentCompleted ? 'Oui' : 'Non' }}</div>
+                <form action="{{ path('checkout.reset') }}" method="POST">
+                    <button type="submit" class="text-red-600 underline">Reset</button>
+                </form>
+            </div>
+        {% endif %}
     </div>
 </div>
