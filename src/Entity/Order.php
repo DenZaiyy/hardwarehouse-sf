@@ -15,6 +15,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_REFERENCE', fields: ['reference'])]
 #[UniqueEntity(fields: ['reference'], message: 'There is already an order with this reference')]
 #[ORM\Table(name: '`order`')]
+#[ORM\HasLifecycleCallbacks]
 class Order
 {
     use TimestampTrait;
@@ -33,13 +34,13 @@ class Order
     /**
      * @var Collection<int, OrderLine>
      */
-    #[ORM\OneToMany(targetEntity: OrderLine::class, mappedBy: 'order', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: OrderLine::class, mappedBy: 'order', orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $orderLines;
 
     #[ORM\Column(length: 50, enumType: OrderStatus::class)]
     private OrderStatus $status = OrderStatus::PENDING;
 
-    #[ORM\OneToOne(mappedBy: 'ordr', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'order', cascade: ['persist', 'remove'])]
     private ?Invoice $invoice = null;
 
     #[ORM\Column(length: 50)]
@@ -66,13 +67,13 @@ class Order
     /**
      * @var Collection<int, Shipment>
      */
-    #[ORM\OneToMany(targetEntity: Shipment::class, mappedBy: 'orderr')]
+    #[ORM\OneToMany(targetEntity: Shipment::class, mappedBy: 'order', orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $shipment;
 
     /**
      * @var Collection<int, OrderAddress>
      */
-    #[ORM\OneToMany(targetEntity: OrderAddress::class, mappedBy: 'ordr')]
+    #[ORM\OneToMany(targetEntity: OrderAddress::class, mappedBy: 'order', orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $orderAddresses;
 
     public function __construct()

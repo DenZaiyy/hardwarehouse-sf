@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CartRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Cart
 {
     use TimestampTrait;
@@ -21,7 +22,7 @@ class Cart
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $session_token = null;
 
-    #[ORM\OneToOne(inversedBy: 'cart', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'cart')]
     private ?User $user = null;
 
     /**

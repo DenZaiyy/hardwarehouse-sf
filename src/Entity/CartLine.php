@@ -29,6 +29,15 @@ class CartLine
     #[ORM\Column(length: 255)]
     private ?string $productSlugSnapshot = null;
 
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $productImageSnapshot = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $productCategorySnapshot = null;
+
+    #[ORM\Column]
+    private ?int $stockSnapshot = null;
+
     #[ORM\ManyToOne(inversedBy: 'cartLines')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Cart $cart = null;
@@ -106,6 +115,42 @@ class CartLine
     public function setCart(?Cart $cart): static
     {
         $this->cart = $cart;
+
+        return $this;
+    }
+
+    public function getProductImageSnapshot(): ?string
+    {
+        return $this->productImageSnapshot;
+    }
+
+    public function setProductImageSnapshot(?string $productImageSnapshot): static
+    {
+        $this->productImageSnapshot = $productImageSnapshot;
+
+        return $this;
+    }
+
+    public function getProductCategorySnapshot(): ?string
+    {
+        return $this->productCategorySnapshot;
+    }
+
+    public function setProductCategorySnapshot(?string $productCategorySnapshot): static
+    {
+        $this->productCategorySnapshot = $productCategorySnapshot;
+
+        return $this;
+    }
+
+    public function getStockSnapshot(): ?int
+    {
+        return $this->stockSnapshot;
+    }
+
+    public function setStockSnapshot(int $stockSnapshot): static
+    {
+        $this->stockSnapshot = $stockSnapshot;
 
         return $this;
     }
