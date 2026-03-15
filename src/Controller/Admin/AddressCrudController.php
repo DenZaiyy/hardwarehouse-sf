@@ -45,7 +45,7 @@ class AddressCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            IdField::new('id', 'ID'),
+            IdField::new('id', 'ID')->hideOnForm(),
             AssociationField::new('user')
                 ->formatValue(static fn (User $user) => $user->getUsername())
                 ->setSortProperty('username'),
