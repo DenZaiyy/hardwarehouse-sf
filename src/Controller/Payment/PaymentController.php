@@ -31,7 +31,7 @@ class PaymentController extends AbstractController
         $cartService->clear();
         $checkoutStateManager->reset();
 
-        return $this->render('payment/success.html.twig', [
+        return $this->render('order/payment/success.html.twig', [
             'message' => 'Votre commande a été créée avec succès.',
             'order' => $order,
         ]);
@@ -40,7 +40,7 @@ class PaymentController extends AbstractController
     #[Route('/cancel', name: 'cancel')]
     public function cancel(): Response
     {
-        return $this->render('payment/cancel.html.twig', [
+        return $this->render('order/payment/cancel.html.twig', [
             'message' => 'Le paiement a été annulé. Vous pouvez reprendre votre commande.',
         ]);
     }
