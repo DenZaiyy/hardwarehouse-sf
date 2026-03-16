@@ -9,6 +9,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
+/**
+ * @extends AbstractCrudController<Cart>
+ */
 class CartCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
@@ -16,6 +19,7 @@ class CartCrudController extends AbstractCrudController
         return Cart::class;
     }
 
+    #[\Override]
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
@@ -26,6 +30,7 @@ class CartCrudController extends AbstractCrudController
         ;
     }
 
+    #[\Override]
     public function configureFields(string $pageName): iterable
     {
         return [
