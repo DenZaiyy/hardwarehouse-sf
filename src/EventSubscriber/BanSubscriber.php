@@ -9,20 +9,15 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class BanSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         private readonly Security $security,
         private readonly RouterInterface $router,
+        private readonly TokenStorageInterface $tokenStorage,
     ) {
-    }
-
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            KernelEvents::REQUEST => ['onKernelRequest', 10],
-        ];
     }
 
     public function onKernelRequest(RequestEvent $event): void
@@ -37,6 +32,8 @@ class BanSubscriber implements EventSubscriberInterface
             return;
         }
 
+        $this->tokenStorage->setToken(null);
+
         $request = $event->getRequest();
         $session = $request->getSession();
 
@@ -45,10 +42,15 @@ class BanSubscriber implements EventSubscriberInterface
         $response = new RedirectResponse(
             $this->router->generate('app.login')
         );
-
-        // Supprime le cookie remember_me
         $response->headers->clearCookie('REMEMBERME');
 
         $event->setResponse($response);
+    }
+
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            KernelEvents::REQUEST => ['onKernelRequest', 10],
+        ];
     }
 }

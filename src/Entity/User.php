@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -17,7 +18,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 #[ORM\HasLifecycleCallbacks]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, EquatableInterface
 {
     use TimestampTrait;
 
@@ -329,5 +330,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->cart = $cart;
 
         return $this;
+    }
+
+    public function isEqualTo(UserInterface $user): bool
+    {
+        if (!$user instanceof self) {
+            return false;
+        }
+
+        if ($user->isBanned() !== $this->isBanned()) {
+            return false;
+        }
+
+        return $user->getUserIdentifier() === $this->getUserIdentifier();
     }
 }
