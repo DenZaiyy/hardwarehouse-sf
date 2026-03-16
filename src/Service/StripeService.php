@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use Stripe\Exception\ApiErrorException;
 use Stripe\Stripe;
 use Stripe\StripeClient;
 use Stripe\Webhook;
@@ -21,10 +22,10 @@ class StripeService
     }
 
     /**
-     * Create Stripe checkout session with cart items and carrier costs
-     * @param array{subtotal: float, vat_rate: float, vat_amount: float, carrier_cost: float, total: float} $orderTotals
+     * Create Stripe checkout session with cart items and carrier costs.
+     *
+     * @param array{subtotal: float, vat_rate: float, vat_amount: float, carrier_cost: float, total: float}                                                                                   $orderTotals
      * @param array<string, array{productId: string, quantity: int, remaining_stock: int, category: string, name: string, price_ht: float, price_ttc: float, imageUrl: string, slug: string}> $cartItems
-     * @param string|null $carrierLabel
      */
     public function createCheckoutSession(array $orderTotals, array $cartItems, ?string $carrierLabel, string $successUrl, string $cancelUrl, ?string $orderReference = null): \Stripe\Checkout\Session
     {
@@ -83,11 +84,14 @@ class StripeService
         ]);
     }
 
+    /**
+     * @throws ApiErrorException
+     */
     public function createSession(CartService $cartService, string $successUrl, string $cancelUrl): \Stripe\Checkout\Session
     {
         $lineItems = [];
         foreach ($cartService->getCart() as $item) {
-            $priceTTC = $item['price_ttc'] * 100;
+            $priceTTC = (int) round($item['price_ttc'] * 100);
             $lineItems[] = [
                 'price_data' => [
                     'currency' => 'eur',
@@ -100,7 +104,7 @@ class StripeService
             ];
         }
 
-        return (new StripeClient($this->stripeSecretKey))->checkout->sessions->create([
+        return new StripeClient($this->stripeSecretKey)->checkout->sessions->create([
             'payment_method_types' => ['card'],
             'line_items' => $lineItems,
             'mode' => 'payment',
@@ -109,9 +113,9 @@ class StripeService
         ]);
     }
 
-    public function handle(Request $request)
+    public function handle(Request $request): void
     {
-        $signature = $request->headers->get('stripe-signature');
+        $signature = $request->headers->get('stripe-signature') ?? '';
         $body = $request->getContent();
         $event = Webhook::constructEvent($body, $signature, $this->webhookSecretKey);
 

@@ -355,7 +355,8 @@ final class CheckoutComponent
     }
 
     /**
-     * Get cart totals including carrier costs
+     * Get cart totals including carrier costs.
+     *
      * @return array{subtotal: float, vat_rate: float, vat_amount: float, carrier_cost: float, total: float}
      */
     public function getOrderTotals(): array
@@ -436,6 +437,11 @@ final class CheckoutComponent
             $order->getReference()
         );
 
-        return new RedirectResponse($session->url);
+        $sessionUrl = $session->url;
+        if (null === $sessionUrl) {
+            throw new \RuntimeException('Stripe checkout session URL is missing');
+        }
+
+        return new RedirectResponse($sessionUrl);
     }
 }

@@ -74,6 +74,7 @@ class CartService
     {
         if ($quantity <= 0) {
             $this->removeProduct($productId);
+
             return;
         }
 
@@ -111,19 +112,30 @@ class CartService
 
         $result = [];
         foreach ($cart->getCartLines() as $cartLine) {
+            $productId = $cartLine->getProductId();
+            $quantity = $cartLine->getQuantity();
+            $stock = $cartLine->getStockSnapshot();
+            $category = $cartLine->getProductCategorySnapshot();
+            $name = $cartLine->getProductNameSnapshot();
+            $slug = $cartLine->getProductSlugSnapshot();
+
+            if (null === $productId || null === $quantity || null === $stock || null === $category || null === $name || null === $slug) {
+                continue;
+            }
+
             $priceHt = (float) $cartLine->getUnitPriceSnapshot();
             $priceTtc = $priceHt * (1 + self::VAT_RATE);
 
             $result[$cartLine->getProductId()] = [
-                'productId' => $cartLine->getProductId(),
-                'quantity' => $cartLine->getQuantity(),
-                'remaining_stock' => $cartLine->getStockSnapshot(),
-                'category' => $cartLine->getProductCategorySnapshot(),
-                'name' => $cartLine->getProductNameSnapshot(),
+                'productId' => $productId,
+                'quantity' => $quantity,
+                'remaining_stock' => $stock,
+                'category' => $category,
+                'name' => $name,
                 'price_ht' => $priceHt,
                 'price_ttc' => $priceTtc,
                 'imageUrl' => $cartLine->getProductImageSnapshot() ?? '',
-                'slug' => $cartLine->getProductSlugSnapshot(),
+                'slug' => $slug,
             ];
         }
 
@@ -181,7 +193,7 @@ class CartService
     public function associateCartToUser(User $user): void
     {
         // Ensure user has a valid ID
-        if ($user->getId() === null) {
+        if (null === $user->getId()) {
             return;
         }
 
@@ -213,12 +225,13 @@ class CartService
         $user = $this->security->getUser();
 
         // If user is logged in and has a valid ID, find cart by user
-        if ($user instanceof User && $user->getId() !== null) {
+        if ($user instanceof User && null !== $user->getId()) {
             return $this->cartRepository->findOneBy(['user' => $user]);
         }
 
         // If guest or user without ID, find cart by session token
         $sessionToken = $this->getSessionToken();
+
         return $this->cartRepository->findOneBy(['session_token' => $sessionToken, 'user' => null]);
     }
 
@@ -234,13 +247,14 @@ class CartService
         $cart = new Cart();
         $user = $this->security->getUser();
 
-        if ($user instanceof User && $user->getId() !== null) {
+        if ($user instanceof User && null !== $user->getId()) {
             $cart->setUser($user);
         } else {
             $cart->setSessionToken($this->getSessionToken());
         }
 
         $this->entityManager->persist($cart);
+
         return $cart;
     }
 
@@ -268,7 +282,7 @@ class CartService
         $cartLine->setProductSlugSnapshot($product->getSlug());
         $cartLine->setProductImageSnapshot($product->thumbnail ?? '');
         $cartLine->setProductCategorySnapshot($category->getName());
-        $cartLine->setStockSnapshot($product->stock->quantity);
+        $cartLine->setStockSnapshot($product->stock->quantity ?? 0);
         $cartLine->setCart($cart);
 
         return $cartLine;
@@ -279,7 +293,7 @@ class CartService
         $session = $this->requestStack->getSession();
         $token = $session->get('cart_session_token');
 
-        if (!$token) {
+        if (!is_string($token) || '' === $token) {
             $token = bin2hex(random_bytes(32));
             $session->set('cart_session_token', $token);
         }
@@ -290,7 +304,12 @@ class CartService
     private function mergeCart(Cart $sourceCart, Cart $targetCart): void
     {
         foreach ($sourceCart->getCartLines() as $sourceCartLine) {
-            $existingCartLine = $this->findCartLineByProductId($targetCart, $sourceCartLine->getProductId());
+            $productId = $sourceCartLine->getProductId();
+            if (null === $productId) {
+                continue;
+            }
+
+            $existingCartLine = $this->findCartLineByProductId($targetCart, $productId);
 
             if ($existingCartLine) {
                 // Add quantities together

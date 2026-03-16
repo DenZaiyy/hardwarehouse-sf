@@ -11,6 +11,7 @@ final readonly class CheckoutDeliveryManager
         private CarrierRepository $carrierRepository,
     ) {
     }
+
     /**
      * @return array<int, array{id: int, label: string}>
      */
@@ -18,12 +19,14 @@ final readonly class CheckoutDeliveryManager
     {
         $carriers = $this->carrierRepository->findAll();
 
-        return array_map(static function ($carrier) {
-            return [
+        /** @var array<int, array{id: int, label: string}> */
+        return array_values(array_filter(
+            array_map(static fn ($carrier) => [
                 'id' => $carrier->getId(),
-                'label' => $carrier->getName() . ' - ' . number_format((float) $carrier->getPrice(), 2, ',', ' ') . ' €',
-            ];
-        }, $carriers);
+                'label' => $carrier->getName().' - '.number_format((float) $carrier->getPrice(), 2, ',', ' ').' €',
+            ], $carriers),
+            static fn (array $carrier) => null !== $carrier['id'],
+        ));
     }
 
     public function saveCarrier(CheckoutState $state, int $carrierId): CheckoutState
@@ -47,6 +50,6 @@ final readonly class CheckoutDeliveryManager
             return null;
         }
 
-        return $carrier->getName() . ' - ' . number_format((float) $carrier->getPrice(), 2, ',', ' ') . ' €';
+        return $carrier->getName().' - '.number_format((float) $carrier->getPrice(), 2, ',', ' ').' €';
     }
 }

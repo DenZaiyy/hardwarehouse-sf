@@ -3,10 +3,8 @@
 namespace App\Controller\Payment;
 
 use App\Entity\Order;
-use App\Entity\User;
 use App\Service\CartService;
 use App\Service\Checkout\CheckoutStateManager;
-use App\Service\OrderService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;

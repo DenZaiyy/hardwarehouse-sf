@@ -6,10 +6,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
-use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[AdminDashboard(routePath: '/{_locale}/admin', routeName: 'admin')]
@@ -80,7 +78,7 @@ class DashboardController extends AbstractDashboardController
             MenuItem::subMenu('Settings', 'fa-solid fa-gear')->setSubItems([
                 MenuItem::linkToUrl('Back to the website', 'fa-solid fa-rotate-left', '/')->setLinkTarget('_blank'),
                 MenuItem::linkToLogout('Logout', 'fa-solid fa-arrow-right-from-bracket'),
-            ])
+            ]),
         ];
     }
 }

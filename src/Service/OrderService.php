@@ -24,7 +24,7 @@ class OrderService
     }
 
     /**
-     * Create an order from current cart and checkout state
+     * Create an order from current cart and checkout state.
      */
     public function createOrderFromCartAndCheckout(CheckoutState $checkoutState, ?User $user = null): Order
     {
@@ -48,12 +48,12 @@ class OrderService
         $order->setReference($this->generateOrderReference());
         $order->setUser($user);
 
-        // Set user name snapshot
-        if ($user) {
+        // Set username snapshot
+        if ($user && $user->getUsername()) {
             $order->setUserFullNameSnapshot($user->getUsername());
         } else {
             $identity = $checkoutState->identity;
-            $fullName = trim(($identity['firstName'] ?? '') . ' ' . ($identity['lastName'] ?? ''));
+            $fullName = trim(($identity['firstName'] ?? '').' '.($identity['lastName'] ?? ''));
             $order->setUserFullNameSnapshot($fullName ?: 'Guest');
         }
 
@@ -102,7 +102,7 @@ class OrderService
     }
 
     /**
-     * Generate a unique order reference
+     * Generate a unique order reference.
      */
     private function generateOrderReference(): string
     {
@@ -110,11 +110,11 @@ class OrderService
         $timestamp = date('Ymd');
         $random = strtoupper(bin2hex(random_bytes(4)));
 
-        return $prefix . $timestamp . $random;
+        return $prefix.$timestamp.$random;
     }
 
     /**
-     * Create an order address from checkout state
+     * Create an order address from checkout state.
      */
     private function createOrderAddress(Order $order, CheckoutState $checkoutState, AddressType $type): OrderAddress
     {
@@ -123,7 +123,7 @@ class OrderService
         $orderAddress->setType($type);
 
         // Get address data from checkout state
-        if ($type === AddressType::DELIVERY) {
+        if (AddressType::DELIVERY === $type) {
             $addressData = $checkoutState->deliveryAddress;
             $identity = $checkoutState->identity;
 
@@ -152,7 +152,7 @@ class OrderService
     }
 
     /**
-     * Get carrier cost by carrier ID
+     * Get carrier cost by carrier ID.
      */
     private function getCarrierCost(?int $carrierId): float
     {
@@ -170,7 +170,7 @@ class OrderService
     }
 
     /**
-     * Update order status
+     * Update order status.
      */
     public function updateOrderStatus(Order $order, OrderStatus $status): void
     {

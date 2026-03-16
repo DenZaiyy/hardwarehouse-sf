@@ -3,10 +3,8 @@
 namespace App\Controller\Admin;
 
 use App\Entity\User;
-use DateTimeZone;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AvatarField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
@@ -35,7 +33,7 @@ class UserCrudController extends AbstractCrudController
             ->add('is_banned');
     }
 
-
+    #[\Override]
     public function configureFields(string $pageName): iterable
     {
         return [
@@ -53,9 +51,7 @@ class UserCrudController extends AbstractCrudController
 
             FormField::addTab('Avatar'),
             AvatarField::new('avatar', 'Avatar')
-                ->formatValue(function (string $avatar) {
-                    return '/uploads/images/avatar/' . $avatar;
-                })->setHeight(50),
+                ->formatValue(fn (string $avatar) => '/uploads/images/avatar/'.$avatar)->setHeight(50),
 
             FormField::addTab('Status'),
             BooleanField::new('is_banned')->renderAsSwitch(),

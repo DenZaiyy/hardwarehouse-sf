@@ -317,12 +317,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setCart(?Cart $cart): static
     {
         // unset the owning side of the relation if necessary
-        if ($cart === null && $this->cart !== null) {
+        if (null === $cart && null !== $this->cart) {
             $this->cart->setUser(null);
         }
 
         // set the owning side of the relation if necessary
-        if ($cart !== null && $cart->getUser() !== $this) {
+        if (null !== $cart && $cart->getUser() !== $this) {
             $cart->setUser($this);
         }
 
