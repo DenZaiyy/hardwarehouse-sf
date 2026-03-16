@@ -17,20 +17,12 @@ class UserChecker implements UserCheckerInterface
         }
 
         if ($user->isBanned()) {
-            session_unset();
             throw new CustomUserMessageAuthenticationException('Votre compte a été suspendu.');
         }
     }
 
     public function checkPostAuth(UserInterface $user, ?TokenInterface $token = null): void
     {
-        if (!$user instanceof User) {
-            return;
-        }
-
-        if ($user->isBanned()) {
-            session_unset();
-            throw new CustomUserMessageAuthenticationException('Votre compte a été suspendu.');
-        }
+        // TODO: Implement checkPostAuth() method.
     }
 }

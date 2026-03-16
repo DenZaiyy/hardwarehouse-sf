@@ -4,6 +4,12 @@ namespace App\Service;
 
 use App\DTO\Api\Categories\CategoryDto;
 use App\DTO\Api\Products\ProductDto;
+use App\Entity\Cart;
+use App\Entity\CartLine;
+use App\Entity\User;
+use App\Repository\CartRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -13,12 +19,14 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class CartService
 {
-    private const string SESSION_KEY = 'cart';
     private const float VAT_RATE = 0.20;
 
     public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+        private readonly CartRepository $cartRepository,
         private readonly RequestStack $requestStack,
         private readonly ApiService $apiService,
+        private readonly Security $security,
     ) {
     }
 
@@ -32,82 +40,106 @@ class CartService
     public function addProduct(string $productSlug, int $quantity = 1): void
     {
         $product = $this->apiService->fetchOne("products/$productSlug", ProductDto::class);
+        $cart = $this->getOrCreateCart();
 
-        $productId = $product->getId();
-        /** @var CategoryDto $category */
-        $category = $product->category;
-        $cart = $this->getCart();
+        $existingCartLine = $this->findCartLineByProductId($cart, $product->getId());
 
-        if (isset($cart[$productId])) {
-            $cart[$productId]['quantity'] += $quantity;
+        if ($existingCartLine) {
+            $existingCartLine->setQuantity($existingCartLine->getQuantity() + $quantity);
         } else {
-            // Calculate price TVA included
-            $priceTTC = $product->price * self::VAT_RATE;
-            // Add price HT to get price TTC
-            $priceTTC += $product->price;
-
-            $cart[$productId] = [
-                'productId' => $productId,
-                'quantity' => $quantity,
-                'remaining_stock' => $product->stock,
-                'category' => $category->getName(),
-                'name' => $product->name,
-                'price_ht' => (float) $product->price,
-                'price_ttc' => $priceTTC,
-                'imageUrl' => $product->thumbnail ?? '',
-                'slug' => $product->getSlug(),
-            ];
+            $cartLine = $this->createCartLine($cart, $product, $quantity);
+            $cart->addCartLine($cartLine);
+            $this->entityManager->persist($cartLine);
         }
 
-        $this->saveCart($cart);
+        $this->entityManager->flush();
     }
 
     public function removeProduct(string $productId): void
     {
-        $cart = $this->getCart();
-        unset($cart[$productId]);
-        $this->saveCart($cart);
+        $cart = $this->getCurrentCart();
+        if (!$cart) {
+            return;
+        }
+
+        $cartLine = $this->findCartLineByProductId($cart, $productId);
+        if ($cartLine) {
+            $cart->removeCartLine($cartLine);
+            $this->entityManager->remove($cartLine);
+            $this->entityManager->flush();
+        }
     }
 
-    public function decrease(string $productId, int $currentQtt): void
+    public function updateQuantity(string $productId, int $quantity): void
     {
-        if ($currentQtt <= 1) {
+        if ($quantity <= 0) {
             $this->removeProduct($productId);
 
             return;
         }
 
-        $cart = $this->getCart();
-
-        if (isset($cart[$productId])) {
-            $cart[$productId]['quantity'] = $currentQtt - 1;
-            $this->saveCart($cart);
-        }
-    }
-
-    public function increase(string $productId, int $currentQtt): void
-    {
-        if ($currentQtt <= 0) {
-            $this->removeProduct($productId);
-
+        $cart = $this->getCurrentCart();
+        if (!$cart) {
             return;
         }
 
-        $cart = $this->getCart();
-
-        if (isset($cart[$productId])) {
-            $cart[$productId]['quantity'] = $currentQtt + 1;
-            $this->saveCart($cart);
+        $cartLine = $this->findCartLineByProductId($cart, $productId);
+        if ($cartLine) {
+            $cartLine->setQuantity($quantity);
+            $this->entityManager->flush();
         }
+    }
+
+    public function decrease(string $productId, int $currentQty): void
+    {
+        $this->updateQuantity($productId, $currentQty - 1);
+    }
+
+    public function increase(string $productId, int $currentQty): void
+    {
+        $this->updateQuantity($productId, $currentQty + 1);
     }
 
     /**
-     * @return array<string, array{productId: string, quantity: int, name: string, price_ht: float, imageUrl: string, slug: string}>
+     * @return array<string, array{productId: string, quantity: int, remaining_stock: int, category: string, name: string, price_ht: float, price_ttc: float, imageUrl: string, slug: string}>
      */
     public function getCart(): array
     {
-        /** @var array<string, array{productId: string, quantity: int, name: string, price_ht: float, imageUrl: string, slug: string}> */
-        return $this->requestStack->getSession()->get(self::SESSION_KEY, []);
+        $cart = $this->getCurrentCart();
+        if (!$cart) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($cart->getCartLines() as $cartLine) {
+            $productId = $cartLine->getProductId();
+            $quantity = $cartLine->getQuantity();
+            $stock = $cartLine->getStockSnapshot();
+            $category = $cartLine->getProductCategorySnapshot();
+            $name = $cartLine->getProductNameSnapshot();
+            $slug = $cartLine->getProductSlugSnapshot();
+
+            if (null === $productId || null === $quantity || null === $stock || null === $category || null === $name || null === $slug) {
+                continue;
+            }
+
+            $priceHt = (float) $cartLine->getUnitPriceSnapshot();
+            $priceTtc = $priceHt * (1 + self::VAT_RATE);
+
+            $result[$cartLine->getProductId()] = [
+                'productId' => $productId,
+                'quantity' => $quantity,
+                'remaining_stock' => $stock,
+                'category' => $category,
+                'name' => $name,
+                'price_ht' => $priceHt,
+                'price_ttc' => $priceTtc,
+                'imageUrl' => $cartLine->getProductImageSnapshot() ?? '',
+                'slug' => $slug,
+            ];
+        }
+
+        return $result;
     }
 
     /**
@@ -133,22 +165,162 @@ class CartService
 
     public function getCount(): int
     {
-        return array_sum(array_map(
-            static fn (array $item): int => $item['quantity'],
-            $this->getCart()
-        ));
+        $cart = $this->getCurrentCart();
+        if (!$cart) {
+            return 0;
+        }
+
+        $count = 0;
+        foreach ($cart->getCartLines() as $cartLine) {
+            $count += $cartLine->getQuantity();
+        }
+
+        return $count;
     }
 
     public function clear(): void
     {
-        $this->requestStack->getSession()->remove(self::SESSION_KEY);
+        $cart = $this->getCurrentCart();
+        if (!$cart) {
+            return;
+        }
+
+        // Remove the cart - CartLines will be automatically deleted due to orphanRemoval: true
+        $this->entityManager->remove($cart);
+        $this->entityManager->flush();
     }
 
-    /**
-     * @param array<string, array{productId: string, quantity: int, name: string, price_ht: float, imageUrl: string, slug: string}> $cart
-     */
-    private function saveCart(array $cart): void
+    public function associateCartToUser(User $user): void
     {
-        $this->requestStack->getSession()->set(self::SESSION_KEY, $cart);
+        // Ensure user has a valid ID
+        if (null === $user->getId()) {
+            return;
+        }
+
+        $sessionToken = $this->getSessionToken();
+
+        // Find guest cart by session token
+        $guestCart = $this->cartRepository->findOneBy(['session_token' => $sessionToken, 'user' => null]);
+
+        if ($guestCart) {
+            // Check if user already has a cart
+            $existingUserCart = $this->cartRepository->findOneBy(['user' => $user]);
+
+            if ($existingUserCart) {
+                // Merge guest cart into existing user cart
+                $this->mergeCart($guestCart, $existingUserCart);
+                $this->entityManager->remove($guestCart);
+            } else {
+                // Transfer guest cart to user - clear session_token and set user
+                $guestCart->setUser($user);
+                $guestCart->setSessionToken(null);
+            }
+
+            $this->entityManager->flush();
+        }
+    }
+
+    private function getCurrentCart(): ?Cart
+    {
+        $user = $this->security->getUser();
+
+        // If user is logged in and has a valid ID, find cart by user
+        if ($user instanceof User && null !== $user->getId()) {
+            return $this->cartRepository->findOneBy(['user' => $user]);
+        }
+
+        // If guest or user without ID, find cart by session token
+        $sessionToken = $this->getSessionToken();
+
+        return $this->cartRepository->findOneBy(['session_token' => $sessionToken, 'user' => null]);
+    }
+
+    private function getOrCreateCart(): Cart
+    {
+        $cart = $this->getCurrentCart();
+
+        if ($cart) {
+            return $cart;
+        }
+
+        // Create new cart
+        $cart = new Cart();
+        $user = $this->security->getUser();
+
+        if ($user instanceof User && null !== $user->getId()) {
+            $cart->setUser($user);
+        } else {
+            $cart->setSessionToken($this->getSessionToken());
+        }
+
+        $this->entityManager->persist($cart);
+
+        return $cart;
+    }
+
+    private function findCartLineByProductId(Cart $cart, string $productId): ?CartLine
+    {
+        foreach ($cart->getCartLines() as $cartLine) {
+            if ($cartLine->getProductId() === $productId) {
+                return $cartLine;
+            }
+        }
+
+        return null;
+    }
+
+    private function createCartLine(Cart $cart, ProductDto $product, int $quantity): CartLine
+    {
+        /** @var CategoryDto $category */
+        $category = $product->category;
+
+        $cartLine = new CartLine();
+        $cartLine->setProductId($product->getId());
+        $cartLine->setQuantity($quantity);
+        $cartLine->setUnitPriceSnapshot((string) $product->price);
+        $cartLine->setProductNameSnapshot($product->name);
+        $cartLine->setProductSlugSnapshot($product->getSlug());
+        $cartLine->setProductImageSnapshot($product->thumbnail ?? '');
+        $cartLine->setProductCategorySnapshot($category->getName());
+        $cartLine->setStockSnapshot($product->stock->quantity ?? 0);
+        $cartLine->setCart($cart);
+
+        return $cartLine;
+    }
+
+    private function getSessionToken(): string
+    {
+        $session = $this->requestStack->getSession();
+        $token = $session->get('cart_session_token');
+
+        if (!is_string($token) || '' === $token) {
+            $token = bin2hex(random_bytes(32));
+            $session->set('cart_session_token', $token);
+        }
+
+        return $token;
+    }
+
+    private function mergeCart(Cart $sourceCart, Cart $targetCart): void
+    {
+        foreach ($sourceCart->getCartLines() as $sourceCartLine) {
+            $productId = $sourceCartLine->getProductId();
+            if (null === $productId) {
+                continue;
+            }
+
+            $existingCartLine = $this->findCartLineByProductId($targetCart, $productId);
+
+            if ($existingCartLine) {
+                // Add quantities together
+                $existingCartLine->setQuantity(
+                    $existingCartLine->getQuantity() + $sourceCartLine->getQuantity()
+                );
+            } else {
+                // Move cart line to target cart
+                $sourceCartLine->setCart($targetCart);
+                $targetCart->addCartLine($sourceCartLine);
+            }
+        }
     }
 }

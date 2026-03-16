@@ -7,6 +7,12 @@
 # To list all registered routes, run the following command:
 #   bin/console debug:router
 
+# Webhooks (must be before controllers to avoid locale prefix)
+webhooks:
+    resource: ../src/Controller/Webhook/
+    type: attribute
+    trailing_slash_on_root: false
+
 controllers:
     resource: routing.controllers
     type: attribute

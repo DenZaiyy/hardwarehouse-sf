@@ -234,3 +234,7 @@ user:
 'There were problems with your captcha':
     ' Please try again or contact with support and provide following code(s): {{ errorCodes }}': 'Il y a eu des problèmes avec votre captcha. Veuillez réessayer ou contacter le support et fournir le(s) code(s) suivant(s) : {{ errorCodes }}'
 'La note doit être comprise entre {{ min }} et {{ max }}.': 'La note doit être comprise entre {{ min }} et {{ max }}.'
+'There is already an address of this type for this order': '__There is already an address of this type for this order'
+'There is already an order with this reference': '__There is already an order with this reference'
+'There is already a carrier with this name': '__There is already a carrier with this name'
+'There is already a product with this reference': '__There is already a product with this reference'

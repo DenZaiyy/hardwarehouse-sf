@@ -1,3 +1,4 @@
-webhook:
-    resource: '@FrameworkBundle/Resources/config/routing/webhook.php'
-    prefix: /webhook
+stripe_webhook:
+    resource: ../../src/Controller/Webhook/
+    type: attribute
+    trailing_slash_on_root: false
