@@ -19,7 +19,7 @@ user:
         submit: { label: 'Se connecter' }
     profile:
         title: 'Mon profil'
-        informations: { title: 'Mes informations', email: { label: 'Adresse email' }, username: { label: Pseudo }, addresses: { label: 'Adresse par défaut', default: { delivery: { label: Adresse de livraison par défaut }, billing: { label: Adresse de facturation par défaut } } }, password: { edit: { label: 'Modifier le mot de passe' } }, infos: { edit: { label: 'Modifier mes informations' } } }
+        informations: { title: 'Mes informations', email: { label: 'Adresse email' }, username: { label: Pseudo }, addresses: { label: 'Adresse par défaut', default: { delivery: { label: 'Adresse de livraison par défaut' }, billing: { label: 'Adresse de facturation par défaut' } } }, password: { edit: { label: 'Modifier le mot de passe' } }, infos: { edit: { label: 'Modifier mes informations' } } }
         addresses: { label: "Liste d'adresses", add: { label: 'Ajouter une adresse' }, address: { label: Intitulé }, empty: { label: 'Aucune adresses enregistrés' } }
     update:
         infos: { email: { label: 'Adresse email', already_exists: "L'adresse email renseigné est déjà utiliser par un autre utilisateur." }, username: { label: Pseudo }, avatar: { label: Avatar }, submit: { label: 'Mettre à jour' }, not_logged: { message: "Veuillez vous connectez avant d'accéder à votre profile" }, success: __user.update.infos.success }
@@ -34,6 +34,10 @@ user:
         delete: { success: 'Votre adresse à été supprimé avec succès' }
         save: { success: __user.address.save.success }
         default: { replaced: __user.address.default.replaced }
+    roles:
+        superadmin: { label: Fondateur }
+        admin: { label: Administrateur }
+        user: { label: Utilisateur }
 seo:
     description:
         default: 'Découvrez notre sélection de composants PC : cartes graphiques, processeurs, cartes mères, mémoire RAM et stockage. Livraison rapide.'
@@ -140,6 +144,8 @@ orderStatus:
         label: Livré
     cancelled:
         label: Annulé
+    confirmed:
+        label: __orderStatus.confirmed.label
 carrierType:
     dhl:
         label: DHL

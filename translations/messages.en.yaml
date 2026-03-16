@@ -31,6 +31,10 @@ user:
         delete: { success: __user.address.delete.success }
         save: { success: __user.address.save.success }
         default: { replaced: __user.address.default.replaced }
+    roles:
+        superadmin: { label: Founder }
+        admin: { label: Administrator }
+        user: { label: User }
 seo:
     description:
         default: 'Discover our selection of PC components: graphics cards, processors, motherboards, RAM and storage. Fast delivery and dedicated technical support.'
@@ -137,6 +141,8 @@ orderStatus:
         label: Delivered
     cancelled:
         label: Cancelled
+    confirmed:
+        label: __orderStatus.confirmed.label
 carrierType:
     dhl:
         label: DHL

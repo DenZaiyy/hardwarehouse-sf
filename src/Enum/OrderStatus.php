@@ -8,6 +8,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 enum OrderStatus: string implements TranslatableInterface
 {
     case PENDING = 'PENDING';
+    case CONFIRMED = 'CONFIRMED';
     case PROCESSING = 'PROCESSING';
     case SHIPPED = 'SHIPPED';
     case DELIVERED = 'DELIVERED';
@@ -17,6 +18,7 @@ enum OrderStatus: string implements TranslatableInterface
     {
         return match ($this) {
             self::PENDING => $translator->trans('orderStatus.pending.label', locale: $locale),
+            self::CONFIRMED => $translator->trans('orderStatus.confirmed.label', locale: $locale),
             self::PROCESSING => $translator->trans('orderStatus.processing.label', locale: $locale),
             self::SHIPPED => $translator->trans('orderStatus.shipped.label', locale: $locale),
             self::DELIVERED => $translator->trans('orderStatus.delivered.label', locale: $locale),

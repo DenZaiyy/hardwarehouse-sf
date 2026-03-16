@@ -8,8 +8,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: OrderAddressRepository::class)]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_TYPE', fields: ['type'])]
-#[UniqueEntity(fields: ['type'], message: 'There is already an order with this type')]
+#[ORM\UniqueConstraint(name: 'UNIQ_ORDER_ADDRESS_TYPE', fields: ['order', 'type'])]
+#[UniqueEntity(fields: ['order', 'type'], message: 'There is already an address of this type for this order')]
 class OrderAddress
 {
     #[ORM\Id]

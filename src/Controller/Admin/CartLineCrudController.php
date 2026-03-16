@@ -2,20 +2,17 @@
 
 namespace App\Controller\Admin;
 
-use App\Entity\Order;
+use App\Entity\CartLine;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 /**
- * @extends AbstractCrudController<Order>
+ * @extends AbstractCrudController<CartLine>
  */
-class OrderCrudController extends AbstractCrudController
+class CartLineCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
     {
-        return Order::class;
+        return CartLine::class;
     }
 
     /*

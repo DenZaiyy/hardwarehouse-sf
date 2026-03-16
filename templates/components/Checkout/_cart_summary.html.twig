@@ -1,0 +1,65 @@
+<div class="rounded-lg border p-4 space-y-4 bg-gray-50">
+    <h3 class="text-lg font-semibold">Résumé de commande</h3>
+
+    {% if cartItems is not empty %}
+        {# Cart Items #}
+        <div class="space-y-3">
+            <h4 class="font-medium text-gray-700">Articles ({{ cartCount }})</h4>
+            {% for item in cartItems %}
+                <div class="flex justify-between items-start text-sm">
+                    <div class="flex-1">
+                        <div class="font-medium">{{ item.name }}</div>
+                        <div class="text-gray-500">Qté: {{ item.quantity }}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-medium">{{ (item.price_ttc * item.quantity)|format_currency('EUR') }}</div>
+                        <div class="text-gray-500 text-xs">{{ item.price_ht|format_currency('EUR') }} HT/unité</div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <hr>
+
+        {# Totals #}
+        <div class="space-y-2">
+            <div class="flex justify-between text-sm">
+                <span>Sous-total HT</span>
+                <span>{{ totals.subtotal|format_currency('EUR') }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+                <span>TVA ({{ (totals.vat_rate * 100)|round }}%)</span>
+                <span>{{ totals.vat_amount|format_currency('EUR') }}</span>
+            </div>
+            {% if totals.carrier_cost > 0 %}
+                <div class="flex justify-between text-sm">
+                    <span>Livraison</span>
+                    <span>{{ totals.carrier_cost|format_currency('EUR') }}</span>
+                </div>
+            {% endif %}
+            <hr>
+            <div class="flex justify-between text-lg font-bold">
+                <span>Total TTC</span>
+                <span>{{ totals.total|format_currency('EUR') }}</span>
+            </div>
+        </div>
+
+        {% if state.currentStep == 4 and state.identityCompleted and state.addressCompleted and state.deliveryCompleted %}
+            <div class="pt-4">
+                <button
+                    type="button"
+                    data-action="live#action"
+                    data-live-action-param="processPayment"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg"
+                >
+                    Payer {{ totals.total|format_currency('EUR') }}
+                </button>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="text-center text-gray-500 py-8">
+            <p>Votre panier est vide</p>
+            <a href="{{ path('homepage') }}" class="text-blue-600 hover:underline">Continuer mes achats</a>
+        </div>
+    {% endif %}
+</div>
