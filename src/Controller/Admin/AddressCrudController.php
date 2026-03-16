@@ -13,7 +13,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
-use EasyCorp\Bundle\EasyAdminBundle\Filter\TextFilter;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -36,8 +35,8 @@ class AddressCrudController extends AbstractCrudController
         return $filters
             ->add(EntityFilter::new('user')->autocomplete())
             ->add(ChoiceFilter::new('type')->setChoices([
-                'Delivery' => 'DELIVERY',
-                'Billing' => 'BILLING',
+                $this->translator->trans('addresstype.delivery.label') => AddressType::DELIVERY,
+                $this->translator->trans('addresstype.billing.label') => AddressType::BILLING,
             ]));
     }
 
@@ -47,12 +46,11 @@ class AddressCrudController extends AbstractCrudController
         return [
             IdField::new('id', 'ID')->hideOnForm(),
             AssociationField::new('user')
-                ->formatValue(static fn (User $user) => $user->getUsername())
-                ->setSortProperty('username'),
-            ChoiceField::new('type')->setChoices([
-                'Delivery' => 'DELIVERY',
-                'Billing' => 'BILLING',
-            ]),
+                ->formatValue(static fn (User $user) => $user->getEmail())
+                ->setSortProperty('email'),
+            ChoiceField::new('type', 'Type')
+                ->setChoices(AddressType::cases())
+                ->formatValue(fn (?AddressType $value) => $value?->trans($this->translator)),
             TextField::new('label', 'Intitulé'),
             TextField::new('firstname', 'Prénom'),
             TextField::new('lastname', 'Nom'),
