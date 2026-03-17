@@ -70,15 +70,14 @@
     {# Fonts Google Exo2 #}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap">
 
-    <link rel="icon"
-          href="{{ asset('carton-80x80.webp')}}">
+    <link rel="icon" href="{{ asset('carton-80x80.webp')}}">
     {% block stylesheets %}
     {% endblock %}
 
     {% block javascripts %}
-        {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% block importmap %}{{ importmap('app', {nonce: csp_nonce()}) }}{% endblock %}
     {% endblock %}
 </head>
 <body class="flex flex-col min-h-screen relative">
