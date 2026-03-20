@@ -29,6 +29,7 @@ final class CategoryController extends AbstractController
         }
 
         return $this->render('category/index.html.twig', [
+            'categoriesCount' => count($categories),
             'categories' => $categories,
         ]);
     }

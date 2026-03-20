@@ -6,6 +6,7 @@ use App\Entity\Cart;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
@@ -27,6 +28,7 @@ class CartCrudController extends AbstractCrudController
             ->setEntityLabelInPlural('Paniers')
             ->setTimezone('Europe/Paris')
             ->setDefaultSort(['created_at' => 'DESC'])
+            ->setTimezone('Europe/Paris')
         ;
     }
 
@@ -37,6 +39,8 @@ class CartCrudController extends AbstractCrudController
             IdField::new('id')->hideOnForm(),
             TextField::new('session_token')->onlyOnIndex(),
             AssociationField::new('user')->onlyOnIndex(),
+            DateTimeField::new('created_at'),
+            DateTimeField::new('updated_at'),
         ];
     }
 }
