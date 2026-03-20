@@ -6,6 +6,7 @@ use App\Entity\Carrier;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
@@ -25,6 +26,7 @@ class CarrierCrudController extends AbstractCrudController
         return [
             IdField::new('id')->hideOnForm(),
             TextField::new('name'),
+            NumberField::new('price')->setDecimalSeparator(',')->setNumDecimals(2),
             TextEditorField::new('description'),
             ImageField::new('logo', 'Logo')
                 ->setBasePath('uploads/images/carriers/')
