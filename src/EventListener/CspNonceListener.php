@@ -35,7 +35,8 @@ class CspNonceListener
         $response->headers->set(
             'Content-Security-Policy',
             "default-src 'none'; ".
-            "script-src 'self' 'nonce-$nonce'; ".
+            "manifest-src 'self'; ".
+            "script-src 'self' 'nonce-$nonce' data:; ".
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; ".
             "font-src 'self' https://fonts.gstatic.com data:; ".
             "img-src 'self' data: https://api.hardwarehouse.fr https://picsum.photos https://fastly.picsum.photos; ".
