@@ -43,22 +43,9 @@
                 <span>{{ totals.total|format_currency('EUR') }}</span>
             </div>
         </div>
-
-        {% if state.currentStep == 4 and state.identityCompleted and state.addressCompleted and state.deliveryCompleted %}
-            <div class="pt-4">
-                <button
-                    type="button"
-                    data-action="live#action"
-                    data-live-action-param="processPayment"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg"
-                >
-                    Payer {{ totals.total|format_currency('EUR') }}
-                </button>
-            </div>
-        {% endif %}
     {% else %}
         <div class="text-center text-gray-500 py-8">
-            <p>Votre panier est vide</p>
+            <p>Votre panier est vide.</p>
             <a href="{{ path('homepage') }}" class="text-blue-600 hover:underline">Continuer mes achats</a>
         </div>
     {% endif %}
