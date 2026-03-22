@@ -3,14 +3,16 @@
 {% block title %}{{ category.name }} - HardWareHouse{% endblock %}
 
 {% block body %}
-    <div class="relative flex flex-col md:flex-row gap-10">
-        <div class="basis-1/4 relative">
+    <div class="relative flex flex-col gap-10 lg:flex-row">
+        <div class="lg:w-72 lg:shrink-0">
             {% include '_partials/filters/_filters.html.twig' %}
         </div>
-        <div class="basis-3/4">
+
+        <div class="min-w-0 flex-1">
             <h1>Liste des produits - {{ category.name }}</h1>
+
             {% if products is not null %}
-                <div class="mt-5 grid gap-6 grid-cols-auto-fit-210">
+                <div class="mt-5 grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-5 items-stretch">
                     {% for product in products %}
                         {% include '_partials/_product_card.html.twig' with {product: product} %}
                     {% endfor %}
