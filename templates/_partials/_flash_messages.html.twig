@@ -1,6 +1,6 @@
 {% for label, messages in app.flashes %}
     {% for message in messages %}
-        <div data-controller="alert"
+        <div data-controller="shared--alert"
              class="flash-message flash-{{ label }} fixed top-4 right-4 flex gap-2 items-center z-99" role="alert">
             <div class="icon">
                 {% if label == "success" %}

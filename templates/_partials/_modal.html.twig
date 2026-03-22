@@ -1,18 +1,18 @@
-<div data-controller="modal" class="relative z-90">
+<div data-controller="shared--modal" class="relative z-90">
     <div
         class="fixed inset-0 hidden items-center justify-center bg-black/50"
-        data-modal-target="container"
+        data-shared--modal-target="container"
     >
         <div class="bg-white p-6 rounded shadow-xl w-[500px] relative">
 
             <button
                 class="absolute top-2 right-2 px-4 py-2"
-                data-action="modal#close"
+                data-action="shared--modal#close"
             >
                 ✕
             </button>
 
-            <turbo-frame id="modal_content" data-modal-target="content"></turbo-frame>
+            <turbo-frame id="modal_content" data-shared--modal-target="content"></turbo-frame>
 
         </div>
     </div>
