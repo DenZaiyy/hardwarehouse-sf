@@ -23,6 +23,12 @@ class CartLine
     #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: 2)]
     private ?string $unitPriceSnapshot = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: 2, nullable: true)]
+    private ?string $discountPriceSnapshot = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 15, scale: 2, nullable: true)]
+    private ?string $discountAmountSnapshot = null;
+
     #[ORM\Column(length: 100)]
     private ?string $productNameSnapshot = null;
 
@@ -79,6 +85,30 @@ class CartLine
     public function setUnitPriceSnapshot(string $unitPriceSnapshot): static
     {
         $this->unitPriceSnapshot = $unitPriceSnapshot;
+
+        return $this;
+    }
+
+    public function getDiscountPriceSnapshot(): ?string
+    {
+        return $this->discountPriceSnapshot;
+    }
+
+    public function setDiscountPriceSnapshot(?string $discountPriceSnapshot): static
+    {
+        $this->discountPriceSnapshot = $discountPriceSnapshot;
+
+        return $this;
+    }
+
+    public function getDiscountAmountSnapshot(): ?string
+    {
+        return $this->discountAmountSnapshot;
+    }
+
+    public function setDiscountAmountSnapshot(?string $discountAmountSnapshot): static
+    {
+        $this->discountAmountSnapshot = $discountAmountSnapshot;
 
         return $this;
     }

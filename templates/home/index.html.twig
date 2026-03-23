@@ -1,257 +1,380 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ 'home.title'|trans(domain="title") }} - HardWareHouse{% endblock %}
+{% block title %}{{ 'home.title'|trans(domain = 'title') }} - HardWareHouse{% endblock %}
 
 {% block body %}
-    <header class="relative">
-        <figure class="relative">
-            <img
-                class="w-full h-[500px] object-cover"
-                src="{{ asset('images/header_50.webp') }}"
-                alt="Exemple de configuration PC Haut de gamme"
-            >
-            <div class="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent"></div>
-
-            <figcaption class="absolute bottom-20 left-0 right-0 text-center px-4">
-                <p class="text-white/70 text-sm font-display uppercase tracking-widest mb-2">Spécialiste composants PC</p>
-                <h1 class="text-white text-3xl md:text-5xl font-bold font-title tracking-tight leading-tight mb-4">
-                    Construis ton PC<br>
-                    <span class="text-blue-300">pièce par pièce.</span>
-                </h1>
-                <p class="text-white/70 text-base max-w-xl mx-auto">
-                    GPU, CPU, cartes mères, RAM, SSD — sélectionnés pour la performance et la compatibilité.
-                </p>
-            </figcaption>
-
-            <div class="absolute bottom-6 left-0 right-0 flex justify-center gap-3 px-4">
-                <a href="{{ path('product.index') }}"
-                   class="rounded-full py-2.5 px-6 bg-secondary text-white font-display text-sm font-semibold hover:bg-primary transition-colors no-underline">
-                    Explorer les composants
-                </a>
-                <a href="#builds"
-                   class="rounded-full py-2.5 px-6 border border-white/40 text-white font-display text-sm font-semibold hover:bg-white/10 transition-colors no-underline">
-                    Voir les builds recommandés
-                </a>
+    <div class="relative overflow-hidden bg-white">
+        {# HERO #}
+        <section
+            data-controller="homepage--home-hero"
+            class="relative isolate min-h-[calc(100vh-140px)] bg-primary"
+        >
+            <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.10),transparent_40%),linear-gradient(to_bottom,rgba(22,32,51,0.25),rgba(22,32,51,0.82))]"></div>
+                <div class="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(rgba(255,255,255,.22)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.22)_1px,transparent_1px)] [background-size:48px_48px]"></div>
             </div>
-        </figure>
 
-        <div class="bg-primary text-white">
-            <div class="max-w-6xl mx-auto grid grid-cols-3 divide-x divide-white/10">
-                <div class="flex flex-col items-center py-4 px-6">
-                    <span class="font-title font-bold text-2xl text-blue-300">2 000+</span>
-                    <span class="text-white/60 text-xs uppercase tracking-wider mt-0.5">Références en stock</span>
-                </div>
-                <div class="flex flex-col items-center py-4 px-6">
-                    <span class="font-title font-bold text-2xl text-blue-300">24h</span>
-                    <span class="text-white/60 text-xs uppercase tracking-wider mt-0.5">Livraison express</span>
-                </div>
-                <div class="flex flex-col items-center py-4 px-6">
-                    <span class="font-title font-bold text-2xl text-blue-300">4.9 ★</span>
-                    <span class="text-white/60 text-xs uppercase tracking-wider mt-0.5">Note clients</span>
-                </div>
-            </div>
-        </div>
-    </header>
+            <div class="relative mx-auto grid min-h-[calc(100vh-140px)] max-w-7xl items-center gap-10 px-4 py-10 md:grid-cols-2 md:px-6 lg:px-8">
+                <div class="relative z-10 max-w-2xl">
+                    <span
+                        data-homepage--home-hero-target="eyebrow"
+                        class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-blue-200 backdrop-blur-sm"
+                    >
+                        <span class="h-1.5 w-1.5 rounded-full bg-blue-300"></span>
+                        {{ hero.eyebrow }}
+                    </span>
 
-    {# CATÉGORIES #}
-    <section class="py-14 px-4 max-w-6xl mx-auto">
-        <div class="flex items-end justify-between mb-8">
-            <div>
-                <span class="text-xs font-semibold text-secondary uppercase tracking-widest">Catalogue</span>
-                <h2 class="mt-1">Toutes les catégories</h2>
-            </div>
-            <a href="{{ path('category.index') }}"
-               class="text-sm font-semibold text-secondary no-underline hover:underline">
-                Voir tout →
-            </a>
-        </div>
+                    <h1
+                        data-homepage--home-hero-target="title"
+                        class="mt-6 max-w-xl text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl"
+                    >
+                        {{ hero.title }}
+                        <span class="mt-2 block text-blue-300">{{ hero.highlight }}</span>
+                    </h1>
 
-        <div class="grid grid-cols-auto-fit-210 gap-4">
-            {% for cat in featured_categories %}
-                <a href="{{ path('category.show', { slug: cat.slug }) }}"
-                   class="group relative h-44 rounded-[--radius-section] overflow-hidden no-underline
-                          shadow-sm hover:shadow-xl transition-shadow duration-300">
+                    <p
+                        data-homepage--home-hero-target="text"
+                        class="mt-6 max-w-xl text-base leading-7 text-white/72 sm:text-lg"
+                    >
+                        {{ hero.description }}
+                    </p>
 
-                    {% if cat.logo %}
-                        <img
-                            src="{{ cat.logo }}"
-                            alt="{{ cat.name }}"
-                            class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    <div
+                        data-homepage--home-hero-target="actions"
+                        class="mt-8 flex flex-col gap-3 sm:flex-row"
+                    >
+                        <a
+                            href="{{ hero.primary_cta_url }}"
+                            class="inline-flex items-center justify-center gap-2 rounded-full bg-secondary px-6 py-3 text-sm font-semibold text-white no-underline shadow-[0_16px_40px_rgba(0,0,0,.24)] transition duration-300 hover:-translate-y-0.5 hover:bg-white hover:text-primary"
                         >
-                    {% else %}
-                        <div class="absolute inset-0 bg-gradient-to-br from-primary to-secondary/60"></div>
-                    {% endif %}
+                            {{ hero.primary_cta_label }}
+                            <span aria-hidden="true">→</span>
+                        </a>
 
-                    {# Dégradé permanent #}
-                    <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent"></div>
-
-                    {# Flash couleur au hover #}
-                    <div class="absolute inset-0 bg-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                    <div class="absolute bottom-0 left-0 right-0 p-4">
-                        <h3 class="text-white text-sm font-bold font-title leading-tight mb-0.5 drop-shadow">
-                            {{ cat.name }}
-                        </h3>
-                        <p class="text-white/60 text-xs">{{ cat.productsCount }} produits</p>
+                        <a
+                            href="{{ hero.secondary_cta_url }}"
+                            class="inline-flex items-center justify-center rounded-full border border-white/18 bg-white/7 px-6 py-3 text-sm font-semibold text-white no-underline backdrop-blur-sm transition duration-300 hover:border-white/35 hover:bg-white/12"
+                        >
+                            {{ hero.secondary_cta_label }}
+                        </a>
                     </div>
-
-                    <span class="absolute top-3 right-3 text-white/40 group-hover:text-white
-                                 group-hover:translate-x-0.5 group-hover:-translate-y-0.5
-                                 transition-all duration-200 text-base leading-none">↗</span>
-                </a>
-            {% endfor %}
-        </div>
-    </section>
-
-    {# PRODUITS PHARES #}
-    {% if featured_products is defined and featured_products is not empty %}
-        <section class="py-14 px-4 bg-slate-50">
-            <div class="max-w-6xl mx-auto">
-                <div class="flex items-end justify-between mb-8">
-                    <div>
-                        <span class="text-xs font-semibold text-secondary uppercase tracking-widest">Sélection</span>
-                        <h2 class="mt-1">Produits phares</h2>
-                    </div>
-                    <a href="{{ path('product.index') }}"
-                       class="text-sm font-semibold text-secondary no-underline hover:underline">
-                        Tout voir →
-                    </a>
                 </div>
 
-                <div class="grid grid-cols-auto-fit-210 gap-5">
-                    {% for product in featured_products %}
-                        <article class="bg-white border border-slate-200 rounded-[--radius-section] overflow-hidden
-                                    hover:border-secondary hover:shadow-lg transition-all duration-200 flex flex-col">
-                            <a href="{{ path('product.show', { slug: product.slug }) }}"
-                               class="block overflow-hidden no-underline">
-                                {% if product.mainImage %}
-                                    <img
-                                        src="{{ asset('uploads/products/' ~ product.mainImage) }}"
-                                        alt="{{ product.name }}"
-                                        class="w-full h-44 object-contain p-4 hover:scale-105 transition-transform duration-300"
-                                    >
-                                {% else %}
-                                    <div class="w-full h-44 bg-slate-100 flex items-center justify-center text-5xl">📦</div>
-                                {% endif %}
-                            </a>
+                <div
+                    data-homepage--home-hero-target="visual"
+                    class="relative z-10 flex justify-center md:justify-end"
+                >
+                    <div class="group relative w-full max-w-xl overflow-hidden rounded-[28px] border border-white/12 bg-white/8 p-3 shadow-[0_30px_80px_rgba(0,0,0,.38)] backdrop-blur-sm">
+                        <div class="absolute inset-0 rounded-[24px] bg-gradient-to-br from-white/10 via-transparent to-transparent"></div>
+                        <div class="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent"></div>
 
-                            <div class="p-4 flex flex-col flex-1">
-                                {% if product.brand %}
-                                    <span class="text-xs font-semibold text-secondary uppercase tracking-wider mb-1">
-                                    {{ product.brand.name }}
-                                </span>
-                                {% endif %}
+                        <figure class="relative overflow-hidden rounded-[22px] border border-white/10 bg-slate-950">
+                            <img
+                                data-homepage--home-hero-target="image"
+                                fetchpriority="high"
+                                src="{{ asset(hero.image) }}"
+                                alt="Configuration PC premium"
+                                class="h-[320px] w-full object-cover sm:h-[420px] lg:h-[520px]"
+                            >
 
-                                <a href="{{ path('product.show', { slug: product.slug }) }}"
-                                   class="font-title font-bold text-sm text-slate-800 leading-snug mb-3 hover:text-secondary transition-colors no-underline line-clamp-2">
-                                    {{ product.name }}
-                                </a>
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent"></div>
 
-                                <div class="flex-1"></div>
+                            <div class="absolute left-4 top-4 flex items-center gap-2 rounded-full border border-white/12 bg-slate-950/55 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.20em] text-white/80 backdrop-blur-sm">
+                                <span class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_16px_rgba(52,211,153,.8)]"></span>
+                                Build ready
+                            </div>
 
-                                <div class="flex items-center justify-between mt-2">
-                                <span class="font-title font-bold text-lg text-primary">
-                                    {{ product.price|number_format(2, ',', ' ') }} €
-                                </span>
-                                    <button type="button"
-                                            class="bg-secondary hover:bg-primary text-white rounded-lg px-3 py-2 text-xs font-semibold transition-colors">
-                                        + Panier
-                                    </button>
+                            <div class="absolute bottom-4 left-4 right-4 grid gap-3 sm:grid-cols-2">
+                                <div class="rounded-2xl border border-white/10 bg-slate-950/55 p-4 backdrop-blur-md">
+                                    <p class="text-[11px] uppercase tracking-[0.22em] text-white/45">Focus</p>
+                                    <p class="mt-2 text-sm font-semibold text-white">Composants triés pour la performance</p>
+                                </div>
+                                <div class="rounded-2xl border border-white/10 bg-slate-950/55 p-4 backdrop-blur-md">
+                                    <p class="text-[11px] uppercase tracking-[0.22em] text-white/45">Objectif</p>
+                                    <p class="mt-2 text-sm font-semibold text-white">Une expérience e-commerce plus premium</p>
                                 </div>
                             </div>
-                        </article>
+                        </figure>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative z-10 border-t border-white/10 bg-slate-950/18 backdrop-blur-sm">
+                <div
+                    data-homepage--home-hero-target="stats"
+                    data-controller="homepage--stats-counter"
+                    class="mx-auto grid max-w-7xl grid-cols-1 divide-y divide-white/10 px-4 sm:grid-cols-3 sm:divide-x sm:divide-y-0 md:px-6 lg:px-8"
+                >
+                    {% for stat in stats %}
+                        <div class="flex flex-col items-center px-6 py-5 text-center">
+                            <span
+                                data-homepage--stats-counter-target="number"
+                                data-value="{{ stat.number }}"
+                                data-decimals="{{ stat.decimals|default(0) }}"
+                                data-suffix="{{ stat.suffix|default('') }}"
+                                class="font-title text-3xl font-bold text-blue-300"
+                            >
+                                0
+                            </span>
+                            <span class="mt-1 text-xs uppercase tracking-[0.22em] text-white/52">{{ stat.label }}</span>
+                        </div>
                     {% endfor %}
                 </div>
             </div>
         </section>
-    {% endif %}
 
-    {# BANNIÈRE PROMO #}
-    <section class="py-14 px-4 max-w-6xl mx-auto">
-        <div class="relative bg-primary rounded-[--radius-section] overflow-hidden px-8 py-12 flex flex-col md:flex-row items-center justify-between gap-8">
-            <div class="absolute -right-20 -top-20 w-72 h-72 rounded-full bg-secondary/20 pointer-events-none"></div>
-            <div class="absolute -right-4 -bottom-16 w-48 h-48 rounded-full bg-white/5 pointer-events-none"></div>
+        {# CATEGORIES #}
+        <section
+            id="home-categories"
+            data-controller="shared--reveal"
+            class="relative mx-auto max-w-7xl px-4 py-18 md:px-6 lg:px-8"
+        >
+            <div class="mb-8 flex items-end justify-between gap-4">
+                <div class="max-w-xl">
+                    <span class="text-xs font-semibold uppercase tracking-[0.22em] text-secondary">Catalogue</span>
+                    <h2 class="mt-2">Explore les catégories les plus recherchées</h2>
+                    <p class="mt-3 text-slate-500">
+                        Une entrée rapide vers les univers les plus demandés, avec une présentation plus premium et plus lisible.
+                    </p>
+                </div>
 
-            <div class="relative z-10">
-                <span class="inline-block bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4">
-                    Offre limitée
-                </span>
-                <h2 class="text-white text-3xl md:text-4xl font-title font-bold tracking-tight leading-tight mb-3">
-                    -15% sur tous<br>les processeurs
-                </h2>
-                <p class="text-white/60 text-sm max-w-md">
-                    Du 1<sup>er</sup> au 31 mars. Profite de nos meilleures offres sur les CPU Intel et AMD de dernière génération.
+                <a
+                    href="{{ path('category.index') }}"
+                    class="hidden text-sm font-semibold text-secondary no-underline transition hover:text-primary md:inline-flex"
+                >
+                    Voir toutes les catégories →
+                </a>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+                {% for cat in featured_categories %}
+                    <a
+                        href="{{ path('category.show', { slug: cat.slug }) }}"
+                        data-shared--reveal-target="item"
+                        class="group relative min-h-[320px] overflow-hidden rounded-[24px] border border-slate-200/80 bg-slate-950 no-underline shadow-[0_14px_40px_rgba(15,23,42,.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(15,23,42,.16)]"
+                    >
+                        {% if cat.logo %}
+                            <img
+                                src="{{ cat.logo }}"
+                                alt="{{ cat.name }}"
+                                class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.06]"
+                            >
+                        {% else %}
+                            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,.14),transparent_30%),linear-gradient(135deg,rgba(22,32,51,1),rgba(82,111,184,.75))]"></div>
+                        {% endif %}
+
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/45 to-transparent"></div>
+                        <div class="absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100 bg-[linear-gradient(135deg,transparent,rgba(255,255,255,.08),transparent)]"></div>
+
+                        <div class="relative z-10 flex h-full flex-col justify-between p-5">
+                            <div class="flex items-start justify-between">
+                                <span class="rounded-full border border-white/12 bg-white/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/72 backdrop-blur-sm">
+                                    {{ loop.index < 10 ? '0' ~ loop.index : loop.index }}
+                                </span>
+                                <span class="text-2xl text-white/35 transition duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-white">↗</span>
+                            </div>
+
+                            <div>
+                                <h3 class="text-xl font-bold text-white">{{ cat.name }}</h3>
+                                <p class="mt-2 text-sm text-white/62">{{ cat.productsCount }} produits</p>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+
+            <div class="mt-6 md:hidden">
+                <a
+                    href="{{ path('category.index') }}"
+                    class="inline-flex text-sm font-semibold text-secondary no-underline"
+                >
+                    Voir toutes les catégories →
+                </a>
+            </div>
+        </section>
+
+        {# PROMO #}
+        <section
+            data-controller="shared--reveal homepage--promo-motion"
+            class="mx-auto max-w-7xl px-4 pb-18 md:px-6 lg:px-8"
+        >
+            <div class="relative overflow-hidden rounded-[28px] border border-primary/10 bg-primary px-6 py-8 shadow-[0_20px_70px_rgba(15,23,42,.14)] sm:px-8 sm:py-10 lg:px-12">
+                <div class="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.5)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.5)_1px,transparent_1px)] [background-size:44px_44px]"></div>
+                <div data-homepage--promo-motion-target="orbOne" class="absolute -right-14 -top-12 h-44 w-44 rounded-full bg-secondary/30 blur-3xl"></div>
+                <div data-homepage--promo-motion-target="orbTwo" class="absolute bottom-0 left-[10%] h-36 w-36 rounded-full bg-white/10 blur-3xl"></div>
+
+                <div class="relative z-10 grid items-center gap-8 lg:grid-cols-[1.4fr_auto]">
+                    <div class="max-w-2xl">
+                        <span class="inline-flex rounded-full bg-yellow-400 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.22em] text-yellow-950">
+                            {{ promo.badge }}
+                        </span>
+
+                        <h2 class="mt-4 text-3xl font-bold leading-tight text-white md:text-4xl">
+                            {{ promo.title }}
+                        </h2>
+
+                        <p class="mt-4 max-w-xl text-sm leading-7 text-white/72 md:text-base">
+                            {{ promo.description }}
+                        </p>
+                    </div>
+
+                    <div class="flex">
+                        <a
+                            href="{{ promo.cta_url }}"
+                            class="inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-primary no-underline shadow-[0_14px_34px_rgba(0,0,0,.18)] transition duration-300 hover:-translate-y-0.5 hover:bg-blue-50"
+                        >
+                            {{ promo.cta_label }}
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        {# PRODUITS PHARES #}
+        {% if featured_products is defined and featured_products is not empty %}
+            <section
+                data-controller="shared--reveal"
+                class="bg-slate-50/70 py-18"
+            >
+                <div class="mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
+                    <div class="mb-8 flex items-end justify-between gap-4">
+                        <div class="max-w-xl">
+                            <span class="text-xs font-semibold uppercase tracking-[0.22em] text-secondary">Sélection</span>
+                            <h2 class="mt-2">Produits phares</h2>
+                            <p class="mt-3 text-slate-500">
+                                Une sélection mise en avant pour renforcer la dimension premium et commerciale de la homepage.
+                            </p>
+                        </div>
+
+                        <a
+                            href="{{ path('product.index') }}"
+                            class="hidden text-sm font-semibold text-secondary no-underline transition hover:text-primary md:inline-flex"
+                        >
+                            Tout voir →
+                        </a>
+                    </div>
+
+                    <div class="grid grid-cols-auto-fit-210 gap-5">
+                        {% for product in featured_products %}
+                            <article
+                                data-shared--reveal-target="item"
+                                class="group flex flex-col overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_12px_32px_rgba(15,23,42,.06)] transition duration-300 hover:-translate-y-1 hover:border-secondary/40 hover:shadow-[0_18px_48px_rgba(15,23,42,.12)]"
+                            >
+                                <a href="{{ path('product.show', { slug: product.slug }) }}" class="relative block overflow-hidden no-underline">
+                                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(82,111,184,.10),transparent_50%)]"></div>
+
+                                    {% if product.mainImage %}
+                                        <img
+                                            src="{{ asset('uploads/products/' ~ product.mainImage) }}"
+                                            alt="{{ product.name }}"
+                                            class="h-52 w-full object-contain p-5 transition duration-500 group-hover:scale-[1.05]"
+                                        >
+                                    {% else %}
+                                        <div class="flex h-52 w-full items-center justify-center bg-slate-100 text-5xl">📦</div>
+                                    {% endif %}
+                                </a>
+
+                                <div class="flex flex-1 flex-col p-5">
+                                    {% if product.brand %}
+                                        <span class="text-[11px] font-semibold uppercase tracking-[0.22em] text-secondary">
+                                            {{ product.brand.name }}
+                                        </span>
+                                    {% endif %}
+
+                                    <a
+                                        href="{{ path('product.show', { slug: product.slug }) }}"
+                                        class="mt-2 line-clamp-2 font-title text-base font-bold leading-snug text-slate-800 no-underline transition hover:text-secondary"
+                                    >
+                                        {{ product.name }}
+                                    </a>
+
+                                    <div class="mt-5 flex-1"></div>
+
+                                    <div class="mt-4 flex items-center justify-between gap-3">
+                                        <span class="font-title text-xl font-bold text-primary">
+                                            {{ product.price|number_format(2, ',', ' ') }} €
+                                        </span>
+
+                                        <button
+                                            type="button"
+                                            class="rounded-full bg-secondary px-4 py-2 text-xs font-semibold text-white transition duration-300 hover:bg-primary"
+                                        >
+                                            + Panier
+                                        </button>
+                                    </div>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mt-6 md:hidden">
+                        <a
+                            href="{{ path('product.index') }}"
+                            class="inline-flex text-sm font-semibold text-secondary no-underline"
+                        >
+                            Tout voir →
+                        </a>
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+
+        {# PERKS #}
+        <section
+            data-controller="shared--reveal"
+            class="mx-auto max-w-7xl px-4 py-18 md:px-6 lg:px-8"
+        >
+            <div class="mx-auto max-w-2xl text-center">
+                <span class="text-xs font-semibold uppercase tracking-[0.22em] text-secondary">Pourquoi HardWareHouse</span>
+                <h2 class="mt-2">Une expérience plus claire, plus technique, plus premium</h2>
+                <p class="mt-4 text-slate-500">
+                    Ce bloc garde ton angle e-commerce, mais le présente avec une hiérarchie plus premium et plus orientée confiance.
                 </p>
             </div>
 
-            <a href="{{ path('category.show', { slug: 'processeurs' }) }}"
-               class="relative z-10 flex-shrink-0 rounded-full bg-white text-primary font-display font-bold text-sm px-8 py-3 no-underline hover:bg-blue-50 transition-colors shadow-lg">
-                Voir les offres →
-            </a>
-        </div>
-    </section>
-
-    {# POURQUOI NOUS #}
-    <section class="py-14 px-4 bg-slate-50">
-        <div class="max-w-6xl mx-auto">
-            <div class="text-center mb-10">
-                <span class="text-xs font-semibold text-secondary uppercase tracking-widest">Pourquoi HardwareHouse</span>
-                <h2 class="mt-1">Ton partenaire hardware de confiance</h2>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {% set perks = [
-                    {
-                        icon: 'ph:lightning-duotone',
-                        title: 'Livraison express 24h',
-                        desc: 'Commande avant 16h, reçois le lendemain. Expédition depuis notre entrepôt en Alsace.'
-                    },
-                    {
-                        icon: 'ph:magnifying-glass-duotone',
-                        title: 'Expertise technique',
-                        desc: 'Notre équipe valide la compatibilité de chaque composant. Conseils personnalisés disponibles.'
-                    },
-                    {
-                        icon: 'ph:trophy-duotone',
-                        title: 'Meilleur prix garanti',
-                        desc: 'On s\'aligne sur n\'importe quel concurrent agréé. Prix compétitifs tous les jours.'
-                    },
-                    {
-                        icon: 'ph:shield-check-duotone',
-                        title: 'Garantie constructeur',
-                        desc: 'Tous les produits bénéficient de la garantie officielle. SAV réactif et retours simplifiés.'
-                    },
-                ] %}
-
+            <div class="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
                 {% for perk in perks %}
-                    <div class="bg-white border border-slate-200 rounded-[--radius-section] p-6 flex flex-col gap-4
-                                hover:border-secondary hover:shadow-md transition-all duration-200">
-                        {# Icône grande dans un carré aux couleurs du thème #}
-                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-white bg-primary">
-                            {{ ux_icon(perk.icon, { class: 'w-7 h-7' }) }}
+                    <article
+                        data-shared--reveal-target="item"
+                        class="group rounded-[24px] border border-slate-200 bg-white p-6 shadow-[0_12px_30px_rgba(15,23,42,.05)] transition duration-300 hover:-translate-y-1 hover:border-secondary/40 hover:shadow-[0_18px_44px_rgba(15,23,42,.12)]"
+                    >
+                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-white shadow-[0_12px_28px_rgba(22,32,51,.20)] transition duration-300 group-hover:scale-105 group-hover:bg-secondary">
+                            {{ ux_icon(perk.icon, { class: 'h-7 w-7' }) }}
                         </div>
-                        <div>
-                            <h3 class="text-slate-800 font-bold mb-1.5">{{ perk.title }}</h3>
-                            <p class="text-slate-500 text-xs leading-relaxed">{{ perk.desc }}</p>
-                        </div>
-                    </div>
+
+                        <h3 class="mt-5 text-lg font-bold text-slate-800">{{ perk.title }}</h3>
+                        <p class="mt-3 text-sm leading-7 text-slate-500">{{ perk.desc }}</p>
+                    </article>
                 {% endfor %}
             </div>
-        </div>
-    </section>
+        </section>
 
-    {# MARQUES #}
-    <section class="py-12 px-4 max-w-6xl mx-auto text-center">
-        <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-8">
-            Les marques que nous distribuons
-        </p>
-        <div class="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
-            {% for brand in brands %}
-                <span class="font-title font-extrabold text-xl text-slate-400 hover:text-primary transition-colors cursor-default tracking-tight">
-                    {{ brand.name }}
-                </span>
-            {% endfor %}
-        </div>
-    </section>
+        {# MARQUES #}
+        <section
+            data-controller="shared--reveal homepage--brands-marquee"
+            class="border-t border-slate-100 bg-slate-50/70 py-16"
+        >
+            <div class="mx-auto max-w-7xl px-4 text-center md:px-6 lg:px-8">
+                <p class="text-xs font-semibold uppercase tracking-[0.26em] text-slate-400">
+                    Les marques que nous distribuons
+                </p>
 
+                <div class="mt-8 overflow-hidden">
+                    <div
+                        data-homepage--brands-marquee-target="track"
+                        class="flex min-w-max items-center gap-10 whitespace-nowrap pl-6 will-change-transform"
+                    >
+                        {% for i in 1..2 %}
+                            {% for brand in brands %}
+                                <span class="font-title text-2xl font-extrabold tracking-tight text-slate-400 transition duration-300 hover:text-primary">
+                                    {{ brand.name }}
+                                </span>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
 {% endblock %}

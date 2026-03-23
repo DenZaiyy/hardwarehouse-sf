@@ -65,42 +65,33 @@
                     Ajouter une nouvelle adresse
                 </button>
             </div>
+        {% endif %}
 
-            {# Optionnel : afficher aussi le form en dessous si tu veux un mode mixte #}
-            {{ form_start(form, {
-                attr: {
-                    'data-model': 'on(change)|*',
-                    'data-action': 'live#action:prevent',
-                    'data-live-action-param': 'saveAddress',
-                    'class': 'hidden'
-                }
-            }) }}
-            {{ form_widget(form) }}
-            {{ form_end(form) }}
+        {% if shouldShowAddressForm %}
+            <div data-live-update-on="address-form-update">
+                {{ form_start(form, {
+                    attr: {
+                        'data-model': 'on(change)|*',
+                        'data-action': 'submit->live#action:prevent',
+                        'data-live-action-param': 'saveAddress'
+                    }
+                }) }}
+                <div class="grid gap-4 md:grid-cols-2">
+                    {{ form_row(form.label) }}
+                    <div></div>
+                    {{ form_row(form.firstName) }}
+                    {{ form_row(form.lastName) }}
+                    {{ form_row(form.address1) }}
+                    {{ form_row(form.postcode) }}
+                    {{ form_row(form.city) }}
+                    {{ form_row(form.country) }}
+                </div>
 
-        {% else %}
-            {{ form_start(form, {
-                attr: {
-                    'data-model': 'on(change)|*',
-                    'data-action': 'live#action:prevent',
-                    'data-live-action-param': 'saveAddress'
-                }
-            }) }}
-            <div class="grid gap-4 md:grid-cols-2">
-                {{ form_row(form.label) }}
-                <div></div>
-                {{ form_row(form.firstName) }}
-                {{ form_row(form.lastName) }}
-                {{ form_row(form.address1) }}
-                {{ form_row(form.postcode) }}
-                {{ form_row(form.city) }}
-                {{ form_row(form.country) }}
+                <button type="submit" class="mt-4 rounded border px-4 py-2">
+                    Enregistrer l'adresse
+                </button>
+                {{ form_end(form) }}
             </div>
-
-            <button type="submit" class="mt-4 rounded border px-4 py-2">
-                Enregistrer l'adresse
-            </button>
-            {{ form_end(form) }}
         {% endif %}
     {% endif %}
 </section>

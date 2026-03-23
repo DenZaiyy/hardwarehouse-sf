@@ -171,3 +171,7 @@ shipmentStatus:
         label: 'In transit'
     delivered:
         label: Delivered
+cart:
+    summary:
+        title: __cart.summary.title
+        articles: __cart.summary.articles

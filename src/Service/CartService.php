@@ -101,7 +101,7 @@ class CartService
     }
 
     /**
-     * @return array<string, array{productId: string, quantity: int, remaining_stock: int, category: string, name: string, price_ht: float, price_ttc: float, imageUrl: string, slug: string}>
+     * @return array<string, array{productId: string, quantity: int, remaining_stock: int, category: string, name: string, price_ht: float, price_ttc: float, effective_ht: float, effective_ttc: float, imageUrl: string, slug: string, discount_price: float|null, discount_amount: float|null, promote: bool}>
      */
     public function getCart(): array
     {
@@ -124,7 +124,16 @@ class CartService
             }
 
             $priceHt = (float) $cartLine->getUnitPriceSnapshot();
-            $priceTtc = $priceHt * (1 + self::VAT_RATE);
+
+            $discountPrice = null !== $cartLine->getDiscountPriceSnapshot()
+                ? (float) $cartLine->getDiscountPriceSnapshot()
+                : null;
+
+            $discountAmount = null !== $cartLine->getDiscountAmountSnapshot()
+                ? (float) $cartLine->getDiscountAmountSnapshot()
+                : null;
+
+            $effectivePriceHt = $discountPrice ?? $priceHt;
 
             $result[$cartLine->getProductId()] = [
                 'productId' => $productId,
@@ -133,9 +142,14 @@ class CartService
                 'category' => $category,
                 'name' => $name,
                 'price_ht' => $priceHt,
-                'price_ttc' => $priceTtc,
+                'price_ttc' => $priceHt * (1 + self::VAT_RATE),
+                'effective_ht' => $effectivePriceHt,
+                'effective_ttc' => $effectivePriceHt * (1 + self::VAT_RATE),
                 'imageUrl' => $cartLine->getProductImageSnapshot() ?? '',
                 'slug' => $slug,
+                'discount_price' => $discountPrice,
+                'discount_amount' => $discountAmount,
+                'promote' => null !== $discountPrice,
             ];
         }
 
@@ -150,7 +164,8 @@ class CartService
         $subtotal = 0.0;
 
         foreach ($this->getCart() as $item) {
-            $subtotal += $item['price_ht'] * $item['quantity'];
+            $effectivePrice = $item['discount_price'] ?? $item['price_ht'];
+            $subtotal += $effectivePrice * $item['quantity'];
         }
 
         $vatAmount = $subtotal * self::VAT_RATE;
@@ -284,6 +299,11 @@ class CartService
         $cartLine->setProductCategorySnapshot($category->getName());
         $cartLine->setStockSnapshot($product->stock->quantity ?? 0);
         $cartLine->setCart($cart);
+
+        if ($product->promote && null !== $product->discountPrice && null !== $product->discountAmount) {
+            $cartLine->setDiscountPriceSnapshot((string) $product->discountPrice);
+            $cartLine->setDiscountAmountSnapshot((string) $product->discountAmount);
+        }
 
         return $cartLine;
     }
