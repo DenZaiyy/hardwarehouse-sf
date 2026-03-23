@@ -58,17 +58,6 @@ final class CheckoutComponent
         return $user instanceof User ? $user : null;
     }
 
-    public function hasSavedDeliveryAddresses(): bool
-    {
-        $user = $this->getUser();
-
-        if (!$user) {
-            return false;
-        }
-
-        return \count($this->addressManager->getUserAddressesByType($user, AddressType::DELIVERY)) > 0;
-    }
-
     /**
      * @return list<array{id: int|null, label: string|null, firstName: string|null, lastName: string|null, address1: string|null, postcode: string|null, city: string|null, country: string|null, isDefault: bool|null}>
      */
@@ -82,7 +71,12 @@ final class CheckoutComponent
 
         $addresses = $this->addressManager->getUserAddressesByType($user, AddressType::DELIVERY);
 
-        return array_values(array_map(static fn ($address): array => [
+        return array_values(array_map($this->mapAddressToArray(...), $addresses));
+    }
+
+    private function mapAddressToArray($address): array
+    {
+        return [
             'id' => $address->getId(),
             'label' => $address->getLabel(),
             'firstName' => $address->getFirstName(),
@@ -92,14 +86,29 @@ final class CheckoutComponent
             'city' => $address->getCity(),
             'country' => $address->getCountry()?->value,
             'isDefault' => $address->isDefault(),
-        ], $addresses));
+        ];
     }
 
     public function shouldShowAddressSelection(): bool
     {
-        return 2 === $this->getState()->currentStep
-            && $this->getUser() instanceof User
-            && $this->hasSavedDeliveryAddresses();
+        $state = $this->getState();
+        $user = $this->getUser();
+
+        return 2 === $state->currentStep
+            && $user instanceof User
+            && \count($this->addressManager->getUserAddressesByType($user, AddressType::DELIVERY)) > 0
+            && !$state->showAddressForm;
+    }
+
+    public function shouldShowAddressForm(): bool
+    {
+        $state = $this->getState();
+        $user = $this->getUser();
+
+        return 2 === $state->currentStep
+            && (!$user instanceof User
+                || 0 === \count($this->addressManager->getUserAddressesByType($user, AddressType::DELIVERY))
+                || $state->showAddressForm);
     }
 
     public function mount(): void
@@ -124,42 +133,69 @@ final class CheckoutComponent
         $state = $this->getState();
 
         if (1 === $state->currentStep && 'guest' === $state->identityMode) {
-            $identity = $state->identity;
-            $data = new GuestIdentityData();
-            $data->title = $identity['title'] ?? null;
-            $data->firstName = $identity['firstName'] ?? null;
-            $data->lastName = $identity['lastName'] ?? null;
-            $data->email = $identity['email'] ?? null;
-
-            return $this->formFactory->create(GuestIdentityType::class, $data);
+            return $this->createGuestForm($state);
         }
 
-        if (2 === $state->currentStep) {
-            $identity = $state->identity;
-            $deliveryAddress = $state->deliveryAddress;
-
-            $data = new AddressData();
-            $data->label = $deliveryAddress['label'] ?? 'Domicile';
-            $data->firstName = $deliveryAddress['firstName'] ?? ($identity['firstName'] ?? null);
-            $data->lastName = $deliveryAddress['lastName'] ?? ($identity['lastName'] ?? null);
-            $data->address1 = $deliveryAddress['address1'] ?? null;
-            $data->postcode = $deliveryAddress['postcode'] ?? null;
-            $data->city = $deliveryAddress['city'] ?? null;
-            $data->country = $deliveryAddress['country'] ?? 'FR';
-
-            return $this->formFactory->create(CheckoutAddressType::class, $data);
+        if (2 === $state->currentStep && $this->shouldShowAddressForm()) {
+            return $this->createAddressForm($state);
         }
 
         if (3 === $state->currentStep) {
-            $data = new DeliveryChoiceData();
-            $data->carrierId = $state->carrierId;
-
-            return $this->formFactory->create(DeliveryChoiceType::class, $data, [
-                'carriers' => $this->deliveryManager->getCarriers($state),
-            ]);
+            return $this->createDeliveryForm($state);
         }
 
-        return $this->formFactory->create(GuestIdentityType::class, new GuestIdentityData());
+        return $this->createDefaultForm();
+    }
+
+    private function createGuestForm(CheckoutState $state): FormInterface
+    {
+        $identity = $state->identity;
+        $data = new GuestIdentityData();
+        $data->title = $identity['title'] ?? null;
+        $data->firstName = $identity['firstName'] ?? null;
+        $data->lastName = $identity['lastName'] ?? null;
+        $data->email = $identity['email'] ?? null;
+
+        return $this->formFactory->create(GuestIdentityType::class, $data, [
+            'csrf_protection' => false,
+        ]);
+    }
+
+    private function createAddressForm(CheckoutState $state): FormInterface
+    {
+        $identity = $state->identity;
+        $deliveryAddress = $state->deliveryAddress;
+
+        $data = new AddressData();
+        $data->label = $deliveryAddress['label'] ?? 'Domicile';
+        $data->firstName = $deliveryAddress['firstName'] ?? ($identity['firstName'] ?? null);
+        $data->lastName = $deliveryAddress['lastName'] ?? ($identity['lastName'] ?? null);
+        $data->address1 = $deliveryAddress['address1'] ?? null;
+        $data->postcode = $deliveryAddress['postcode'] ?? null;
+        $data->city = $deliveryAddress['city'] ?? null;
+        $data->country = $deliveryAddress['country'] ?? 'FR';
+
+        return $this->formFactory->create(CheckoutAddressType::class, $data, [
+            'csrf_protection' => false,
+        ]);
+    }
+
+    private function createDeliveryForm(CheckoutState $state): FormInterface
+    {
+        $data = new DeliveryChoiceData();
+        $data->carrierId = $state->carrierId;
+
+        return $this->formFactory->create(DeliveryChoiceType::class, $data, [
+            'carriers' => $this->deliveryManager->getCarriers($state),
+            'csrf_protection' => false,
+        ]);
+    }
+
+    private function createDefaultForm(): FormInterface
+    {
+        return $this->formFactory->create(GuestIdentityType::class, new GuestIdentityData(), [
+            'csrf_protection' => false,
+        ]);
     }
 
     public function isStepCompleted(int $step): bool
@@ -230,28 +266,40 @@ final class CheckoutComponent
             $state = $this->addressManager->saveGuestAddress($state, $data);
         }
 
+        // Avance automatiquement à l'étape suivante si l'adresse est complétée
+        if ($state->addressCompleted) {
+            $state->currentStep = 3;
+            $state->showAddressForm = false; // Cache le formulaire d'adresse
+        }
+
         $this->stateManager->saveState($state);
+
+        // Force form re-instantiation pour l'étape suivante
+        $this->resetForm();
     }
 
     #[LiveAction]
-    public function useNewAddressForm(): void
+    public function useNewAddressForm(): RedirectResponse
     {
         $state = $this->getState();
         $state->deliveryAddressId = null;
+        $state->showAddressForm = true;
 
         $this->stateManager->saveState($state);
+
+        // Force une redirection pour rafraîchir le composant avec un nouveau CSRF token
+        return new RedirectResponse($this->urlGenerator->generate('checkout.index'));
     }
 
     #[LiveAction]
-    public function saveDeliveryChoice(): void
+    public function saveDeliveryChoice(#[LiveArg] int $carrierId = 0): void
     {
-        $this->submitForm();
-
-        /** @var DeliveryChoiceData $data */
-        $data = $this->getForm()->getData();
-        $state = $this->deliveryManager->saveCarrier($this->getState(), (int) $data->carrierId);
-
+        $state = $this->deliveryManager->saveCarrier($this->getState(), $carrierId);
         $this->stateManager->saveState($state);
+
+        if ($state->deliveryCompleted) {
+            $this->resetForm();
+        }
     }
 
     #[LiveAction]
@@ -271,6 +319,9 @@ final class CheckoutComponent
 
         $state = $this->addressManager->saveSelectedDeliveryAddress($this->getState(), $address);
         $this->stateManager->saveState($state);
+
+        // Force form re-instantiation to refresh CSRF token
+        $this->resetForm();
     }
 
     #[LiveAction]
@@ -309,6 +360,19 @@ final class CheckoutComponent
     }
 
     #[LiveAction]
+    public function selectPaymentMethod(#[LiveArg] string $method): void
+    {
+        $state = $this->getState();
+
+        if ($state->identityCompleted && $state->addressCompleted && $state->deliveryCompleted) {
+            $state->paymentMethod = empty($method) ? null : $method;
+            $state->currentStep = 4;
+
+            $this->stateManager->saveState($state);
+        }
+    }
+
+    #[LiveAction]
     public function finalizePayment(): void
     {
         $state = $this->getState();
@@ -319,6 +383,16 @@ final class CheckoutComponent
 
             $this->stateManager->saveState($state);
         }
+    }
+
+    public function getAvailablePaymentMethods(): array
+    {
+        return [
+            'stripe' => 'Carte bancaire (Stripe)',
+            // Ajoutez d'autres méthodes ici :
+            // 'paypal' => 'PayPal',
+            // 'bank_transfer' => 'Virement bancaire',
+        ];
     }
 
     public function getSelectedCarrierLabel(): ?string
@@ -342,7 +416,7 @@ final class CheckoutComponent
     }
 
     /**
-     * @return array<string, array{productId: string, quantity: int, remaining_stock: int, category: string, name: string, price_ht: float, price_ttc: float, imageUrl: string, slug: string}>
+     * @return array<string, array{productId: string, quantity: int, remaining_stock: int, category: string, name: string, price_ht: float, price_ttc: float, effective_ht: float, effective_ttc: float, imageUrl: string, slug: string, discount_price: float|null, discount_amount: float|null, promote: bool}>
      */
     public function getCartItems(): array
     {
@@ -388,11 +462,18 @@ final class CheckoutComponent
 
         foreach ($carriers as $carrier) {
             if ($carrier['id'] === $state->carrierId) {
-                // Extract price from label (format: "Name - X,XX €")
-                if (preg_match('/(\d+,\d+)\s*€/', $carrier['label'], $matches)) {
-                    return (float) str_replace(',', '.', $matches[1]);
-                }
+                return $this->extractPriceFromLabel($carrier['label']);
             }
+        }
+
+        return 0.0;
+    }
+
+    private function extractPriceFromLabel(string $label): float
+    {
+        // Extract price from label (format: "Name - X,XX €")
+        if (preg_match('/(\d+(?:,\d+)?)\s*€/', $label, $matches)) {
+            return (float) str_replace(',', '.', $matches[1]);
         }
 
         return 0.0;
