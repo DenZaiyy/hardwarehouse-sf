@@ -115,6 +115,7 @@ readonly class ApiService
 
         return [
             'data' => $data,
+            'total' => $response['total'],
             'meta' => $meta,
         ];
     }
