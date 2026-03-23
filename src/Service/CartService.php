@@ -125,31 +125,31 @@ class CartService
 
             $priceHt = (float) $cartLine->getUnitPriceSnapshot();
 
-            $discountPrice = $cartLine->getDiscountPriceSnapshot() !== null
+            $discountPrice = null !== $cartLine->getDiscountPriceSnapshot()
                 ? (float) $cartLine->getDiscountPriceSnapshot()
                 : null;
 
-            $discountAmount = $cartLine->getDiscountAmountSnapshot() !== null
+            $discountAmount = null !== $cartLine->getDiscountAmountSnapshot()
                 ? (float) $cartLine->getDiscountAmountSnapshot()
                 : null;
 
             $effectivePriceHt = $discountPrice ?? $priceHt;
 
             $result[$cartLine->getProductId()] = [
-                'productId'       => $productId,
-                'quantity'        => $quantity,
+                'productId' => $productId,
+                'quantity' => $quantity,
                 'remaining_stock' => $stock,
-                'category'        => $category,
-                'name'            => $name,
-                'price_ht'        => $priceHt,
-                'price_ttc'       => $priceHt * (1 + self::VAT_RATE),
-                'effective_ht'    => $effectivePriceHt,
-                'effective_ttc'   => $effectivePriceHt * (1 + self::VAT_RATE),
-                'imageUrl'        => $cartLine->getProductImageSnapshot() ?? '',
-                'slug'            => $slug,
-                'discount_price'  => $discountPrice,
+                'category' => $category,
+                'name' => $name,
+                'price_ht' => $priceHt,
+                'price_ttc' => $priceHt * (1 + self::VAT_RATE),
+                'effective_ht' => $effectivePriceHt,
+                'effective_ttc' => $effectivePriceHt * (1 + self::VAT_RATE),
+                'imageUrl' => $cartLine->getProductImageSnapshot() ?? '',
+                'slug' => $slug,
+                'discount_price' => $discountPrice,
                 'discount_amount' => $discountAmount,
-                'promote'         => $discountPrice !== null,
+                'promote' => null !== $discountPrice,
             ];
         }
 
@@ -171,10 +171,10 @@ class CartService
         $vatAmount = $subtotal * self::VAT_RATE;
 
         return [
-            'subtotal'   => $subtotal,
-            'vat_rate'   => self::VAT_RATE,
+            'subtotal' => $subtotal,
+            'vat_rate' => self::VAT_RATE,
             'vat_amount' => $vatAmount,
-            'total'      => $subtotal + $vatAmount,
+            'total' => $subtotal + $vatAmount,
         ];
     }
 
@@ -300,7 +300,7 @@ class CartService
         $cartLine->setStockSnapshot($product->stock->quantity ?? 0);
         $cartLine->setCart($cart);
 
-        if ($product->promote && $product->discountPrice !== null && $product->discountAmount !== null) {
+        if ($product->promote && null !== $product->discountPrice && null !== $product->discountAmount) {
             $cartLine->setDiscountPriceSnapshot((string) $product->discountPrice);
             $cartLine->setDiscountAmountSnapshot((string) $product->discountAmount);
         }

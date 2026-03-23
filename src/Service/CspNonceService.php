@@ -9,6 +9,7 @@ class CspNonceService
     public function generate(): string
     {
         $this->nonce = base64_encode(random_bytes(16));
+
         return $this->nonce;
     }
 

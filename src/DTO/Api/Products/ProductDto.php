@@ -20,7 +20,7 @@ readonly class ProductDto
         public ?float $discountPrice = null,
         public ?float $discountAmount = null,
         public bool $promote = false,
-        public bool $active,
+        public bool $active = false,
         public ?string $thumbnail = null,
         public array $images = [],
         public ?string $shortDescription = null,

@@ -11,8 +11,10 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 #[AsEventListener(event: 'kernel.response')]
 class CspNonceListener
 {
+    public function __construct(private readonly CspNonceService $nonceService)
+    {
+    }
 
-    public function __construct(private readonly CspNonceService $nonceService) {}
     public function onKernelRequest(RequestEvent $event): void
     {
         if (!$event->isMainRequest()) {
@@ -42,7 +44,7 @@ class CspNonceListener
             "font-src 'self' https://fonts.gstatic.com data:; ".
             "img-src 'self' data: https://api.hardwarehouse.fr https://picsum.photos https://fastly.picsum.photos; ".
             "connect-src 'self' https://api.hardwarehouse.fr; ".
-            "frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/; ".
+            'frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/; '.
             "form-action 'self'; ".
             "frame-ancestors 'none'; ".
             "base-uri 'self';"
