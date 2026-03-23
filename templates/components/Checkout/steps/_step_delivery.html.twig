@@ -21,20 +21,41 @@
             </button>
         </div>
     {% elseif state.currentStep == 3 %}
-        {{ form_start(form, {
-            attr: {
-                'data-model': 'on(change)|*',
-                'data-action': 'live#action:prevent',
-                'data-live-action-param': 'saveDeliveryChoice'
-            }
-        }) }}
-        <div class="space-y-3">
-            {{ form_row(form.carrierId) }}
-        </div>
+        {% if app.environment == 'dev' %}
+            <div class="text-xs bg-yellow-100 p-2 mb-2">
+                DEBUG: Step={{ state.currentStep }}, Form type={{ form.vars.block_prefixes|last }}
+            </div>
+        {% endif %}
 
-        <button type="submit" class="mt-4 rounded border px-4 py-2">
-            Choisir ce mode de livraison
-        </button>
-        {{ form_end(form) }}
+        {{ form_start(form) }}
+        <div class="space-y-3">
+            {% if form.carrierId is defined %}
+                {% for child in form.carrierId %}
+                    <div class="flex items-center gap-2">
+                        <input
+                            type="radio"
+                            id="{{ child.vars.id }}"
+                            name="{{ child.vars.full_name }}"
+                            value="{{ child.vars.value }}"
+                            {% if child.vars.checked %}checked{% endif %}
+                            data-action="change->live#action"
+                            data-live-action-param="saveDeliveryChoice"
+                            data-live-carrier-id-param="{{ child.vars.value }}"
+                        >
+                        <label for="{{ child.vars.id }}">{{ child.vars.label }}</label>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        {{ form_end(form, {render_rest: false}) }}
+    {% endif %}
+
+    {% if app.environment == 'dev' %}
+        <div class="text-xs bg-yellow-100 p-2 mb-2">
+            DEBUG: Step={{ state.currentStep }},
+            addressCompleted={{ state.addressCompleted ? 'oui' : 'non' }},
+            Form type={{ form.vars.block_prefixes|last }},
+            carrierId field exists={{ form.carrierId is defined ? 'oui' : 'non' }}
+        </div>
     {% endif %}
 </section>

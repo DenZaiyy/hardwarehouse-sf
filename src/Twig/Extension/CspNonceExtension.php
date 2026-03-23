@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Twig\Extension;
 
-use Symfony\Component\HttpFoundation\RequestStack;
+use App\Service\CspNonceService;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
 class CspNonceExtension extends AbstractExtension
 {
-    public function __construct(private readonly RequestStack $requestStack)
+    public function __construct(private readonly CspNonceService $nonceService)
     {
     }
 
@@ -24,8 +24,6 @@ class CspNonceExtension extends AbstractExtension
 
     public function getNonce(): string
     {
-        $nonce = $this->requestStack->getCurrentRequest()?->attributes->get('csp_nonce');
-
-        return is_string($nonce) ? $nonce : '';
+        return $this->nonceService->getNonce();
     }
 }

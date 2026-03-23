@@ -4,7 +4,10 @@
 
 {% block javascripts %}
     {{ parent() }}
-    <script src="https://www.google.com/recaptcha/api.js?render=6LfZM3AsAAAAAM7MnrYcb_kzS64NOf00p3UP1tHg"></script>
+    <script
+        nonce="{{ csp_nonce() }}"
+        src="https://www.google.com/recaptcha/api.js?render=6LfZM3AsAAAAAM7MnrYcb_kzS64NOf00p3UP1tHg"
+    ></script>
 {% endblock %}
 
 {% block body %}

@@ -28,4 +28,10 @@ return [
     '@symfony/ux-live-component' => [
         'version' => '2.32.0',
     ],
+    'gsap' => [
+        'version' => '3.14.2',
+    ],
+    'gsap/ScrollTrigger' => [
+        'version' => '3.14.2',
+    ],
 ];
