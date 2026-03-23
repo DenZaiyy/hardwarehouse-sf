@@ -1,21 +1,37 @@
-<div class="flex flex-col gap-2 md:gap-4 bg-secondary text-paragraph rounded p-4 md:max-h-max md:max-w-1/2 w-full">
-    <div class="hidden md:grid space-y-2 grid-flow-row border-b pb-2 text-sm">
-        <div class="flex justify-between gap-2 text-paragraph">
-            <span class="w-1/4 text-center font-bold">Nom:</span>
-            <span class="w-1/4 text-center font-bold">Quantité:</span>
-            <span class="w-1/4 text-center font-bold">Prix HT:</span>
-            <span class="w-1/4 text-center font-bold">Prix TTC:</span>
+<div class="flex flex-col gap-4 bg-secondary text-paragraph rounded-lg p-4 w-full">
+
+    <h2 class="font-bold text-lg border-b border-paragraph/20 pb-2">
+        {{ 'cart.summary.title'|trans }}
+    </h2>
+
+    <div class="hidden md:block text-sm">
+        <p class="text-gray-300 mb-3">{{ 'cart.summary.articles'|trans }} ({{ cart|length }})</p>
+
+        <div class="space-y-4 border-b border-paragraph/20 pb-4">
+            {% for item in cart %}
+                <div class="flex justify-between items-start gap-2">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold truncate">{{ item.name }}</p>
+                        <p class="text-gray-300 text-xs">Qté : {{ item.quantity }}</p>
+                        {% if item.promote and item.discount_amount %}
+                            <span class="inline-flex items-center gap-1 mt-1 rounded-full bg-red-500/20 border border-red-400/40 px-2 py-0.5 text-xs font-semibold text-red-300">
+                                -{{ item.discount_amount|round }}%
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div class="text-right shrink-0">
+                        <p class="font-semibold">{{ item.effective_ttc|format_currency('EUR') }}</p>
+                        {% if item.promote %}
+                            <p class="text-gray-400 text-xs line-through">{{ item.price_ttc|format_currency('EUR') }}</p>
+                        {% endif %}
+                        <p class="text-gray-300 text-xs">{{ item.effective_ht|format_currency('EUR') }} HT/unité</p>
+                    </div>
+                </div>
+            {% endfor %}
         </div>
-        {% for item in cart %}
-            <div class="flex justify-between gap-2 text-gray-300">
-                <span class="truncate w-1/4 text-center">{{ item.name }}</span>
-                <span class="w-1/4 text-center">{{ item.quantity }}</span>
-                <span class="w-1/4 text-center">{{ item.price_ht|format_currency('EUR') }}</span>
-                <span class="w-1/4 text-center">{{ item.price_ttc|format_currency('EUR') }}</span>
-            </div>
-        {% endfor %}
     </div>
-    <div class="space-y-2 text-sm text-paragraph grow">
+
+    <div class="space-y-2 text-sm text-paragraph">
         <div class="flex justify-between">
             <span>Sous-total HT</span>
             <span>{{ totals.subtotal|format_currency('EUR') }}</span>
@@ -24,24 +40,23 @@
             <span>TVA ({{ (totals.vat_rate * 100)|round }}%)</span>
             <span>{{ totals.vat_amount|format_currency('EUR') }}</span>
         </div>
-        <div class="flex justify-between font-bold text-base border-t pt-2 mt-2">
+        <div class="flex justify-between font-bold text-base border-t border-paragraph/20 pt-2 mt-2">
             <span>Total TTC</span>
             <span>{{ totals.total|format_currency('EUR') }}</span>
         </div>
     </div>
 
-    <div class="flex gap-2 md:gap-4 justify-between items-center mt-6">
-        <form data-turbo-stream="" action="{{ path('cart.clear') }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir vider le panier ?')">
-            <button
-                type="submit"
-                class="bg-red-600 text-paragraph hover:bg-red-700 text-base px-4 py-2 rounded"
-            >
-                Vider le panier
-            </button>
-        </form>
+    <a href="{{ path('checkout.index') }}" class="mt-2 w-full block text-center bg-primary hover:bg-primary-dark text-paragraph font-bold text-base px-6 py-3 rounded-lg transition-colors duration-200">
+        {{ 'header.cart.checkout.label'|trans }}
+        {{ ux_icon('heroicons:arrow-right', {class: 'size-4 inline-block ml-1'}) }}
+    </a>
 
-        <a href="{{ path('checkout.index') }}" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
-            {{ 'header.cart.checkout.label'|trans }}
-        </a>
-    </div>
+    <form data-turbo-stream="" action="{{ path('cart.clear') }}" method="POST"
+          onsubmit="return confirm('Êtes-vous sûr de vouloir vider le panier ?')"
+          class="text-center">
+        <button type="submit" class="btn-ghost">
+            Vider le panier
+        </button>
+    </form>
+
 </div>
