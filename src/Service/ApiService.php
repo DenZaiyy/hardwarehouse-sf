@@ -76,7 +76,7 @@ readonly class ApiService
      * @param class-string<T>      $dtoClass
      * @param array<string, mixed> $params
      *
-     * @return array{data: array<T>, meta: PaginationMeta}
+     * @return array{data: array<T>, total: int, meta: PaginationMeta}
      *
      * @throws TransportExceptionInterface
      * @throws ExceptionInterface
@@ -92,7 +92,7 @@ readonly class ApiService
         $query = http_build_query($newParams);
         $url = $endpoint.($query ? '?'.$query : '');
 
-        /** @var array{data: array<T>, meta: array{total: int, page: int, limit: int, totalPages: int, hasNext: bool, hasPrev: bool}} $response */
+        /** @var array{data: array<T>, total: int, meta: array{page: int, limit: int, totalPages: int, hasNext: bool, hasPrev: bool}} $response */
         $response = $this->apiClient->request('GET', $url)->toArray();
 
         $result = $this->serializer->deserialize(
@@ -105,7 +105,7 @@ readonly class ApiService
         $data = $result;
 
         $meta = new PaginationMeta(
-            total: $response['meta']['total'],
+            total: $response['total'],
             page: $response['meta']['page'],
             limit: $response['meta']['limit'],
             totalPages: $response['meta']['totalPages'],
