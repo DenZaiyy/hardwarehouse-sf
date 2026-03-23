@@ -174,3 +174,7 @@ shipmentStatus:
         label: 'En transit'
     delivered:
         label: Livré
+cart:
+    summary:
+        title: Résumé du panier
+        articles: Articles
