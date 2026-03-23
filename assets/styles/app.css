@@ -153,6 +153,12 @@
 }
 
 @layer components {
+    .btn-ghost {
+        @apply bg-transparent text-red-400 hover:text-red-300 hover:bg-transparent
+        text-xs underline underline-offset-2 px-0 py-0
+        focus:ring-0 focus:ring-offset-0 shadow-none;
+    }
+
     .hh-glass {
         @apply border border-white/10 bg-white/8 backdrop-blur-sm;
     }
