@@ -6,6 +6,7 @@ use App\DTO\Checkout\AddressData;
 use App\DTO\Checkout\CheckoutState;
 use App\DTO\Checkout\DeliveryChoiceData;
 use App\DTO\Checkout\GuestIdentityData;
+use App\Entity\Address;
 use App\Entity\User;
 use App\Enum\AddressType;
 use App\Form\Checkout\CheckoutAddressType;
@@ -59,7 +60,17 @@ final class CheckoutComponent
     }
 
     /**
-     * @return list<array{id: int|null, label: string|null, firstName: string|null, lastName: string|null, address1: string|null, postcode: string|null, city: string|null, country: string|null, isDefault: bool|null}>
+     * @return list<array{
+     *     id: int|null,
+     *     label: string|null,
+     *     firstName: string|null,
+     *     lastName: string|null,
+     *     address1: string|null,
+     *     postcode: string|null,
+     *     city: string|null,
+     *     country: string|null,
+     *     isDefault: bool|null
+     * }>
      */
     public function getSavedDeliveryAddresses(): array
     {
@@ -74,7 +85,20 @@ final class CheckoutComponent
         return array_values(array_map($this->mapAddressToArray(...), $addresses));
     }
 
-    private function mapAddressToArray($address): array
+    /**
+     * @return array{
+     *     id: int|null,
+     *     label: string|null,
+     *     firstName: string|null,
+     *     lastName: string|null,
+     *     address1: string|null,
+     *     postcode: string|null,
+     *     city: string|null,
+     *     country: string|null,
+     *     isDefault: bool|null
+     * }
+     */
+    private function mapAddressToArray(Address $address): array
     {
         return [
             'id' => $address->getId(),
@@ -385,11 +409,13 @@ final class CheckoutComponent
         }
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function getAvailablePaymentMethods(): array
     {
         return [
             'stripe' => 'Carte bancaire (Stripe)',
-            // Ajoutez d'autres méthodes ici :
             // 'paypal' => 'PayPal',
             // 'bank_transfer' => 'Virement bancaire',
         ];
