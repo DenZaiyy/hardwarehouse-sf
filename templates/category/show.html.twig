@@ -14,7 +14,7 @@
             {% if products is not null %}
                 <div class="mt-5 grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-5 items-stretch">
                     {% for product in products %}
-                        {% include '_partials/_product_card.html.twig' with {product: product} %}
+                        {% include '_partials/_product_card.html.twig' with {product: product} only %}
                     {% endfor %}
                 </div>
             {% endif %}
