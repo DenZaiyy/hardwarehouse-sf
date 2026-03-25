@@ -17,7 +17,7 @@ APP_ENV ?= dev
 APP_DEBUG ?= 1
 CONSOLE = php bin/console --env=$(APP_ENV)
 
-.PHONY: install start stop tw cache up down migration migrate translate-FR translate-EN quality tests \
+.PHONY: install dev stop tw cache up down migration migrate translate-FR translate-EN quality tests \
 	prod cache-prod twb assets imports sitemap vendor-prod migrate-prod
 
 help: ## Show this help
@@ -29,7 +29,7 @@ install: ## Install composer dependencies
 	$(call banner,$(INFO),Installing dependencies...)
 	composer install --optimize-autoloader
 
-start: vendor ## Starting symfony server with logs
+dev: vendor ## Starting symfony server with logs
 	$(call banner,$(INFO),Starting symfony server...)
 	symfony server:start
 
