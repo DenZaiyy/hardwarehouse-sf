@@ -8,6 +8,16 @@
 {% block og_description %}{{ product.shortDescription }}{% endblock %}
 {% block meta_description %}{{ product.shortDescription }}{% endblock %}
 
+{% block javascripts %}
+    <script type="application/ld+json">
+        {{ productSchema|json_encode(
+                constant('JSON_PRETTY_PRINT')
+                b-or constant('JSON_UNESCAPED_UNICODE')
+                b-or constant('JSON_UNESCAPED_SLASHES')
+            )|raw }}
+    </script>
+{% endblock %}
+
 {% block body %}
     <div class="flex flex-col gap-4">
         <div class="flex flex-col md:flex-row gap-3.75">
