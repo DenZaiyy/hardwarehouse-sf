@@ -52,5 +52,13 @@
 
         </div>
     </div>
+
+    <script type="application/ld+json">
+        {{ productSchema|json_encode(
+            constant('JSON_PRETTY_PRINT')
+            b-or constant('JSON_UNESCAPED_UNICODE')
+            b-or constant('JSON_UNESCAPED_SLASHES')
+        )|raw }}
+    </script>
 {% endblock %}
 

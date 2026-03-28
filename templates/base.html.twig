@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    {# Paramètre par défaut à définir #}
     {% set default_title = "HardWareHouse" %}
     {% set default_description = "seo.description.default"|trans %}
 
@@ -14,7 +13,6 @@
     <meta name="twitter:title"
           content="{% block twitter_title %}{{ block('title')|default(default_title) }}{% endblock %}">
 
-    {# Mise en place des descriptions #}
     <meta name="description" content="{% block meta_description %}{{ default_description }}{% endblock %}">
     <meta property="og:description"
           content="{% block og_description %}{{ block('meta_description')|default(default_description) }}{% endblock %}">
@@ -28,16 +26,7 @@
 
     {# --- Open Graph --- #}
 
-    {# Url affiché par Open Graph, vous êtes libre de la redéfinir mais ici c'est l'url par défaut qui est indiqué #}
     <meta property="og:url" content="{% block og_url %}{{ app.request.uri }}{% endblock %}">
-
-    {# Plusieur valeurs possible
-            website --> contenu générique, type site ou page classique (par défaut).
-            article --> pour un article de blog, une actu, une page éditoriale.
-            video.movie, video.episode, video.tv_show --> si c’est une vidéo.
-            music.song, music.album --> pour du contenu audio.
-            product --> pour une fiche produit (e-commerce).
-    #}
     <meta property="og:type" content="{% block og_type %}website{% endblock %}">
 
     {# --- Twitter Cards --- #}
@@ -55,12 +44,8 @@
     <meta property="og:image" content="{% block og_image %}{{ img }}{% endblock %}">
     <meta name="twitter:image" content="{% block twitter_image %}{{ img }}{% endblock %}">
 
-    {# Défini si un robot est autorisier à index la page dans un moteur de rechercher et a suivre les liens présents dans la page. Valeur possible :
-            --> index, noindex
-            --> follow, nofollow
-    #}
     <meta name="robots" content="{% block meta_robots %}index, follow{% endblock %}">
-
+    
     {# Défini la couleur de fond de certain navigateur moderne #}
     <meta name="theme-color" content="{% block theme_color %}#162033{% endblock %}">
 
