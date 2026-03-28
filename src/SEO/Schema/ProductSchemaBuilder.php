@@ -96,7 +96,7 @@ final readonly class ProductSchemaBuilder
             }
         }
 
-        return array_values($images);
+        return $images;
     }
 
     private function absoluteUrl(?string $path): ?string
@@ -114,7 +114,7 @@ final readonly class ProductSchemaBuilder
 
     private function resolveAvailability(ProductDto $product): string
     {
-        return ($product->stock?->quantity ?? 0) > 0
+        return (null !== $product->stock && $product->stock->quantity > 0)
             ? 'https://schema.org/InStock'
             : 'https://schema.org/OutOfStock';
     }
@@ -125,25 +125,26 @@ final readonly class ProductSchemaBuilder
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param array<array-key, mixed> $data
      *
      * @return array<string, mixed>
      */
     private function clean(array $data): array
     {
+        $result = [];
+
         foreach ($data as $key => $value) {
             if (is_array($value)) {
                 $value = $this->clean($value);
             }
 
             if (null === $value || '' === $value || [] === $value) {
-                unset($data[$key]);
                 continue;
             }
 
-            $data[$key] = $value;
+            $result[(string) $key] = $value;
         }
 
-        return $data;
+        return $result;
     }
 }
