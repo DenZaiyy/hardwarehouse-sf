@@ -43,7 +43,7 @@ final class CategoryController extends AbstractController
         $result = $this->apiService->fetchPaginated(
             "categories/$slug/products",
             CategoryProductsDto::class,
-            ['page' => $page]
+            ['page' => $page, 'limit' => 12]
         );
 
         return $this->render('category/show.html.twig', [

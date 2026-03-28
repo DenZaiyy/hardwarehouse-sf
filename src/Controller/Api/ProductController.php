@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\DTO\Api\Products\ProductDto;
+use App\SEO\Schema\ProductSchemaBuilder;
 use App\Service\ApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,13 +36,15 @@ final class ProductController extends AbstractController
     }
 
     #[Route('/{slug}', name: 'show', methods: ['GET'])]
-    public function show(string $slug): Response
+    public function show(string $slug, ProductSchemaBuilder $productSchemaBuilder): Response
     {
         $product = $this->apiService->fetchOne('products/'.$slug, ProductDto::class);
+        $productSchema = $productSchemaBuilder->build($product);
 
         return $this->render('product/show.html.twig', [
             'product' => $product,
             'attributes' => $product->productAttributeValues,
+            'productSchema' => $productSchema,
         ]);
     }
 }
