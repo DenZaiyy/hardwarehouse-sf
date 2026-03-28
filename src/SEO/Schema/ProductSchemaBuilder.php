@@ -66,7 +66,7 @@ final readonly class ProductSchemaBuilder
     {
         $brandName = $product->brand?->name;
 
-        if ($brandName === null || $brandName === '') {
+        if (null === $brandName || '' === $brandName) {
             return null;
         }
 
@@ -84,14 +84,14 @@ final readonly class ProductSchemaBuilder
         $images = [];
 
         $thumbnail = $this->absoluteUrl($product->thumbnail);
-        if ($thumbnail !== null) {
+        if (null !== $thumbnail) {
             $images[] = $thumbnail;
         }
 
         foreach ($product->images as $image) {
             $absoluteImage = $this->absoluteUrl($image);
 
-            if ($absoluteImage !== null && !in_array($absoluteImage, $images, true)) {
+            if (null !== $absoluteImage && !in_array($absoluteImage, $images, true)) {
                 $images[] = $absoluteImage;
             }
         }
@@ -101,7 +101,7 @@ final readonly class ProductSchemaBuilder
 
     private function absoluteUrl(?string $path): ?string
     {
-        if ($path === null || $path === '') {
+        if (null === $path || '' === $path) {
             return null;
         }
 
@@ -109,7 +109,7 @@ final readonly class ProductSchemaBuilder
             return $path;
         }
 
-        return rtrim(self::BASE_URL, '/') . '/' . ltrim($path, '/');
+        return rtrim(self::BASE_URL, '/').'/'.ltrim($path, '/');
     }
 
     private function resolveAvailability(ProductDto $product): string
@@ -126,6 +126,7 @@ final readonly class ProductSchemaBuilder
 
     /**
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private function clean(array $data): array
@@ -135,7 +136,7 @@ final readonly class ProductSchemaBuilder
                 $value = $this->clean($value);
             }
 
-            if ($value === null || $value === '' || $value === []) {
+            if (null === $value || '' === $value || [] === $value) {
                 unset($data[$key]);
                 continue;
             }

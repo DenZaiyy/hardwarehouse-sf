@@ -19,7 +19,7 @@ readonly class ProductDto
         public ?string $sku = null,
         public ?string $mpn = null,
         public ?string $ean13 = null,
-        public float $price,
+        public float $price = 0.0,
         public ?float $discountPrice = null,
         public ?float $discountAmount = null,
         public bool $promote = false,
