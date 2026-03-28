@@ -3,6 +3,11 @@
 namespace App\Service;
 
 use App\DTO\Api\PaginationMeta;
+use App\Exception\Api\ApiException;
+use App\Exception\Api\ApiNotFoundException;
+use App\Exception\Api\ApiServerException;
+use App\Exception\Api\ApiUnavailableException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -11,12 +16,14 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 readonly class ApiService
 {
     public function __construct(
         private HttpClientInterface $apiClient,
         private SerializerInterface $serializer,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -27,15 +34,15 @@ readonly class ApiService
      *
      * @return T
      *
-     * @throws TransportExceptionInterface
+     * @throws ApiNotFoundException
+     * @throws ApiUnavailableException
+     * @throws ApiServerException
+     * @throws ApiException
      * @throws ExceptionInterface
-     * @throws ClientExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
      */
     public function fetchOne(string $endpoint, string $dtoClass): object
     {
-        $response = $this->apiClient->request('GET', $endpoint.'?active=true');
+        $response = $this->request('GET', $endpoint.'?active=true');
 
         /* @var T */
         return $this->serializer->deserialize($response->getContent(), $dtoClass, 'json');
@@ -48,16 +55,17 @@ readonly class ApiService
      *
      * @return array<T>
      *
-     * @throws TransportExceptionInterface
-     * @throws ExceptionInterface
      * @throws ClientExceptionInterface
+     * @throws ExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws \JsonException
      * @throws DecodingExceptionInterface
      */
     public function fetchAll(string $endpoint, string $dtoClass): array
     {
-        $response = $this->apiClient->request('GET', $endpoint.'?active=true');
+        $response = $this->request('GET', $endpoint.'?active=true');
         $data = $response->toArray();
 
         $payload = array_key_exists('data', $data) ? $data['data'] : $data;
@@ -78,12 +86,11 @@ readonly class ApiService
      *
      * @return array{data: array<T>, total: int, meta: PaginationMeta}
      *
-     * @throws TransportExceptionInterface
+     * @throws ApiNotFoundException
+     * @throws ApiUnavailableException
+     * @throws ApiServerException
+     * @throws ApiException
      * @throws ExceptionInterface
-     * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
      * @throws \JsonException
      */
     public function fetchPaginated(string $endpoint, string $dtoClass, array $params = []): array
@@ -93,7 +100,7 @@ readonly class ApiService
         $url = $endpoint.($query ? '?'.$query : '');
 
         /** @var array{data: array<T>, total: int, meta: array{page: int, limit: int, totalPages: int, hasNext: bool, hasPrev: bool}} $response */
-        $response = $this->apiClient->request('GET', $url)->toArray();
+        $response = $this->request('GET', $url)->toArray();
 
         $result = $this->serializer->deserialize(
             json_encode($response['data'], JSON_THROW_ON_ERROR),
@@ -123,16 +130,16 @@ readonly class ApiService
     /**
      * @return array<string, mixed>
      *
-     * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
+     * @throws ApiNotFoundException
+     * @throws ApiUnavailableException
+     * @throws ApiServerException
+     * @throws ApiException
+     * @throws \JsonException
      */
     public function getData(string $endpoint): array
     {
         /** @var array<string, mixed> $result */
-        $result = $this->apiClient->request('GET', $endpoint)->toArray();
+        $result = $this->request('GET', $endpoint)->toArray();
 
         return $result;
     }
@@ -142,11 +149,11 @@ readonly class ApiService
      *
      * @return array<string, mixed>
      *
-     * @throws TransportExceptionInterface
-     * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
+     * @throws ApiNotFoundException
+     * @throws ApiUnavailableException
+     * @throws ApiServerException
+     * @throws ApiException
+     * @throws \JsonException
      */
     public function search(string $searchTerm, array $params = []): array
     {
@@ -155,8 +162,42 @@ readonly class ApiService
         $endpoint = 'products?'.$queryString;
 
         /** @var array<string, mixed> $result */
-        $result = $this->apiClient->request('GET', $endpoint)->toArray();
+        $result = $this->request('GET', $endpoint)->toArray();
 
         return $result;
+    }
+
+    /**
+     * @throws ApiNotFoundException
+     * @throws ApiUnavailableException
+     * @throws ApiServerException
+     * @throws ApiException
+     */
+    private function request(string $method, string $url): ResponseInterface
+    {
+        try {
+            $response = $this->apiClient->request($method, $url);
+            $response->getStatusCode();
+
+            return $response;
+        } catch (ClientExceptionInterface $e) {
+            // 4xx
+            $statusCode = $e->getResponse()->getStatusCode();
+            if (404 === $statusCode) {
+                throw new ApiNotFoundException($url);
+            }
+            throw new ApiException("Client error ($statusCode) at: $url", $statusCode, $e);
+        } catch (ServerExceptionInterface $e) {
+            // 5xx
+            $this->logger->error('API server error', ['url' => $url, 'error' => $e->getMessage()]);
+            throw new ApiServerException($url);
+        } catch (RedirectionExceptionInterface $e) {
+            // 3xx non gérés
+            throw new ApiException("Too many redirections at: $url", 0, $e);
+        } catch (TransportExceptionInterface $e) {
+            // Réseau down, timeout, DNS fail...
+            $this->logger->critical('API unreachable', ['url' => $url, 'error' => $e->getMessage()]);
+            throw new ApiUnavailableException($url);
+        }
     }
 }
