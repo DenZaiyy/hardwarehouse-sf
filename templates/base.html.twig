@@ -1,6 +1,37 @@
 <!DOCTYPE html>
 <html lang="{{ app.locale }}" class="scroll-smooth">
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-TVB43RJ9');</script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Axeptio -->
+    <script>
+        window.axeptioSettings = {
+            clientId: "69d74ebd882083dc8a2445b2",
+            cookiesVersion: "761910b9-73d3-4848-b0c8-8a79da6d8708",
+            googleConsentMode: {
+                default: {
+                    analytics_storage: "denied",
+                    ad_storage: "denied",
+                    ad_user_data: "denied",
+                    ad_personalization: "denied",
+                    wait_for_update: 500
+                }
+            }
+        };
+
+        (function(d, s) {
+            var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
+            e.async = true; e.src = "//static.axept.io/sdk.js";
+            t.parentNode.insertBefore(e, t);
+        })(document, "script");
+    </script>
+    <!-- Axeptio -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -45,7 +76,7 @@
     <meta name="twitter:image" content="{% block twitter_image %}{{ img }}{% endblock %}">
 
     <meta name="robots" content="{% block meta_robots %}index, follow{% endblock %}">
-    
+
     {# Défini la couleur de fond de certain navigateur moderne #}
     <meta name="theme-color" content="{% block theme_color %}#162033{% endblock %}">
 
@@ -72,6 +103,9 @@
     {% endblock %}
 </head>
 <body class="flex flex-col min-h-screen relative">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVB43RJ9" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     {% include '_partials/_header.html.twig' %}
     <div id="flash-messages" class="relative">
         {% include '_partials/_flash_messages.html.twig' %}
