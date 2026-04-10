@@ -2,6 +2,8 @@
 
 namespace App\DTO\Api\Brands;
 
+use Symfony\Component\Serializer\Attribute\SerializedName;
+
 readonly class BrandDto
 {
     public function __construct(
@@ -9,6 +11,7 @@ readonly class BrandDto
         public string $name,
         public string $slug,
         public ?bool $active,
+        public ?int $productsCount,
         public ?string $logo = null,
         public ?\DateTimeImmutable $createdAt = null,
         public ?\DateTimeImmutable $updatedAt = null,

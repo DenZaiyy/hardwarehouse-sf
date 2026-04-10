@@ -22,4 +22,14 @@ readonly class CategoryProductsDto
         public ?ProductStockDto $stock = null,
     ) {
     }
+
+    public function getBrand(): BrandDto
+    {
+        return $this->brand;
+    }
+
+    public function getStock(): ProductStockDto
+    {
+        return $this->stock;
+    }
 }
