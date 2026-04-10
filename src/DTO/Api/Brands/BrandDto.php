@@ -9,6 +9,7 @@ readonly class BrandDto
         public string $name,
         public string $slug,
         public ?bool $active,
+        public ?int $productsCount,
         public ?string $logo = null,
         public ?\DateTimeImmutable $createdAt = null,
         public ?\DateTimeImmutable $updatedAt = null,

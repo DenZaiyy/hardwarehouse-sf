@@ -1,0 +1,30 @@
+<details
+    class="group overflow-hidden space-y-2"
+    {% if open %}open{% endif %}
+>
+    <summary class="flex cursor-pointer list-none items-center justify-between bg-secondary p-2 text-sm font-semibold text-white marker:hidden rounded-2xl">
+        <div class="flex min-w-0 items-center gap-2">
+            <span class="truncate">{{ title }}</span>
+
+            {% if badge %}
+                <span class="inline-flex items-center rounded-full bg-white/15 px-2 py-0.5 text-[11px] font-medium text-white/90">
+                    {{ badge }}
+                </span>
+            {% endif %}
+        </div>
+
+        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/15">
+            <svg class="block h-4 w-4 group-open:hidden" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z"/>
+            </svg>
+
+            <svg class="hidden h-4 w-4 group-open:block" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path d="M5 9a1 1 0 000 2h10a1 1 0 100-2H5z"/>
+            </svg>
+        </span>
+    </summary>
+
+    <div class="rounded-2xl bg-slate-100 p-4">
+        {% block content %}{% endblock %}
+    </div>
+</details>

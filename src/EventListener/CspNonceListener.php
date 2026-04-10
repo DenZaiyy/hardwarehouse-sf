@@ -40,10 +40,10 @@ class CspNonceListener
             "default-src 'none'; ".
             "manifest-src 'self'; ".
             "script-src 'self' 'nonce-$nonce' 'strict-dynamic'; ".
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; ".
-            "font-src 'self' https://fonts.gstatic.com data:; ".
-            "img-src 'self' data: https://api.hardwarehouse.fr https://picsum.photos https://fastly.picsum.photos; ".
-            "connect-src 'self' https://www.googletagmanager.com https://api.hardwarehouse.fr; ".
+            "style-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://fonts.axept.io https://fonts.googleapis.com; ".
+            "font-src 'self' https://fonts.gstatic.com https://fonts.axept.io data:; ".
+            "img-src 'self' data: https://api.hardwarehouse.fr https://axeptio.imgix.net https://www.googletagmanager.com https://fonts.gstatic.com https://picsum.photos https://fastly.picsum.photos; ".
+            "connect-src 'self' https://www.googletagmanager.com https://api.axept.io https://region1.google-analytics.com https://static.axept.io/ https://client.axept.io/ https://api.hardwarehouse.fr; ".
             'frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/; '.
             "form-action 'self'; ".
             "frame-ancestors 'none'; ".

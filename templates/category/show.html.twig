@@ -3,23 +3,38 @@
 {% block title %}{{ category.name }} - HardWareHouse{% endblock %}
 
 {% block body %}
-    <div class="relative flex flex-col gap-10 lg:flex-row">
-        <div class="lg:w-72 lg:shrink-0">
-            {% include '_partials/filters/_filters.html.twig' %}
-        </div>
+    <div class="relative flex flex-col-reverse gap-10 lg:flex-row-reverse"
+         data-controller="filter"
+         data-filter-filter-url-value="{{ path('category.show', { slug: category.slug }) }}"
+         data-filter-url-path-value="/categories/{{ category.slug }}">
 
-        <div class="min-w-0 flex-1">
+        {# ── Résultats ────────────────────────────────────────── #}
+        <div class="min-w-0 flex-1" data-filter-target="results">
+            {# Loading #}
+            <div class="hidden text-center py-8" data-filter-target="loading">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p class="mt-2 text-gray-600">Filtrage en cours...</p>
+            </div>
+
             <h1>Liste des produits - {{ category.name }}</h1>
 
             {% if products is not null %}
-                <div class="mt-5 grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-5 items-stretch">
-                    {% for product in products %}
-                        {% include '_partials/_product_card.html.twig' with {product: product} only %}
-                    {% endfor %}
-                </div>
+                {% include '_partials/_products_grid.html.twig' with { products: products } only %}
             {% endif %}
 
-            {% include '_partials/_pagination.html.twig' with {pagination: pagination} %}
+            <div data-filter-pagination>
+                {% include '_partials/_pagination_ajax.html.twig' with { pagination: pagination } only %}
+            </div>
+        </div>
+
+        {# ── Filtres ──────────────────────────────────────────── #}
+        <div class="lg:w-72 lg:shrink-0">
+            <form data-filter-target="form" class="sticky top-2">
+                {% include '_partials/filters/_filters.html.twig' with {
+                    brands: brands,
+                    limit: limit
+                } only %}
+            </form>
         </div>
     </div>
 {% endblock %}
