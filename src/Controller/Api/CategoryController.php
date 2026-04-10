@@ -79,10 +79,14 @@ final class CategoryController extends AbstractController
             $seen = [];
 
             foreach ($data as $product) {
-                $slug = $product->getBrand()->getSlug();
-                if (!isset($seen[$slug])) {
-                    $seen[$slug] = true;
-                    $brands[] = $product->getBrand();
+                $brand = $product->getBrand();
+                if (null === $brand) {
+                    continue;
+                }
+                $brandSlug = $brand->getSlug();
+                if (!isset($seen[$brandSlug])) {
+                    $seen[$brandSlug] = true;
+                    $brands[] = $brand;
                 }
             }
 
@@ -99,7 +103,7 @@ final class CategoryController extends AbstractController
                     'success' => true,
                     'productsHtml' => $productsHtml,
                     'paginationHtml' => $paginationHtml,
-                    'total' => $result['total'] ?? 0,
+                    'total' => $result['total'],
                 ]);
             }
         } catch (\Throwable $e) {

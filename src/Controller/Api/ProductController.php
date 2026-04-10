@@ -78,7 +78,7 @@ final class ProductController extends AbstractController
                     'success' => true,
                     'productsHtml' => $productsHtml,
                     'paginationHtml' => $paginationHtml,
-                    'total' => $result['total'] ?? 0,
+                    'total' => $result['total'],
                 ]);
             }
         } catch (\Throwable $e) {

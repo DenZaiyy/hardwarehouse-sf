@@ -23,12 +23,12 @@ readonly class CategoryProductsDto
     ) {
     }
 
-    public function getBrand(): BrandDto
+    public function getBrand(): ?BrandDto
     {
         return $this->brand;
     }
 
-    public function getStock(): ProductStockDto
+    public function getStock(): ?ProductStockDto
     {
         return $this->stock;
     }
