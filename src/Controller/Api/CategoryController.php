@@ -49,7 +49,7 @@ final class CategoryController extends AbstractController
 
         $params = [
             'page' => $page,
-            'limit' => $limit
+            'limit' => $limit,
         ];
 
         if (!empty($brands)) {
