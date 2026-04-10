@@ -3,21 +3,38 @@
 {% block title %}La liste des produits disponibles - HardWareHouse{% endblock %}
 
 {% block body %}
-    <div class="relative flex flex-col md:flex-row gap-10">
-        <div class="basis-1/4 relative">
-            {% include '_partials/filters/_filters.html.twig' %}
-        </div>
-        <div class="basis-3/4">
+    <div class="relative flex flex-col-reverse md:flex-row-reverse gap-10"
+         data-controller="filter"
+         data-filter-filter-url-value="{{ path('product.index') }}">
+
+        {# ── Résultats ────────────────────────────────────────── #}
+        <div class="min-w-0 flex-1" data-filter-target="results">
+            {# Loading #}
+            <div class="hidden text-center py-8" data-filter-target="loading">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <p class="mt-2 text-gray-600">Filtrage en cours...</p>
+            </div>
+
             <h1>Products list</h1>
+
             {% if products is not null %}
-                <div class="mt-5 grid gap-6 grid-cols-auto-fit-210">
-                    {% for product in products %}
-                        {% include '_partials/_product_card.html.twig' with {product: product} %}
-                    {% endfor %}
-                </div>
+                {% include '_partials/_products_grid.html.twig' with { products: products } only %}
             {% endif %}
 
-            {% include '_partials/_pagination.html.twig' with {pagination: pagination} %}
+            <div data-filter-pagination>
+                {% include '_partials/_pagination_ajax.html.twig' with { pagination: pagination } only %}
+            </div>
+        </div>
+
+        {# ── Filtres ──────────────────────────────────────────── #}
+        <div class="lg:w-72 lg:shrink-0">
+            <form data-filter-target="form" class="sticky top-2">
+                {% include '_partials/filters/_filters.html.twig' with {
+                    categories: categories,
+                    brands: brands,
+                    limit: limit
+                } only %}
+            </form>
         </div>
     </div>
 {% endblock %}

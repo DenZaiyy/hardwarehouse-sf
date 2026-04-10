@@ -1,3 +1,169 @@
-<aside class="sticky top-0 flex flex-col gap-3.75 w-full max-w-80">
-    <h2>Filtres</h2>
+<aside class="w-full">
+    <div class="mb-5 flex items-center justify-between gap-3">
+        <h2 class="text-lg font-semibold text-slate-900">
+            Filtres
+            <span
+                class="ml-1 hidden text-sm font-normal text-slate-500"
+                data-filter-target="count"
+            ></span>
+        </h2>
+
+        <button
+            type="button"
+            class="inline-flex items-center rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition hover:opacity-90"
+            data-action="filter#clearAll"
+        >
+            Effacer tout
+        </button>
+    </div>
+
+    <div class="space-y-4">
+        {# Prix #}
+        {% component 'filter_accordion' with {
+            title: "Prix",
+            open: false
+        } %}
+            {% block content %}
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="min_price" class="mb-1 block text-xs font-medium text-slate-600">
+                            Min
+                        </label>
+                        <input
+                            type="number"
+                            name="min_price"
+                            id="min_price"
+                            data-filter-param="minPrice"
+                            min="0"
+                            step="0.01"
+                            placeholder="0"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        >
+                    </div>
+
+                    <div>
+                        <label for="max_price" class="mb-1 block text-xs font-medium text-slate-600">
+                            Max
+                        </label>
+                        <input
+                            type="number"
+                            name="max_price"
+                            id="max_price"
+                            data-filter-param="maxPrice"
+                            min="0"
+                            step="0.01"
+                            placeholder="9999"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        >
+                    </div>
+                </div>
+            {% endblock %}
+        {% endcomponent %}
+
+        {# Catégories #}
+        {% if categories is defined and categories is not empty %}
+            {% component 'filter_accordion' with {
+                title: "Catégorie",
+                open: true
+            } %}
+                {% block content %}
+                    <div class="space-y-3 max-h-48 overflow-y-auto">
+                        {% for category in categories %}
+                            <label class="flex cursor-pointer items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    name="categories[]"
+                                    data-filter-param="categories"
+                                    value="{{ category.slug }}"
+                                    class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                                >
+
+                                <span class="text-sm font-medium text-slate-800">
+                                        {{ category.name }}
+                                    {% if category.productsCount is defined and category.productsCount %}
+                                        <span class="text-slate-500">({{ category.productsCount }})</span>
+                                    {% endif %}
+                                    </span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                {% endblock %}
+            {% endcomponent %}
+        {% endif %}
+
+        {# Marques #}
+        {% if brands is defined and brands is not empty %}
+            {% component 'filter_accordion' with {
+                title: "Marque",
+                open: true
+            } %}
+                {% block content %}
+                    <div class="space-y-3 max-h-48 overflow-y-auto">
+                        {% for brand in brands %}
+                            <label class="flex cursor-pointer items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    name="brands[]"
+                                    data-filter-param="brands"
+                                    value="{{ brand.slug }}"
+                                    class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                                >
+
+                                <span class="text-sm font-medium text-slate-800">
+                                        {{ brand.name }}
+                                    {% if brand.productsCount is defined and brand.productsCount %}
+                                        <span class="text-slate-500">({{ brand.productsCount }})</span>
+                                    {% endif %}
+                                    </span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                {% endblock %}
+            {% endcomponent %}
+        {% endif %}
+
+        {# Nombre de résultats #}
+        {% component 'filter_accordion' with {
+            title: "Nombre de résultats",
+            open: false
+        } %}
+            {% block content %}
+                <label for="limit" class="mb-2 block text-xs font-medium text-slate-600">
+                    <select
+                        name="limit"
+                        id="limit"
+                        class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    >
+                        <option value="{{ limit }}">{{ limit }}</option>
+                        <option value="{{ limit + 10 }}">{{ limit + 10 }}</option>
+                        <option value="{{ limit + 20 }}">{{ limit + 20 }}</option>
+                    </select>
+                </label>
+            {% endblock %}
+        {% endcomponent %}
+
+        {# Attributs #}
+        {% if attributes is defined and attributes is not empty %}
+            {% component 'filter_accordion' with {
+                title: "Caractéristiques",
+                open: true
+            } %}
+                {% block content %}
+                    <div class="space-y-3 max-h-48 overflow-y-auto">
+                        {% for attribute in attributes %}
+                            <label class="flex cursor-pointer items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    name="attributes[]"
+                                    value="{{ attribute.id }}"
+                                    class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
+                                >
+                                <span class="text-sm font-medium text-slate-800">{{ attribute.name }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                {% endblock %}
+            {% endcomponent %}
+        {% endif %}
+    </div>
 </aside>

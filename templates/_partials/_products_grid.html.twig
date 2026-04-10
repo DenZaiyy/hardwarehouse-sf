@@ -1,0 +1,6 @@
+<div class="mt-5 grid grid-cols-[repeat(auto-fit,minmax(210px,1fr))] gap-6 items-stretch"
+     data-filter-grid>
+    {% for product in products %}
+        {% include '_partials/_product_card.html.twig' with { product: product } only %}
+    {% endfor %}
+</div>
