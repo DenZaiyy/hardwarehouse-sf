@@ -1,0 +1,14 @@
+#!/bin/sh
+# Vérifications rapides (style + analyse statique, sans booter le kernel Symfony).
+# Pour ignorer ponctuellement : git commit --no-verify
+
+set -e
+
+echo "→ pre-commit: ecs"
+vendor/bin/ecs check --no-progress-bar
+
+echo "→ pre-commit: rector (dry-run)"
+vendor/bin/rector --dry-run --no-progress-bar
+
+echo "→ pre-commit: phpstan"
+vendor/bin/phpstan analyse --no-progress
