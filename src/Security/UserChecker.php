@@ -21,8 +21,12 @@ class UserChecker implements UserCheckerInterface
         }
     }
 
+    /**
+     * No post-authentication check is currently required (e.g. no forced password
+     * reset or similar flow exists yet); banned accounts are already rejected in
+     * checkPreAuth(). Intentionally a no-op, kept to satisfy UserCheckerInterface.
+     */
     public function checkPostAuth(UserInterface $user, ?TokenInterface $token = null): void
     {
-        // TODO: Implement checkPostAuth() method.
     }
 }

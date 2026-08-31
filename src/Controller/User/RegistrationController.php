@@ -62,16 +62,17 @@ class RegistrationController extends AbstractController
             // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
+            $this->em->persist($user);
+            $this->em->flush();
+
             /** @var ?UploadedFile $avatar */
             $avatar = $form->get('avatar')->getData();
             if ($avatar instanceof UploadedFile) {
-                $uploadedFile = $this->uploadService->upload($avatar, $user->getUsername(), type: 'avatar');
+                $uploadedFile = $this->uploadService->uploadAvatar($avatar, $user);
 
                 $user->setAvatar($uploadedFile);
+                $this->em->flush();
             }
-
-            $this->em->persist($user);
-            $this->em->flush();
 
             // generate a signed url and email it to the user
             $this->emailVerifier->sendEmailConfirmation(
@@ -84,11 +85,10 @@ class RegistrationController extends AbstractController
                     ->htmlTemplate('security/registration/confirmation_email.html.twig')
             );
 
-            $this->addFlash('success', $translator->trans('user.registration.flash.success'));
-            $this->redirectToRoute('homepage');
-
             $this->mailerService->sendAdminNotification('Inscription', sprintf("Un nouvel utilisateur c'est inscrit sur le site : %s (%s)", $user->getUsername(), $user->getEmail()));
             $security->login($user, 'form_login', 'main');
+
+            $this->addFlash('success', $translator->trans('user.registration.flash.success'));
 
             return $this->redirectToRoute('homepage');
         }
