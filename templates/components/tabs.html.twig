@@ -18,7 +18,7 @@
         <div class="p-5">
             {% for item in items %}
                 <div data-tabs-target="panel" role="tabpanel" {% if loop.index0 != default %}hidden{% endif %}>
-                    {{ item.content|raw }}
+                    {{ item.trusted|default(false) ? item.content|raw : item.content }}
                 </div>
             {% endfor %}
         </div>
