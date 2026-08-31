@@ -1,8 +1,10 @@
-# 🚀 Guide de Déploiement CI/CD - HardwareHouse
+# Guide de Déploiement CI/CD - HardwareHouse
 
 Ce guide vous explique comment configurer le déploiement automatique complet de votre application Symfony sur votre VPS OVH via GitHub Actions.
 
-## 🌊 Pipeline de Déploiement
+> Pour la configuration réseau en production (Cloudflare, verrouillage de l'origine, pare-feu), voir [INFRASTRUCTURE.md](INFRASTRUCTURE.md).
+
+## Pipeline de Déploiement
 
 ```mermaid
 graph LR
@@ -14,10 +16,10 @@ graph LR
 
 ### Workflow Automatisé :
 1. **`dev`** → Push → Quality + Audit + Tests → Auto-merge vers `test`
-2. **`test`** → Re-tests → Création PR automatique vers `main`  
+2. **`test`** → Re-tests → Création PR automatique vers `main`
 3. **`main`** → Merge manuel → Triple validation → Déploiement production
 
-## 📋 Prérequis
+## Prérequis
 
 ### Sur votre VPS OVH :
 - **PHP 8.4+** avec extensions (ctype, iconv, json, mbstring, pdo_mysql)
@@ -32,7 +34,7 @@ graph LR
 - Permissions Actions activées
 - Secrets configurés (voir section dédiée)
 
-## 🔧 Configuration du Serveur
+## Configuration du Serveur
 
 ### 1. Structure recommandée
 ```bash
@@ -66,21 +68,23 @@ sudo chmod +x /var/www/hardwarehouse/bin/console
 
 ### 4. Configuration Nginx & SSL
 
-> ✅ **Votre VPS dispose déjà de :**
+> **Votre VPS dispose déjà de :**
 > - Configuration Nginx optimisée pour votre domaine
 > - Certificat SSL via Certbot (Let's Encrypt)
 > - Renouvellement automatique HTTPS
+
+> Le site étant proxifié par Cloudflare en production, la configuration Nginx réelle inclut aussi le module `real_ip` et l'Authenticated Origin Pulls (mTLS) — détaillés dans [INFRASTRUCTURE.md](INFRASTRUCTURE.md#5-restitution-de-lip-réelle-du-visiteur-real_ip). L'exemple ci-dessous ne couvre que la base Nginx/Certbot.
 
 **Configuration recommandée pour le mode maintenance :**
 ```nginx
 server {
     listen 443 ssl http2;
     server_name votre-domaine.com;
-    
+
     # Certificats SSL (gérés par Certbot)
     ssl_certificate /etc/letsencrypt/live/votre-domaine.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/votre-domaine.com/privkey.pem;
-    
+
     root /var/www/hardwarehouse/public;
     index index.php;
 
@@ -88,7 +92,7 @@ server {
     if (-f /var/www/hardwarehouse/var/maintenance.flag) {
         return 503;
     }
-    
+
     error_page 503 @maintenance;
     location @maintenance {
         rewrite ^(.*)$ /maintenance.html break;
@@ -126,7 +130,7 @@ sudo certbot certificates
 sudo certbot renew --dry-run
 ```
 
-## 🔐 Secrets GitHub Requis
+## Secrets GitHub Requis
 
 Dans `Settings > Secrets and variables > Actions` :
 
@@ -142,7 +146,7 @@ PROJECT_PATH=/var/www/hardwarehouse  # Chemin du projet
 ```
 
 ### **Base de données (Tests)**
-> ✅ **Configuration PostgreSQL automatique**  
+> **Configuration PostgreSQL automatique**
 > Les tests utilisent maintenant une configuration PostgreSQL intégrée sans secrets requis.
 
 ### **Auto-merge dev→test**
@@ -152,19 +156,19 @@ PAT_TOKEN=ghp_xxxxxxxxxxxx           # Personal Access Token GitHub
 > **Créer PAT :** GitHub → Settings → Developer settings → Personal access tokens → Generate new token
 > **Permissions :** `repo`, `workflow`, `write:packages`
 
-## 🚀 Workflows et Processus
+## Workflows et Processus
 
 ### **ci-dev.yml** - Branche `dev`
 **Déclenchement :** Push ou PR sur `dev`
 ```
 Jobs:
 ├── quality     # ECS, Rector, PHPStan, Lint
-├── audit       # Composer security audit  
+├── audit       # Composer security audit
 ├── tests       # PHPUnit avec PostgreSQL
 └── auto-merge  # Auto-merge vers test si succès
 ```
 
-### **ci-test.yml** - Branche `test` 
+### **ci-test.yml** - Branche `test`
 **Déclenchement :** Push sur `test`
 ```
 Jobs:
@@ -184,21 +188,21 @@ Jobs:
 └── deploy-production # Déploiement VPS
 ```
 
-## 🎯 Processus de Déploiement Production
+## Processus de Déploiement Production
 
 ### **Phase 1 : Validation Locale**
-- ✅ Checkout optimisé (`fetch-depth: 1`)
-- 🐘 Setup PHP 8.4 + Composer
-- 📦 Cache Composer intelligent 
-- 🔍 Validation `composer.json`
-- 🧪 Dry-run installation
+- Checkout optimisé (`fetch-depth: 1`)
+- Setup PHP 8.4 + Composer
+- Cache Composer intelligent
+- Validation `composer.json`
+- Dry-run installation
 
 ### **Phase 2 : Déploiement SSH Optimisé**
 ```bash
 # Sauvegarde automatique
 sudo cp -r $PROJECT_PATH /var/backups/hardwarehouse/backup-$(date +%Y%m%d_%H%M%S)
 
-# Mode maintenance temporaire  
+# Mode maintenance temporaire
 touch var/maintenance.flag
 
 # Mise à jour code
@@ -210,7 +214,7 @@ composer install --no-dev --optimize-autoloader --classmap-authoritative
 
 # Assets avec cache
 php bin/console asset-map:compile
-php bin/console importmap:install  
+php bin/console importmap:install
 php bin/console tailwind:build --minify
 
 # Base de données
@@ -232,21 +236,21 @@ rm -f var/maintenance.flag
 php bin/console about --env=prod
 ```
 
-## 📊 Optimisations Performance
+## Optimisations Performance
 
 ### **Cache Strategy**
-- 🔄 Cache Composer partagé entre jobs
-- 📦 Clés de cache spécialisées par workflow
-- ⚡ Restoration en cascade pour maximiser hits
+- Cache Composer partagé entre jobs
+- Clés de cache spécialisées par workflow
+- Restoration en cascade pour maximiser hits
 
 ### **Déploiement Optimizations**
-- ⚡ `--classmap-authoritative` Composer
-- 🔥 Cache Symfony pré-chauffé  
-- 🎯 `--minify` Tailwind CSS
-- 🔧 Mode maintenance zero-downtime
-- 📈 Concurrency control production
+- `--classmap-authoritative` Composer
+- Cache Symfony pré-chauffé
+- `--minify` Tailwind CSS
+- Mode maintenance zero-downtime
+- Concurrency control production
 
-## 📝 Variables d'Environnement Serveur
+## Variables d'Environnement Serveur
 
 Créez `/var/www/hardwarehouse/.env.local` :
 ```bash
@@ -256,7 +260,7 @@ APP_SECRET=votre-secret-32-caracteres-aleatoires
 DATABASE_URL="mysql://user:password@127.0.0.1:3306/hardwarehouse_prod"
 MAILER_DSN=smtp://localhost:587
 
-# Cache & Performance  
+# Cache & Performance
 REDIS_URL=redis://localhost:6379
 OPCACHE_ENABLE=1
 
@@ -264,7 +268,7 @@ OPCACHE_ENABLE=1
 LOG_LEVEL=error
 ```
 
-## 🔄 Workflow de Développement
+## Workflow de Développement
 
 ### **Développement Quotidien**
 ```bash
@@ -291,24 +295,24 @@ git push origin dev
 ```
 
 ### **Points de Contrôle**
-- 🔒 **Seule action manuelle :** Merge PR `test → main`
-- ✅ **Triple sécurité :** Tests sur dev, test, et main
-- 🛡️ **Protection :** Environment production avec review
-- 📊 **Monitoring :** Logs à chaque étape
+- **Seule action manuelle :** Merge PR `test → main`
+- **Triple sécurité :** Tests sur dev, test, et main
+- **Protection :** Environment production avec review
+- **Monitoring :** Logs à chaque étape
 
-## 🔍 Monitoring et Logs
+## Monitoring et Logs
 
 ### **GitHub Actions**
-- 📊 Interface Actions pour tous les workflows
-- 📁 Artifacts d'audit sécurité téléchargeables
-- ⏱️ Métriques de performance par job
+- Interface Actions pour tous les workflows
+- Artifacts d'audit sécurité téléchargeables
+- Métriques de performance par job
 
 ### **Serveur Production**
 ```bash
 # Logs de déploiement
 tail -f /var/log/syslog | grep deploy
 
-# Logs Symfony  
+# Logs Symfony
 tail -f /var/www/hardwarehouse/var/log/prod.log
 
 # Logs Nginx
@@ -334,7 +338,7 @@ ls -la var/cache/prod/
 find var/ -not -writable -type d
 ```
 
-## 🆘 Dépannage Avancé
+## Dépannage Avancé
 
 ### **Échec de Déploiement**
 ```bash
@@ -377,35 +381,36 @@ php bin/console importmap:install
 php bin/console tailwind:build --minify
 ```
 
-## 📈 Métriques de Performance
+## Métriques de Performance
 
 ### **Temps d'Exécution Moyens**
-- 📊 **Quality Analysis :** ~2-3 min
-- 🔒 **Security Audit :** ~1-2 min
-- 🧪 **Tests Suite :** ~3-5 min  
-- 🚀 **Production Deploy :** ~3-4 min
-- 🏁 **Total Pipeline :** ~10-15 min
+- **Quality Analysis :** ~2-3 min
+- **Security Audit :** ~1-2 min
+- **Tests Suite :** ~3-5 min
+- **Production Deploy :** ~3-4 min
+- **Total Pipeline :** ~10-15 min
 
 ### **Optimisations Actives**
-- 📦 Cache hits Composer : ~80%
-- ⚡ Parallel job execution
-- 🔄 Incremental builds
-- 🎯 Selective cache invalidation
+- Cache hits Composer : ~80%
+- Parallel job execution
+- Incremental builds
+- Selective cache invalidation
 
-## 🔗 Ressources Utiles
+## Ressources Utiles
 
 ### **Documentation**
+- [INFRASTRUCTURE.md](INFRASTRUCTURE.md) — Cloudflare, verrouillage de l'origine, pare-feu réseau
 - [Symfony Deployment](https://symfony.com/doc/current/deployment.html)
 - [GitHub Actions](https://docs.github.com/en/actions)
 - [Composer Optimization](https://getcomposer.org/doc/articles/autoloader-optimization.md)
 
 ### **Support**
 En cas de problème, vérifiez dans l'ordre :
-1. 📊 Logs GitHub Actions 
-2. 🖥️ Logs serveur production
-3. 📝 Logs application Symfony
-4. 🔍 Status services système
+1. Logs GitHub Actions
+2. Logs serveur production
+3. Logs application Symfony
+4. Status services système
 
 ---
 
-🎉 **Votre pipeline CI/CD est maintenant complètement automatisé et optimisé !**
+**Votre pipeline CI/CD est maintenant complètement automatisé et optimisé.**

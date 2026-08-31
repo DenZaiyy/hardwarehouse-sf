@@ -21,6 +21,14 @@ class CartService
 {
     private const float VAT_RATE = 0.20;
 
+    /**
+     * Per-request memoization of getCurrentCart(): getCart()/getCount()/computeTotals() are
+     * routinely called several times in the same request (header badge, cart dropdown, page
+     * body...) and each used to trigger its own DB lookup for the same row.
+     */
+    private ?Cart $currentCart = null;
+    private bool $currentCartResolved = false;
+
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly CartRepository $cartRepository,
@@ -203,6 +211,9 @@ class CartService
         // Remove the cart - CartLines will be automatically deleted due to orphanRemoval: true
         $this->entityManager->remove($cart);
         $this->entityManager->flush();
+
+        $this->currentCart = null;
+        $this->currentCartResolved = true;
     }
 
     public function associateCartToUser(User $user): void
@@ -232,22 +243,34 @@ class CartService
             }
 
             $this->entityManager->flush();
+
+            // The cart resolved earlier in this request (if any) is now stale: it may have
+            // been merged/removed, or a guest cart now belongs to $user.
+            $this->currentCartResolved = false;
         }
     }
 
     private function getCurrentCart(): ?Cart
     {
+        if ($this->currentCartResolved) {
+            return $this->currentCart;
+        }
+
         $user = $this->security->getUser();
 
         // If user is logged in and has a valid ID, find cart by user
         if ($user instanceof User && null !== $user->getId()) {
-            return $this->cartRepository->findOneBy(['user' => $user]);
+            $cart = $this->cartRepository->findOneBy(['user' => $user]);
+        } else {
+            // If guest or user without ID, find cart by session token
+            $sessionToken = $this->getSessionToken();
+            $cart = $this->cartRepository->findOneBy(['session_token' => $sessionToken, 'user' => null]);
         }
 
-        // If guest or user without ID, find cart by session token
-        $sessionToken = $this->getSessionToken();
+        $this->currentCart = $cart;
+        $this->currentCartResolved = true;
 
-        return $this->cartRepository->findOneBy(['session_token' => $sessionToken, 'user' => null]);
+        return $cart;
     }
 
     private function getOrCreateCart(): Cart
@@ -269,6 +292,9 @@ class CartService
         }
 
         $this->entityManager->persist($cart);
+
+        $this->currentCart = $cart;
+        $this->currentCartResolved = true;
 
         return $cart;
     }

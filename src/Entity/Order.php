@@ -13,6 +13,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_REFERENCE', fields: ['reference'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_ORDER_STRIPE_PAYMENT_INTENT_ID', fields: ['stripePaymentIntentId'])]
 #[UniqueEntity(fields: ['reference'], message: 'There is already an order with this reference')]
 #[ORM\Table(name: '`order`')]
 #[ORM\HasLifecycleCallbacks]
@@ -63,6 +64,21 @@ class Order
 
     #[ORM\Column(length: 10)]
     private ?string $currency = null;
+
+    /**
+     * Stripe PaymentIntent id attached right after the Checkout Session is created.
+     * The single reliable key to resolve charge/refund/dispute webhook events, which
+     * carry no order_reference metadata of their own (see StripePaymentEventHandler).
+     */
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $stripePaymentIntentId = null;
+
+    /**
+     * Id of the last Stripe event that mutated this order, for webhook idempotency
+     * (Stripe redelivers events on retry).
+     */
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $lastStripeEventId = null;
 
     /**
      * @var Collection<int, Shipment>
@@ -251,6 +267,30 @@ class Order
     public function setCurrency(string $currency): static
     {
         $this->currency = $currency;
+
+        return $this;
+    }
+
+    public function getStripePaymentIntentId(): ?string
+    {
+        return $this->stripePaymentIntentId;
+    }
+
+    public function setStripePaymentIntentId(?string $stripePaymentIntentId): static
+    {
+        $this->stripePaymentIntentId = $stripePaymentIntentId;
+
+        return $this;
+    }
+
+    public function getLastStripeEventId(): ?string
+    {
+        return $this->lastStripeEventId;
+    }
+
+    public function setLastStripeEventId(?string $lastStripeEventId): static
+    {
+        $this->lastStripeEventId = $lastStripeEventId;
 
         return $this;
     }

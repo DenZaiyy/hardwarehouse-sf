@@ -2,10 +2,10 @@
 
 namespace App\Service;
 
+use App\Entity\User;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\String\Slugger\SluggerInterface;
 
 class ImageUploadService
 {
@@ -16,53 +16,33 @@ class ImageUploadService
         'image/webp',
     ];
 
-    private const array UPLOAD_TYPES = [
-        'avatar',
-        'product',
-        'category',
-    ];
-
     public function __construct(
         #[Autowire('%kernel.project_dir%/public/uploads/images')]
         private readonly string $uploadDirectory,
-        private readonly SluggerInterface $slugger,
     ) {
     }
 
-    public function upload(UploadedFile $file, ?string $username = null, ?string $subdirectory = null, ?string $type = null): string
+    /**
+     * @return string the stored filename, to save on User::avatar
+     */
+    public function uploadAvatar(UploadedFile $file, User $user): string
     {
         $this->validateMimeType($file);
-        $this->valideFileSize($file);
+        $this->validateFileSize($file);
 
-        if (in_array($type, self::UPLOAD_TYPES, true)) {
-            switch ($type) {
-                case 'avatar':
-                    $subdirectory = 'avatar';
-                    $newFilename = sprintf('%s.%s', strtolower((string) $username), $file->guessExtension());
-                    break;
-                case 'product':
-                    $subdirectory = 'product';
-                    $newFilename = sprintf('%s-%s.%s', $file->getClientOriginalName(), uniqid('', true), $file->guessExtension());
-                    break;
-                case 'category':
-                    $subdirectory = 'category';
-                    $newFilename = sprintf('%s-%s.%s', $file->getClientOriginalName(), uniqid('', true), $file->guessExtension());
-                    break;
-                default:
-                    throw new \InvalidArgumentException(sprintf('Type d\'upload non géré : "%s"', $type));
-            }
-        } else {
-            $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            $safeFilename = strtolower($this->slugger->slug($originalFilename));
-            $newFilename = sprintf('%s-%s.%s', $safeFilename, uniqid('', true), $file->guessExtension());
+        // Keyed by the user's id: stable and guaranteed unique, unlike the username
+        // (no DB uniqueness guarantee prior to this, and unsafe to use verbatim as a
+        // filename). Re-uploading naturally replaces the previous avatar file instead
+        // of accumulating orphans. $user must already be persisted (has an id).
+        $userId = $user->getId();
+        if (null === $userId) {
+            throw new \LogicException('Cannot upload an avatar for a User that has not been persisted yet.');
         }
 
-        $targetDirectory = $subdirectory
-            ? $this->uploadDirectory.'/'.$subdirectory
-            : $this->uploadDirectory;
+        $newFilename = sprintf('%d.%s', $userId, $file->guessExtension());
 
         try {
-            $file->move($targetDirectory, $newFilename);
+            $file->move($this->uploadDirectory.'/avatar', $newFilename);
         } catch (FileException $e) {
             throw new \RuntimeException('Impossible d\'uploader le fichier : '.$e->getMessage());
         }
@@ -79,12 +59,34 @@ class ImageUploadService
         }
     }
 
-    private function valideFileSize(UploadedFile $file): void
+    private function validateFileSize(UploadedFile $file): void
     {
-        $maxSize = ini_get('upload_max_filesize');
+        $maxBytes = $this->parseIniSize((string) ini_get('upload_max_filesize'));
 
-        if ($file->getSize() > $maxSize) {
+        if ($file->getSize() > $maxBytes) {
             throw new \InvalidArgumentException('Fichier trop volumineux.');
         }
+    }
+
+    /**
+     * Converts a php.ini shorthand byte value (e.g. "8M", "2G") to a plain byte count.
+     * Comparing UploadedFile::getSize() (an int) directly against ini_get()'s raw string
+     * does not compare sizes at all under PHP 8's string/number comparison rules.
+     */
+    private function parseIniSize(string $iniValue): int
+    {
+        if ('' === $iniValue) {
+            return PHP_INT_MAX;
+        }
+
+        $unit = strtolower(substr($iniValue, -1));
+        $value = (int) $iniValue;
+
+        return match ($unit) {
+            'g' => $value * 1024 * 1024 * 1024,
+            'm' => $value * 1024 * 1024,
+            'k' => $value * 1024,
+            default => (int) $iniValue,
+        };
     }
 }

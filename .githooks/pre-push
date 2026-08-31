@@ -1,0 +1,17 @@
+#!/bin/sh
+# Gate complet avant push : qualité (lint:yaml/twig/container + style + analyse statique)
+# puis la suite PHPUnit complète. Nécessite la base de données de test locale
+# (APP_ENV=test, voir .env.test) déjà migrée.
+# Pour ignorer ponctuellement : git push --no-verify
+
+set -e
+
+echo "→ pre-push: composer app:code-quality"
+composer app:code-quality
+
+# --no-coverage : phpunit.dist.xml déclare un rapport de couverture HTML ; sans
+# driver (Xdebug/PCOV) installé, phpunit échoue silencieusement en "No tests
+# executed!" tout en sortant en code 0 — ce flag garantit que la suite tourne
+# réellement, avec ou sans driver de couverture disponible en local.
+echo "→ pre-push: phpunit"
+vendor/bin/phpunit --no-coverage

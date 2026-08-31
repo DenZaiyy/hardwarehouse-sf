@@ -18,6 +18,6 @@ class CategoryExtensionRuntime implements RuntimeExtensionInterface
      */
     public function getCategories(): array
     {
-        return $this->apiService->fetchAll('categories', CategoryDto::class);
+        return $this->apiService->fetchAllCached('categories', CategoryDto::class);
     }
 }

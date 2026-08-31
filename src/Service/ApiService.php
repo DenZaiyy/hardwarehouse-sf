@@ -10,6 +10,8 @@ use App\Exception\Api\ApiUnavailableException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -24,6 +26,7 @@ readonly class ApiService
         private HttpClientInterface $apiClient,
         private SerializerInterface $serializer,
         private LoggerInterface $logger,
+        private CacheInterface $cache,
     ) {
     }
 
@@ -75,6 +78,40 @@ readonly class ApiService
             json_encode($payload, JSON_THROW_ON_ERROR),
             $dtoClass.'[]',
             'json'
+        );
+    }
+
+    /**
+     * Same as fetchAll(), cached for a short TTL. Reserved for slow-changing, non-user-specific
+     * catalog data (categories, brands) that would otherwise be re-fetched from the external API
+     * multiple times per page (e.g. once per header render) or on every single page load.
+     *
+     * @template T of object
+     *
+     * @param class-string<T> $dtoClass
+     *
+     * @return array<T>
+     *
+     * @throws ClientExceptionInterface
+     * @throws ExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws \JsonException
+     * @throws DecodingExceptionInterface
+     */
+    public function fetchAllCached(string $endpoint, string $dtoClass, int $ttl = 300): array
+    {
+        $cacheKey = 'api_fetch_all.'.preg_replace('/[^A-Za-z0-9_.]/', '_', $endpoint);
+
+        /** @var array<T> */
+        return $this->cache->get(
+            $cacheKey,
+            function (ItemInterface $item) use ($endpoint, $dtoClass, $ttl) {
+                $item->expiresAfter($ttl);
+
+                return $this->fetchAll($endpoint, $dtoClass);
+            }
         );
     }
 
