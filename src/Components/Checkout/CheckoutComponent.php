@@ -135,6 +135,58 @@ final class CheckoutComponent
                 || $state->showAddressForm);
     }
 
+    /**
+     * @return list<array{
+     *     id: int|null,
+     *     label: string|null,
+     *     firstName: string|null,
+     *     lastName: string|null,
+     *     address1: string|null,
+     *     postcode: string|null,
+     *     city: string|null,
+     *     country: string|null,
+     *     isDefault: bool|null
+     * }>
+     */
+    public function getSavedBillingAddresses(): array
+    {
+        $user = $this->getUser();
+
+        if (!$user) {
+            return [];
+        }
+
+        $addresses = $this->addressManager->getUserBillingAddresses($user);
+
+        return array_values(array_map($this->mapAddressToArray(...), $addresses));
+    }
+
+    public function shouldShowBillingAddressSelection(): bool
+    {
+        $state = $this->getState();
+        $user = $this->getUser();
+
+        return $state->addressCompleted
+            && !$state->billingSameAsDelivery
+            && !$state->billingCompleted
+            && $user instanceof User
+            && \count($this->addressManager->getUserBillingAddresses($user)) > 0
+            && !$state->showBillingAddressForm;
+    }
+
+    public function shouldShowBillingAddressForm(): bool
+    {
+        $state = $this->getState();
+        $user = $this->getUser();
+
+        return $state->addressCompleted
+            && !$state->billingSameAsDelivery
+            && !$state->billingCompleted
+            && (!$user instanceof User
+                || 0 === \count($this->addressManager->getUserBillingAddresses($user))
+                || $state->showBillingAddressForm);
+    }
+
     public function mount(): void
     {
         $state = $this->identityManager->syncAuthenticatedUser($this->stateManager->getState());
@@ -162,6 +214,10 @@ final class CheckoutComponent
 
         if (2 === $state->currentStep && $this->shouldShowAddressForm()) {
             return $this->createAddressForm($state);
+        }
+
+        if ($this->shouldShowBillingAddressForm()) {
+            return $this->createBillingAddressForm($state);
         }
 
         if (3 === $state->currentStep) {
@@ -198,6 +254,25 @@ final class CheckoutComponent
         $data->postcode = $deliveryAddress['postcode'] ?? null;
         $data->city = $deliveryAddress['city'] ?? null;
         $data->country = $deliveryAddress['country'] ?? 'FR';
+
+        return $this->formFactory->create(CheckoutAddressType::class, $data, [
+            'csrf_protection' => false,
+        ]);
+    }
+
+    private function createBillingAddressForm(CheckoutState $state): FormInterface
+    {
+        $identity = $state->identity;
+        $billingAddress = $state->billingAddress;
+
+        $data = new AddressData();
+        $data->label = $billingAddress['label'] ?? 'Facturation';
+        $data->firstName = $billingAddress['firstName'] ?? ($identity['firstName'] ?? null);
+        $data->lastName = $billingAddress['lastName'] ?? ($identity['lastName'] ?? null);
+        $data->address1 = $billingAddress['address1'] ?? null;
+        $data->postcode = $billingAddress['postcode'] ?? null;
+        $data->city = $billingAddress['city'] ?? null;
+        $data->country = $billingAddress['country'] ?? 'FR';
 
         return $this->formFactory->create(CheckoutAddressType::class, $data, [
             'csrf_protection' => false,
@@ -316,6 +391,54 @@ final class CheckoutComponent
     }
 
     #[LiveAction]
+    public function toggleBillingSameAsDelivery(#[LiveArg] bool $sameAsDelivery): void
+    {
+        $state = $this->addressManager->saveBillingSameAsDelivery($this->getState(), $sameAsDelivery);
+        $this->stateManager->saveState($state);
+
+        $this->resetForm();
+    }
+
+    #[LiveAction]
+    public function saveBillingAddress(): void
+    {
+        $this->submitForm();
+
+        /** @var AddressData $data */
+        $data = $this->getForm()->getData();
+        $state = $this->getState();
+        $user = $this->getUser();
+
+        if ($user instanceof User) {
+            $hasExisting = \count($this->addressManager->getUserBillingAddresses($user)) > 0;
+
+            $state = $this->addressManager->createBillingAddressForUser(
+                $state,
+                $user,
+                $data,
+                !$hasExisting
+            );
+        } else {
+            $state = $this->addressManager->saveGuestBillingAddress($state, $data);
+        }
+
+        $this->stateManager->saveState($state);
+        $this->resetForm();
+    }
+
+    #[LiveAction]
+    public function useNewBillingAddressForm(): RedirectResponse
+    {
+        $state = $this->getState();
+        $state->billingAddressId = null;
+        $state->showBillingAddressForm = true;
+
+        $this->stateManager->saveState($state);
+
+        return new RedirectResponse($this->urlGenerator->generate('checkout.index'));
+    }
+
+    #[LiveAction]
     public function saveDeliveryChoice(#[LiveArg] int $carrierId = 0): void
     {
         $state = $this->deliveryManager->saveCarrier($this->getState(), $carrierId);
@@ -345,6 +468,27 @@ final class CheckoutComponent
         $this->stateManager->saveState($state);
 
         // Force form re-instantiation to refresh CSRF token
+        $this->resetForm();
+    }
+
+    #[LiveAction]
+    public function selectBillingAddress(#[LiveArg] int $addressId): void
+    {
+        $user = $this->getUser();
+
+        if (!$user) {
+            return;
+        }
+
+        $address = $this->addressManager->findOwnedBillingAddressById($user, $addressId);
+
+        if (!$address) {
+            return;
+        }
+
+        $state = $this->addressManager->saveSelectedBillingAddress($this->getState(), $address);
+        $this->stateManager->saveState($state);
+
         $this->resetForm();
     }
 
@@ -547,6 +691,11 @@ final class CheckoutComponent
         $sessionUrl = $session->url;
         if (null === $sessionUrl) {
             throw new \RuntimeException('Stripe checkout session URL is missing');
+        }
+
+        $paymentIntentId = $session->payment_intent;
+        if (is_string($paymentIntentId)) {
+            $this->orderService->attachStripeSession($order, $paymentIntentId);
         }
 
         return new RedirectResponse($sessionUrl);

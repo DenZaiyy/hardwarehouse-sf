@@ -6,7 +6,6 @@ use App\Entity\Address;
 use App\Entity\User;
 use App\Enum\AddressType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
@@ -16,9 +15,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * @extends AbstractCrudController<Address>
+ * @extends AbstractSecuredCrudController<Address>
  */
-class AddressCrudController extends AbstractCrudController
+class AddressCrudController extends AbstractSecuredCrudController
 {
     public function __construct(private readonly TranslatorInterface $translator)
     {

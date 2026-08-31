@@ -15,7 +15,10 @@
             form: form,
             shouldShowAddressSelection: this.shouldShowAddressSelection,
             shouldShowAddressForm: this.shouldShowAddressForm,
-            savedDeliveryAddresses: this.savedDeliveryAddresses
+            savedDeliveryAddresses: this.savedDeliveryAddresses,
+            shouldShowBillingAddressSelection: this.shouldShowBillingAddressSelection,
+            shouldShowBillingAddressForm: this.shouldShowBillingAddressForm,
+            savedBillingAddresses: this.savedBillingAddresses
         } only %}
 
         {% include 'components/Checkout/steps/_step_delivery.html.twig' with {

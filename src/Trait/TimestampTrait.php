@@ -62,9 +62,7 @@ trait TimestampTrait
      */
     public function formatDateTime(?\DateTimeImmutable $aDateTime = null, string $pattern = 'eeee d MMMM yyyy', string $separator = ' ', string $locale = 'fr_FR', string $timeZone = 'Europe/Paris'): string
     {
-        if (null === $aDateTime) {
-            $aDateTime = new \DateTimeImmutable();
-        }
+        $aDateTime ??= new \DateTimeImmutable();
 
         $formatter = new \IntlDateFormatter($locale, \IntlDateFormatter::SHORT, \IntlDateFormatter::SHORT, $timeZone);
 

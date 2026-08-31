@@ -3,12 +3,11 @@
 namespace App\Controller\Admin;
 
 use App\Entity\CartLine;
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 
 /**
- * @extends AbstractCrudController<CartLine>
+ * @extends AbstractSecuredCrudController<CartLine>
  */
-class CartLineCrudController extends AbstractCrudController
+class CartLineCrudController extends AbstractSecuredCrudController
 {
     public static function getEntityFqcn(): string
     {

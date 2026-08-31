@@ -226,6 +226,7 @@ user:
         agree_terms: { is_true: 'You should agree to our terms.' }
     assert:
         password: { not_blank: 'Password cannot be blank, please enter your password', min_length: 'Your password should be at least {{ limit }} characters' }
+        username: { unique: 'This username is already taken.' }
 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.': 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.'
 'There is already an account with this email': 'There is already an account with this email'
 "Format d'adresse invalide":

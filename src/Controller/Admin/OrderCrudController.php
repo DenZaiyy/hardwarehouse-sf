@@ -3,15 +3,14 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Order;
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 /**
- * @extends AbstractCrudController<Order>
+ * @extends AbstractSecuredCrudController<Order>
  */
-class OrderCrudController extends AbstractCrudController
+class OrderCrudController extends AbstractSecuredCrudController
 {
     public static function getEntityFqcn(): string
     {

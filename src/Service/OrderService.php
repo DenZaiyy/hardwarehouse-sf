@@ -76,11 +76,15 @@ class OrderService
             $orderLine->setProductName($cartItem['name']);
             $orderLine->setProductSlug($cartItem['slug']);
             $orderLine->setQuantity($cartItem['quantity']);
-            $orderLine->setUnitPrice((string) $cartItem['price_ht']);
+
+            // Effective (discounted, if any) unit price — must match the price used by
+            // CartService::computeTotals() so that Order::subtotal/totalAmount reconcile
+            // with the sum of the order lines.
+            $effectiveUnitPrice = $cartItem['discount_price'] ?? $cartItem['price_ht'];
+            $orderLine->setUnitPrice((string) $effectiveUnitPrice);
             $orderLine->setTaxRate((string) self::VAT_RATE);
 
-            // Calculate line total (HT price * quantity + VAT)
-            $lineSubtotal = $cartItem['price_ht'] * $cartItem['quantity'];
+            $lineSubtotal = $effectiveUnitPrice * $cartItem['quantity'];
             $lineTaxAmount = $lineSubtotal * self::VAT_RATE;
             $orderLine->setLineTotal((string) ($lineSubtotal + $lineTaxAmount));
 
@@ -122,29 +126,21 @@ class OrderService
         $orderAddress->setOrder($order);
         $orderAddress->setType($type);
 
-        // Get address data from checkout state
-        if (AddressType::DELIVERY === $type) {
-            $addressData = $checkoutState->deliveryAddress;
-            $identity = $checkoutState->identity;
+        // Billing falls back to the delivery address whenever the customer didn't pick a
+        // distinct one (billingSameAsDelivery, or a guest who never filled the billing form).
+        $useDistinctBillingAddress = AddressType::BILLING === $type
+            && !$checkoutState->billingSameAsDelivery
+            && null !== $checkoutState->billingAddress;
 
-            $orderAddress->setFirstName($addressData['firstName'] ?? ($identity['firstName'] ?? ''));
-            $orderAddress->setLastName($addressData['lastName'] ?? ($identity['lastName'] ?? ''));
-            $orderAddress->setAddress($addressData['address1'] ?? '');
-            $orderAddress->setPostalCode($addressData['postcode'] ?? '');
-            $orderAddress->setCity($addressData['city'] ?? '');
-            $orderAddress->setCountry($addressData['country'] ?? 'FR');
-        } else {
-            // For billing, use same as delivery for now
-            $addressData = $checkoutState->deliveryAddress;
-            $identity = $checkoutState->identity;
+        $addressData = $useDistinctBillingAddress ? $checkoutState->billingAddress : $checkoutState->deliveryAddress;
+        $identity = $checkoutState->identity;
 
-            $orderAddress->setFirstName($addressData['firstName'] ?? ($identity['firstName'] ?? ''));
-            $orderAddress->setLastName($addressData['lastName'] ?? ($identity['lastName'] ?? ''));
-            $orderAddress->setAddress($addressData['address1'] ?? '');
-            $orderAddress->setPostalCode($addressData['postcode'] ?? '');
-            $orderAddress->setCity($addressData['city'] ?? '');
-            $orderAddress->setCountry($addressData['country'] ?? 'FR');
-        }
+        $orderAddress->setFirstName($addressData['firstName'] ?? ($identity['firstName'] ?? ''));
+        $orderAddress->setLastName($addressData['lastName'] ?? ($identity['lastName'] ?? ''));
+        $orderAddress->setAddress($addressData['address1'] ?? '');
+        $orderAddress->setPostalCode($addressData['postcode'] ?? '');
+        $orderAddress->setCity($addressData['city'] ?? '');
+        $orderAddress->setCountry($addressData['country'] ?? 'FR');
 
         $order->addOrderAddress($orderAddress);
 
@@ -175,6 +171,16 @@ class OrderService
     public function updateOrderStatus(Order $order, OrderStatus $status): void
     {
         $order->setStatus($status);
+        $this->entityManager->flush();
+    }
+
+    /**
+     * Link the order to the Stripe PaymentIntent created for it, so webhook events can
+     * resolve the order strictly (see StripePaymentEventHandler) instead of guessing.
+     */
+    public function attachStripeSession(Order $order, string $stripePaymentIntentId): void
+    {
+        $order->setStripePaymentIntentId($stripePaymentIntentId);
         $this->entityManager->flush();
     }
 }

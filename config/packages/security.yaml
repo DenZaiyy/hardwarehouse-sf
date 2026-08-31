@@ -43,12 +43,16 @@ security:
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
 
-    # Note: Only the *first* matching rule is applied
+    # Note: Only the *first* matching rule is applied.
+    # Routes below are prefixed by {_locale} (/fr/..., /en/...), so every path is
+    # locale-agnostic (^/[a-z]{2}/...). This is a defense-in-depth net: the primary
+    # enforcement for /admin lives on the controllers themselves via #[IsGranted]
+    # (see App\Controller\Admin\AbstractSecuredCrudController), since a routing change
+    # here alone was previously enough to make these rules match nothing at all.
     access_control:
-        - { path: '^/admin/user', roles: ROLE_SUPER_ADMIN }
-        - { path: '^/admin', roles: ROLE_ADMIN }
-        - { path: '^/profile', roles: ROLE_USER }
-        - { path: ^/(login|register)$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: '^/[a-z]{2}/admin/user', roles: ROLE_SUPER_ADMIN }
+        - { path: '^/[a-z]{2}/admin', roles: ROLE_ADMIN }
+        - { path: '^/[a-z]{2}/profile', roles: ROLE_USER }
 
     role_hierarchy:
         ROLE_ADMIN: ROLE_USER

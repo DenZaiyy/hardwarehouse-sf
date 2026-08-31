@@ -226,6 +226,7 @@ user:
         agree_terms: { is_true: __user.registration.agree_terms.is_true }
     assert:
         password: { not_blank: 'Le mot de passe doit être renseigné', min_length: __user.assert.password.min_length }
+        username: { unique: "Ce nom d'utilisateur est déjà utilisé." }
 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.': 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.'
 'There is already an account with this email': 'Il existe déjà un compte avec cette adresse email.'
 "Format d'adresse invalide":

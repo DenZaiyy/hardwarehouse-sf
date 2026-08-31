@@ -9,7 +9,12 @@ framework:
                 # caching géré automatiquement si tu utilises HttpCache
 
     # Note that the session will be started ONLY if you read or write from it.
-    session: true
+    # Values below match Symfony's own defaults, made explicit so a future Symfony
+    # upgrade can't silently change them for a checkout/payment app.
+    session:
+        cookie_secure: auto
+        cookie_httponly: true
+        cookie_samesite: lax
 
     #esi: true
     #fragments: true

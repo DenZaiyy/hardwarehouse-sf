@@ -2,20 +2,15 @@
 
 namespace App\Service;
 
-use Stripe\Exception\ApiErrorException;
 use Stripe\Stripe;
 use Stripe\StripeClient;
-use Stripe\Webhook;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\HttpFoundation\Request;
 
 class StripeService
 {
     public function __construct(
         #[Autowire('%env(STRIPE_SECRET_KEY)%')]
         private readonly string $stripeSecretKey,
-        #[Autowire('%env(STRIPE_WEBHOOK_SECRET)')]
-        private readonly string $webhookSecretKey = '',
     ) {
         Stripe::setApiKey($this->stripeSecretKey);
         Stripe::setApiVersion('');
@@ -81,58 +76,12 @@ class StripeService
             'success_url' => $successUrl,
             'cancel_url' => $cancelUrl,
             'metadata' => $metadata,
+            // Checkout Session metadata is NOT copied to the underlying PaymentIntent by
+            // Stripe. Without this, payment_intent.* webhook events (succeeded, failed,
+            // canceled...) have no order_reference to resolve the order from.
+            'payment_intent_data' => [
+                'metadata' => $metadata,
+            ],
         ]);
-    }
-
-    /**
-     * @throws ApiErrorException
-     */
-    public function createSession(CartService $cartService, string $successUrl, string $cancelUrl): \Stripe\Checkout\Session
-    {
-        $lineItems = [];
-        foreach ($cartService->getCart() as $item) {
-            $priceTTC = (int) round($item['price_ttc'] * 100);
-            $lineItems[] = [
-                'price_data' => [
-                    'currency' => 'eur',
-                    'product_data' => [
-                        'name' => $item['name'],
-                    ],
-                    'unit_amount' => $priceTTC,
-                ],
-                'quantity' => $item['quantity'],
-            ];
-        }
-
-        return new StripeClient($this->stripeSecretKey)->checkout->sessions->create([
-            'payment_method_types' => ['card'],
-            'line_items' => $lineItems,
-            'mode' => 'payment',
-            'success_url' => $successUrl,
-            'cancel_url' => $cancelUrl,
-        ]);
-    }
-
-    public function handle(Request $request): void
-    {
-        $signature = $request->headers->get('stripe-signature') ?? '';
-        $body = $request->getContent();
-        $event = Webhook::constructEvent($body, $signature, $this->webhookSecretKey);
-
-        switch ($event->type) {
-            case 'payment_intent.succeeded':
-                $paymentIntent = $event->data->object;
-                // Handle successful payment here
-                break;
-            case 'payment_intent.payment_failed':
-                $paymentIntent = $event->data->object;
-                // Handle failed payment here
-                break;
-            case 'checkout.session.completed':
-                $session = $event->data->object;
-                file_put_contents('stripe_webhook.log', 'Checkout session completed: '.json_encode($session, JSON_THROW_ON_ERROR)."\n", FILE_APPEND);
-                // Handle completed checkout session here
-                break;
-        }
     }
 }

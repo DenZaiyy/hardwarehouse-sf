@@ -103,7 +103,20 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "app:code-quality": [
+            "@php bin/console lint:yaml config --parse-tags",
+            "@php bin/console lint:twig templates",
+            "@php bin/console lint:container",
+            "@php vendor/bin/ecs check --no-progress-bar",
+            "@php vendor/bin/rector --dry-run --no-progress-bar",
+            "@php vendor/bin/phpstan analyse --no-progress"
+        ],
+        "app:code-quality-fix": [
+            "@php vendor/bin/ecs check --fix --no-progress-bar",
+            "@php vendor/bin/rector --no-progress-bar"
+        ],
+        "githooks:install": "git config core.hooksPath .githooks"
     },
     "conflict": {
         "symfony/symfony": "*"

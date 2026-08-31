@@ -4,16 +4,15 @@ namespace App\Controller\Admin;
 
 use App\Entity\Cart;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 /**
- * @extends AbstractCrudController<Cart>
+ * @extends AbstractSecuredCrudController<Cart>
  */
-class CartCrudController extends AbstractCrudController
+class CartCrudController extends AbstractSecuredCrudController
 {
     public static function getEntityFqcn(): string
     {
