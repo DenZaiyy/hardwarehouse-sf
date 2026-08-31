@@ -54,6 +54,7 @@
     <form data-turbo-stream="" action="{{ path('cart.clear') }}" method="POST"
           onsubmit="return confirm('Êtes-vous sûr de vouloir vider le panier ?')"
           class="text-center">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('cart') }}">
         <button type="submit" class="btn-ghost">
             Vider le panier
         </button>

@@ -26,7 +26,7 @@ final class CategoryController extends AbstractController
         $categories = [];
 
         try {
-            $categories = $this->apiService->fetchAll('categories', CategoryDto::class);
+            $categories = $this->apiService->fetchAllCached('categories', CategoryDto::class);
         } catch (\Error) {
         }
 

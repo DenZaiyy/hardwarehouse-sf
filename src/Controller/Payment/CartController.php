@@ -7,12 +7,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 #[Route('/cart', name: 'cart.')]
 class CartController extends AbstractController
 {
     public function __construct(
         private readonly CartService $cartService,
+        private readonly CsrfTokenManagerInterface $csrfTokenManager,
     ) {
     }
 
@@ -29,6 +32,10 @@ class CartController extends AbstractController
     #[Route('/add', name: 'add', methods: ['POST'])]
     public function add(Request $request): Response
     {
+        if ($invalid = $this->checkCsrfToken($request)) {
+            return $invalid;
+        }
+
         $slug = $request->request->getString('slug');
         $quantity = $request->request->getInt('quantity', 1);
 
@@ -50,6 +57,10 @@ class CartController extends AbstractController
     #[Route('/decrease/{productId}', name: 'decrease', methods: ['POST'])]
     public function decrease(string $productId, Request $request): Response
     {
+        if ($invalid = $this->checkCsrfToken($request)) {
+            return $invalid;
+        }
+
         $currentQtt = $request->request->getInt('current_qtt');
 
         try {
@@ -68,6 +79,10 @@ class CartController extends AbstractController
     #[Route('/increase/{productId}', name: 'increase', methods: ['POST'])]
     public function increase(string $productId, Request $request): Response
     {
+        if ($invalid = $this->checkCsrfToken($request)) {
+            return $invalid;
+        }
+
         $currentQtt = $request->request->getInt('current_qtt');
         try {
             $this->cartService->increase($productId, $currentQtt);
@@ -83,8 +98,12 @@ class CartController extends AbstractController
     }
 
     #[Route('/remove/{productId}', name: 'remove', methods: ['POST'])]
-    public function remove(string $productId): Response
+    public function remove(string $productId, Request $request): Response
     {
+        if ($invalid = $this->checkCsrfToken($request)) {
+            return $invalid;
+        }
+
         try {
             $this->cartService->removeProduct($productId);
             $this->addFlash('success', 'Produit retiré du panier.');
@@ -98,8 +117,12 @@ class CartController extends AbstractController
     }
 
     #[Route('/clear', name: 'clear', methods: ['POST'])]
-    public function clear(): Response
+    public function clear(Request $request): Response
     {
+        if ($invalid = $this->checkCsrfToken($request)) {
+            return $invalid;
+        }
+
         try {
             $this->cartService->clear();
             $this->addFlash('success', 'Panier vidé.');
@@ -110,5 +133,22 @@ class CartController extends AbstractController
 
             return $this->redirectToRoute('cart.index');
         }
+    }
+
+    /**
+     * These routes are plain POST forms, not Symfony Forms, so the framework's own
+     * form CSRF protection (config/packages/csrf.yaml) never runs for them.
+     */
+    private function checkCsrfToken(Request $request): ?Response
+    {
+        $token = $request->request->getString('_csrf_token');
+
+        if ($this->csrfTokenManager->isTokenValid(new CsrfToken('cart', $token))) {
+            return null;
+        }
+
+        $this->addFlash('danger', 'Jeton de sécurité invalide, merci de réessayer.');
+
+        return $this->redirectToRoute('cart.index');
     }
 }

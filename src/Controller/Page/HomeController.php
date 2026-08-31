@@ -30,8 +30,8 @@ class HomeController extends AbstractController
     #[Route('/', name: 'homepage', options: ['sitemap' => true])]
     public function index(ApiService $apiService): Response
     {
-        $brands = $apiService->fetchAll('brands', BrandDto::class);
-        $categories = $apiService->fetchAll('categories', CategoryDto::class);
+        $brands = $apiService->fetchAllCached('brands', BrandDto::class);
+        $categories = $apiService->fetchAllCached('categories', CategoryDto::class);
 
         $hero = [
             'eyebrow' => 'Spécialiste composants PC',

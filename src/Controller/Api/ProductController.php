@@ -55,8 +55,8 @@ final class ProductController extends AbstractController
             $params['maxPrice'] = $maxPrice;
         }
 
-        $categoriesData = $this->apiService->fetchAll('categories', CategoryDto::class);
-        $brandsData = $this->apiService->fetchAll('brands', BrandDto::class);
+        $categoriesData = $this->apiService->fetchAllCached('categories', CategoryDto::class);
+        $brandsData = $this->apiService->fetchAllCached('brands', BrandDto::class);
 
         try {
             $result = $this->apiService->fetchPaginated(
