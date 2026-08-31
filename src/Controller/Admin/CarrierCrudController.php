@@ -3,7 +3,6 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Carrier;
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
@@ -11,9 +10,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 /**
- * @extends AbstractCrudController<Carrier>
+ * @extends AbstractSecuredCrudController<Carrier>
  */
-class CarrierCrudController extends AbstractCrudController
+class CarrierCrudController extends AbstractSecuredCrudController
 {
     public static function getEntityFqcn(): string
     {

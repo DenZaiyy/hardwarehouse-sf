@@ -4,7 +4,6 @@ namespace App\Controller\Admin;
 
 use App\Entity\Shipment;
 use App\Enum\ShipmentStatus;
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
@@ -12,9 +11,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 /**
- * @extends AbstractCrudController<Shipment>
+ * @extends AbstractSecuredCrudController<Shipment>
  */
-class ShipmentCrudController extends AbstractCrudController
+class ShipmentCrudController extends AbstractSecuredCrudController
 {
     public static function getEntityFqcn(): string
     {

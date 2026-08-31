@@ -6,7 +6,6 @@ use App\Entity\User;
 use App\Enum\UserRoleType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AvatarField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
@@ -14,12 +13,17 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * @extends AbstractCrudController<User>
+ * User management is reserved to super admins: it lets an operator grant
+ * ROLE_SUPER_ADMIN to any account, so ROLE_ADMIN alone must not be enough.
+ *
+ * @extends AbstractSecuredCrudController<User>
  */
-class UserCrudController extends AbstractCrudController
+#[IsGranted('ROLE_SUPER_ADMIN')]
+class UserCrudController extends AbstractSecuredCrudController
 {
     public function __construct(private readonly TranslatorInterface $translator)
     {
