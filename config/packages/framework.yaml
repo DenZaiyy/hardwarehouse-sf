@@ -16,6 +16,13 @@ framework:
         cookie_httponly: true
         cookie_samesite: lax
 
+    # Une ressource absente de l'API du catalogue (slug inconnu, fiche supprimée) est une page
+    # introuvable pour le visiteur, pas une erreur serveur : produit, catégorie et marque.
+    exceptions:
+        App\Exception\Api\ApiNotFoundException:
+            status_code: 404
+            log_level: notice
+
     #esi: true
     #fragments: true
 

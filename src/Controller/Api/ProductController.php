@@ -105,6 +105,12 @@ final class ProductController extends AbstractController
     public function show(string $slug, ProductSchemaBuilder $productSchemaBuilder): Response
     {
         $product = $this->apiService->fetchOne('products/'.$slug, ProductDto::class);
+
+        // L'API renvoie aussi les fiches désactivées dans le back-office : elles ne sont plus en vente
+        if (!$product->active) {
+            throw $this->createNotFoundException();
+        }
+
         $productSchema = $productSchemaBuilder->build($product);
 
         return $this->render('product/show.html.twig', [

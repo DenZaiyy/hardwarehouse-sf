@@ -5,6 +5,7 @@ namespace App\Controller\Api;
 use App\DTO\Api\Brands\BrandDto;
 use App\DTO\Api\Categories\CategoryDto;
 use App\DTO\Api\Categories\CategoryProductsDto;
+use App\Exception\Api\ApiException;
 use App\Service\ApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -27,7 +28,7 @@ final class CategoryController extends AbstractController
 
         try {
             $categories = $this->apiService->fetchAllCached('categories', CategoryDto::class);
-        } catch (\Error) {
+        } catch (ApiException) {
         }
 
         return $this->render('category/index.html.twig', [

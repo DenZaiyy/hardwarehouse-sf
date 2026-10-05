@@ -7,15 +7,13 @@ use App\DTO\Api\Products\ProductDto;
 use App\Entity\Cart;
 use App\Entity\CartLine;
 use App\Entity\User;
+use App\Exception\Api\ApiException;
+use App\Exception\Api\ApiNotFoundException;
 use App\Repository\CartRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class CartService
 {
@@ -39,22 +37,25 @@ class CartService
     }
 
     /**
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
+     * @throws \RuntimeException message destiné au client, affiché tel quel par CartController
      * @throws ExceptionInterface
-     * @throws ClientExceptionInterface
      */
     public function addProduct(string $productSlug, int $quantity = 1): void
     {
-        $product = $this->apiService->fetchOne("products/$productSlug", ProductDto::class);
-        $cart = $this->getOrCreateCart();
+        if ($quantity < 1) {
+            throw new \RuntimeException('La quantité doit être au moins égale à 1.');
+        }
 
-        $existingCartLine = $this->findCartLineByProductId($cart, $product->getId());
+        $product = $this->fetchProductForSale($productSlug);
+        $cart = $this->getCurrentCart();
+        $existingCartLine = $cart ? $this->findCartLineByProductId($cart, $product->getId()) : null;
+
+        $this->assertStockCovers($product, $quantity, $existingCartLine?->getQuantity() ?? 0);
 
         if ($existingCartLine) {
             $existingCartLine->setQuantity($existingCartLine->getQuantity() + $quantity);
         } else {
+            $cart = $this->getOrCreateCart();
             $cartLine = $this->createCartLine($cart, $product, $quantity);
             $cart->addCartLine($cartLine);
             $this->entityManager->persist($cartLine);
@@ -297,6 +298,46 @@ class CartService
         $this->currentCartResolved = true;
 
         return $cart;
+    }
+
+    /**
+     * L'API renvoie aussi les fiches désactivées : seul un produit actif peut entrer dans le panier.
+     *
+     * @throws ExceptionInterface
+     */
+    private function fetchProductForSale(string $productSlug): ProductDto
+    {
+        try {
+            $product = $this->apiService->fetchOne("products/$productSlug", ProductDto::class);
+        } catch (ApiNotFoundException) {
+            $product = null;
+        } catch (ApiException $e) {
+            throw new \RuntimeException('Le catalogue est momentanément indisponible, merci de réessayer.', 0, $e);
+        }
+
+        if (null === $product || !$product->active) {
+            throw new \RuntimeException("Ce produit n'est plus disponible.");
+        }
+
+        return $product;
+    }
+
+    /** Le stock porte sur la quantité totale du panier, pas seulement sur celle qu'on ajoute. */
+    private function assertStockCovers(ProductDto $product, int $quantity, int $alreadyInCart): void
+    {
+        $stock = $product->stock->quantity ?? 0;
+
+        if ($alreadyInCart + $quantity <= $stock) {
+            return;
+        }
+
+        if ($stock <= 0) {
+            throw new \RuntimeException('Ce produit est en rupture de stock.');
+        }
+
+        throw new \RuntimeException(0 === $alreadyInCart
+            ? sprintf('Stock insuffisant : il ne reste que %d exemplaire(s).', $stock)
+            : sprintf('Stock insuffisant : il ne reste que %d exemplaire(s), dont %d déjà dans votre panier.', $stock, $alreadyInCart));
     }
 
     private function findCartLineByProductId(Cart $cart, string $productId): ?CartLine
