@@ -18,19 +18,19 @@ user:
         submit: { label: Login }
     profile:
         title: 'My profile'
-        informations: { title: 'My information', email: { label: 'Email address' }, username: { label: Nickname }, addresses: { label: 'Default address', default: { delivery: { label: __user.profile.informations.addresses.default.delivery.label }, billing: { label: __user.profile.informations.addresses.default.billing.label } } }, password: { edit: { label: 'Change password' } }, infos: { edit: { label: 'Edit my information' } } }
+        informations: { title: 'My information', email: { label: 'Email address' }, username: { label: Nickname }, addresses: { label: 'Default address', default: { delivery: { label: "Default delivery address" }, billing: { label: "Default billing address" } } }, password: { edit: { label: 'Change password' } }, infos: { edit: { label: 'Edit my information' } } }
         addresses: { label: 'Address list', add: { label: 'Add an address' }, address: { label: Title }, empty: { label: 'No addresses saved' } }
     update:
-        infos: { email: { label: 'Email address', already_exists: 'The email address you entered is already being used by another user.' }, username: { label: Nickname }, avatar: { label: Avatar }, submit: { label: Update }, not_logged: { message: __user.update.infos.not_logged.message }, success: __user.update.infos.success }
+        infos: { email: { label: 'Email address', already_exists: 'The email address you entered is already being used by another user.' }, username: { label: Nickname }, avatar: { label: Avatar }, submit: { label: Update }, not_logged: { message: "Please log in to access your profile." }, success: "Your details have been updated." }
         changePassword: { current: { label: Password, help: 'Enter your current password' }, new: { first: { label: 'New password', help: 'Enter the new password' }, constraint: { not_blank: 'The new password cannot be blank.', length: { minMessage: 'Your password must contain at least 12 characters.' } }, second: { label: 'Repeat the password', help: 'Repeat your new password' }, invalid: { message: 'Your password is invalid.' } }, submit: { label: Update } }
     changePassword:
-        current: { constraint: { not_blank: __user.changePassword.current.constraint.not_blank } }
+        current: { constraint: { not_blank: "Please enter your current password." } }
     address:
-        home: { title: 'My addresses', table: { label: { label: Title }, firstname: { label: 'First name' }, lastname: { label: __user.address.home.table.lastname.label }, address: { label: __user.address.home.table.address.label }, cp: { label: __user.address.home.table.cp.label }, city: { label: __user.address.home.table.city.label }, country: { label: __user.address.home.table.country.label }, default: { label: __user.address.home.table.default.label }, actions: { label: __user.address.home.table.actions.label } }, no_items: { message: __user.address.home.no_items.message }, button: { add: { label: __user.address.home.button.add.label } }, delivery: { label: __user.address.home.delivery.label }, billing: { label: __user.address.home.billing.label } }
+        home: { title: 'My addresses', table: { label: { label: Title }, firstname: { label: 'First name' }, lastname: { label: "Last name" }, address: { label: "Address" }, cp: { label: "Postcode" }, city: { label: "City" }, country: { label: "Country" }, default: { label: "Default" }, actions: { label: "Actions" } }, no_items: { message: "No saved address" }, button: { add: { label: "Add an address" } }, delivery: { label: "Delivery addresses" }, billing: { label: "Billing addresses" } }
         form: { label: { label: 'My addresses' }, firstname: { label: 'First name' }, lastname: { label: 'Last name' }, address: { label: Address }, cp: { label: 'Postal code' }, city: { label: City }, country: { label: Country }, is_default: { label: 'Define by default' }, type: { label: 'Address type' } }
-        delete: { success: __user.address.delete.success }
-        save: { success: __user.address.save.success }
-        default: { replaced: __user.address.default.replaced }
+        delete: { success: "Your address has been deleted." }
+        save: { success: "Your address has been saved." }
+        default: { replaced: "This address is now your default address, replacing the previous one." }
     roles:
         superadmin: { label: Founder }
         admin: { label: Administrator }
@@ -75,7 +75,7 @@ listing:
         button: { add_to_cart: 'Add to cart' }
 form:
     delete:
-        confirm: { message: __form.delete.confirm.message }
+        confirm: { message: "Do you really want to delete this item?" }
 app:
     locale:
         en: English
@@ -95,41 +95,41 @@ category:
     cartes-meres: Motherboards
     processeurs: Processors
 footer:
-    description: __footer.description
+    description: "Your PC components specialist. Fast delivery, technical expertise, best prices."
     contact:
-        title: __footer.contact.title
-        address: __footer.contact.address
-        city: __footer.contact.city
-        zip: __footer.contact.zip
-        country: __footer.contact.country
-        email: __footer.contact.email
-        phone: __footer.contact.phone
+        title: "Contact"
+        address: "Address"
+        city: "City"
+        zip: "Postcode"
+        country: "Country"
+        email: "Email"
+        phone: "Phone"
     information:
-        title: __footer.information.title
-        about: __footer.information.about
-        contact: __footer.information.contact
-        shipping: __footer.information.shipping
-        returns: __footer.information.returns
-        privacy: __footer.information.privacy
-        terms: __footer.information.terms
-        sales_terms: __footer.information.sales_terms
+        title: "Information"
+        about: "About us"
+        contact: "Contact us"
+        shipping: "Shipping and delivery"
+        returns: "Returns and exchanges"
+        privacy: "Privacy policy"
+        terms: "Terms of use"
+        sales_terms: "Terms of sale"
     navigation:
-        title: __footer.navigation.title
-        account: __footer.navigation.account
-        addresses: __footer.navigation.addresses
-        connect: __footer.navigation.connect
-        register: __footer.navigation.register
-        brands: __footer.navigation.brands
-        categories: __footer.navigation.categories
+        title: "Navigation"
+        account: "My account"
+        addresses: "My addresses"
+        connect: "Log in"
+        register: "Sign up"
+        brands: "Brands"
+        categories: "Categories"
     newsletter:
-        title: __footer.newsletter.title
-        subtitle: __footer.newsletter.subtitle
-        placeholder: __footer.newsletter.placeholder
-        submit: __footer.newsletter.submit
+        title: "Newsletter"
+        subtitle: "Exclusive offers & new arrivals"
+        placeholder: "Your email address"
+        submit: "Subscribe"
     payment:
-        mastercard: { alt: { message: __footer.payment.mastercard.alt.message } }
-        cb: { alt: { message: __footer.payment.cb.alt.message } }
-        paypal: { alt: { message: __footer.payment.paypal.alt.message } }
+        mastercard: { alt: { message: "Mastercard ID Check" } }
+        cb: { alt: { message: "Cartes Bancaires (CB)" } }
+        paypal: { alt: { message: "PayPal" } }
 orderStatus:
     pending:
         label: Pending
@@ -142,7 +142,7 @@ orderStatus:
     cancelled:
         label: Cancelled
     confirmed:
-        label: __orderStatus.confirmed.label
+        label: "Confirmed"
 carrierType:
     dhl:
         label: DHL
@@ -173,8 +173,8 @@ shipmentStatus:
         label: Delivered
 cart:
     summary:
-        title: __cart.summary.title
-        articles: __cart.summary.articles
+        title: "Cart summary"
+        articles: "Items"
     line:
         decrease: 'Remove one'
         increase: 'Add one'

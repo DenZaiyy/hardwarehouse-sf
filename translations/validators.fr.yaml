@@ -216,16 +216,16 @@ Error: Erreur
 'Please select a valid option.': 'Veuillez sélectionner une option valide.'
 'Please select a valid range.': 'Veuillez sélectionner une plage valide.'
 'Please enter a valid week.': 'Veuillez entrer une semaine valide.'
-'Please enter a password': '__Please enter a password'
+'Please enter a password': 'Veuillez saisir un mot de passe.'
 'Your password should be at least {{ limit }} characters': 'Votre mot de passe doit comporter au moins {{ limit }} caractères.'
 user:
     reset_password:
-        email: { not_blank: __user.reset_password.email.not_blank }
+        email: { not_blank: 'Veuillez saisir votre adresse e-mail.' }
     registration:
-        password: { not_blank: __user.registration.password.not_blank, min_length: __user.registration.password.min_length }
-        agree_terms: { is_true: __user.registration.agree_terms.is_true }
+        password: { not_blank: 'Veuillez saisir un mot de passe.', min_length: 'Votre mot de passe doit contenir au moins {{ limit }} caractères.' }
+        agree_terms: { is_true: "Vous devez accepter les conditions générales d'utilisation." }
     assert:
-        password: { not_blank: 'Le mot de passe doit être renseigné', min_length: __user.assert.password.min_length }
+        password: { not_blank: 'Le mot de passe doit être renseigné', min_length: 'Votre mot de passe doit contenir au moins {{ limit }} caractères.' }
         username: { unique: "Ce nom d'utilisateur est déjà utilisé." }
 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.': 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.'
 'There is already an account with this email': 'Il existe déjà un compte avec cette adresse email.'
@@ -235,7 +235,6 @@ user:
 'There were problems with your captcha':
     ' Please try again or contact with support and provide following code(s): {{ errorCodes }}': 'Il y a eu des problèmes avec votre captcha. Veuillez réessayer ou contacter le support et fournir le(s) code(s) suivant(s) : {{ errorCodes }}'
 'La note doit être comprise entre {{ min }} et {{ max }}.': 'La note doit être comprise entre {{ min }} et {{ max }}.'
-'There is already an address of this type for this order': '__There is already an address of this type for this order'
-'There is already an order with this reference': '__There is already an order with this reference'
-'There is already a carrier with this name': '__There is already a carrier with this name'
-'There is already a product with this reference': '__There is already a product with this reference'
+'There is already an address of this type for this order': 'Cette commande a déjà une adresse de ce type.'
+'There is already an order with this reference': 'Une commande porte déjà cette référence.'
+'There is already a carrier with this name': 'Un transporteur porte déjà ce nom.'
