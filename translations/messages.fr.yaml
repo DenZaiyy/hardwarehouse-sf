@@ -1,12 +1,13 @@
 user:
     registration:
-        title: 'Crée votre compte'
-        agree_terms: { label: 'Acceptez les conditions', is_true: 'Vous devez accepter nos conditions générales' }
-        email: { label: 'Adresse mail' }
+        title: 'Créez votre compte'
+        agree_terms: { label: "J'accepte les conditions générales d'utilisation", is_true: "Vous devez accepter les conditions générales d'utilisation." }
+        email: { label: 'Adresse e-mail' }
         username: { label: Pseudonyme }
-        password: { label: 'Mot de passe', confirm: { label: 'Confirmez votre mot de passe' } }
-        avatar: { label: 'Image de profile', placeholder: 'Glissez ou cliquer pour choisir votre image' }
-        submit: 'Crée mon compte'
+        password: { label: 'Mot de passe', confirm: { label: 'Confirmez le mot de passe' }, help: '12 à 32 caractères, dont au moins une majuscule, une minuscule, un chiffre et un caractère spécial.' }
+        avatar: { label: 'Image de profil (facultatif)', placeholder: 'Glissez une image ici ou cliquez pour la choisir', help: 'Formats acceptés : JPG, PNG ou WEBP' }
+        submit: 'Créer mon compte'
+        already_registered: 'Déjà inscrit ?'
         flash: { success: 'Vous venez de vous inscrire, bienvenue !' }
     register:
         email: { confirm: { subject: 'Veuillez confirmer votre adresse e-mail' } }
@@ -23,7 +24,7 @@ user:
         addresses: { label: "Liste d'adresses", add: { label: 'Ajouter une adresse' }, address: { label: Intitulé }, empty: { label: 'Aucune adresse enregistrée' } }
     update:
         infos: { email: { label: 'Adresse email', already_exists: 'Cette adresse e-mail est déjà utilisée par un autre compte.' }, username: { label: Pseudo }, avatar: { label: Avatar }, submit: { label: 'Mettre à jour' }, not_logged: { message: 'Connectez-vous pour accéder à votre profil.' }, success: 'Vos informations ont été mises à jour.' }
-        changePassword: { current: { label: 'Mot de passe', help: 'Saisissez votre mot de passe actuel' }, new: { first: { label: 'Nouveau mot de passe', help: 'Saisissez le nouveau mot de passe' }, constraint: { not_blank: 'Le nouveau mot de passe ne peut pas être vide.', length: { minMessage: 'Votre mot de passe doit contenir au minimum 12 caractères.' } }, second: { label: 'Répétez le mot de passe', help: 'Répétez votre nouveau mot de passe' }, invalid: { message: "Votre mot de passe n'est pas valide." } }, submit: { label: 'Mettre à jour' } }
+        changePassword: { current: { label: 'Mot de passe', help: 'Saisissez votre mot de passe actuel' }, new: { first: { label: 'Nouveau mot de passe', help: '12 à 32 caractères, dont au moins une majuscule, une minuscule, un chiffre et un caractère spécial.' }, second: { label: 'Répétez le mot de passe', help: 'Répétez votre nouveau mot de passe' }, invalid: { message: "Votre mot de passe n'est pas valide." } }, submit: { label: 'Mettre à jour' } }
     changePassword:
         current: { constraint: { not_blank: 'Saisissez votre mot de passe actuel.' } }
     address:
@@ -34,6 +35,10 @@ user:
         delete: { success: 'Votre adresse a été supprimée.' }
         save: { success: 'Votre adresse a été enregistrée.' }
         default: { replaced: 'Cette adresse devient votre adresse par défaut, à la place de la précédente.' }
+    password:
+        first: 'Nouveau mot de passe'
+        second: 'Confirmez le mot de passe'
+        invalid: 'Les deux mots de passe doivent être identiques.'
     roles:
         superadmin: { label: Fondateur }
         admin: { label: Administrateur }
@@ -74,6 +79,9 @@ country:
     italian:
         label: Italie
 form:
+    password:
+        show: Afficher
+        hide: Masquer
     delete:
         confirm: { message: 'Voulez-vous vraiment supprimer cet élément ?' }
 listing:

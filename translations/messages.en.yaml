@@ -1,14 +1,20 @@
 user:
     registration:
-        title: 'Create account'
-        agree_terms: { label: 'Accept the terms and conditions', is_true: 'You must accept our terms and conditions.' }
+        title: 'Create your account'
+        agree_terms: { label: 'I accept the terms of use', is_true: 'You must accept the terms of use.' }
         email: { label: 'Email address' }
         username: { label: Username }
-        password: { label: Password, confirm: { label: 'Confirm your password' } }
+        password: { label: Password, confirm: { label: 'Confirm the password' }, help: '12 to 32 characters, including at least one uppercase letter, one lowercase letter, one digit and one special character.' }
+        avatar: { label: 'Profile picture (optional)', placeholder: 'Drop an image here or click to choose one', help: 'Accepted formats: JPG, PNG or WEBP' }
         submit: 'Create my account'
+        already_registered: 'Already registered?'
         flash: { success: 'You have just registered, welcome!' }
     register:
         email: { confirm: { subject: 'Please confirm your e-mail address.' } }
+    password:
+        first: 'New password'
+        second: 'Confirm the password'
+        invalid: 'The two passwords must match.'
     login:
         title: 'Log in'
         logged: { message: 'You are logged in as %user%', logout: { label: Logout } }
@@ -74,6 +80,9 @@ listing:
     product:
         button: { add_to_cart: 'Add to cart' }
 form:
+    password:
+        show: Show
+        hide: Hide
     delete:
         confirm: { message: "Do you really want to delete this item?" }
 app:

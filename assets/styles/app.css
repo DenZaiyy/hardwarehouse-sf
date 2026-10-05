@@ -228,7 +228,7 @@
     }
 
     form .help-text {
-        @apply text-muted text-xs mt-2 w-max leading-[1.4];
+        @apply text-muted text-xs mt-2 leading-[1.4];
     }
 
     /* =========================
