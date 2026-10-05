@@ -8,6 +8,7 @@ use App\DTO\Api\Categories\CategoryDto;
 use App\DTO\Api\Products\ProductDto;
 use App\Exception\Api\ApiNotFoundException;
 use App\Exception\Api\ApiServerException;
+use App\Exception\Api\ApiUnavailableException;
 use App\Service\ApiService;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
@@ -41,6 +42,15 @@ final class ApiServiceTest extends TestCase
         $this->expectException(ApiServerException::class);
 
         $this->apiService(new MockResponse('', ['http_code' => 503]))
+            ->fetchAll('categories', CategoryDto::class);
+    }
+
+    public function testApiThatStopsRespondingRaisesApiUnavailableException(): void
+    {
+        $this->expectException(ApiUnavailableException::class);
+
+        // Les en-têtes arrivent, puis plus rien : une chaîne vide simule le délai d'inactivité dépassé
+        $this->apiService(new MockResponse(['{"data": [', '']))
             ->fetchAll('categories', CategoryDto::class);
     }
 

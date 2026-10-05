@@ -6,6 +6,10 @@ framework:
         scoped_clients:
             api.client:
                 base_uri:  '%env(API_BASE_URL)%'
+                # Une API qui ne répond plus ne doit pas bloquer la boutique : au-delà de 3 s sans
+                # données ou de 5 s au total, ApiService lève ApiUnavailableException
+                timeout: 3
+                max_duration: 5
                 # caching géré automatiquement si tu utilises HttpCache
 
     # Note that the session will be started ONLY if you read or write from it.
