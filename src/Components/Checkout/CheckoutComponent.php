@@ -37,6 +37,13 @@ final class CheckoutComponent
     use DefaultActionTrait;
     use ComponentWithFormTrait;
 
+    /**
+     * Chaque étape a son type de formulaire, mais ComponentWithFormTrait retient le nom du premier
+     * formulaire (LiveProp formName) et y rattache les saisies : sous des noms différents, les champs
+     * des étapes suivantes n'étaient plus reliés au composant et arrivaient vides sur le serveur.
+     */
+    private const string FORM_NAME = 'checkout';
+
     public function __construct(
         private readonly CheckoutStateManager $stateManager,
         private readonly CheckoutIdentityManager $identityManager,
@@ -236,7 +243,7 @@ final class CheckoutComponent
         $data->lastName = $identity['lastName'] ?? null;
         $data->email = $identity['email'] ?? null;
 
-        return $this->formFactory->create(GuestIdentityType::class, $data, [
+        return $this->formFactory->createNamed(self::FORM_NAME, GuestIdentityType::class, $data, [
             'csrf_protection' => false,
         ]);
     }
@@ -255,7 +262,7 @@ final class CheckoutComponent
         $data->city = $deliveryAddress['city'] ?? null;
         $data->country = $deliveryAddress['country'] ?? 'FR';
 
-        return $this->formFactory->create(CheckoutAddressType::class, $data, [
+        return $this->formFactory->createNamed(self::FORM_NAME, CheckoutAddressType::class, $data, [
             'csrf_protection' => false,
         ]);
     }
@@ -274,7 +281,7 @@ final class CheckoutComponent
         $data->city = $billingAddress['city'] ?? null;
         $data->country = $billingAddress['country'] ?? 'FR';
 
-        return $this->formFactory->create(CheckoutAddressType::class, $data, [
+        return $this->formFactory->createNamed(self::FORM_NAME, CheckoutAddressType::class, $data, [
             'csrf_protection' => false,
         ]);
     }
@@ -284,7 +291,7 @@ final class CheckoutComponent
         $data = new DeliveryChoiceData();
         $data->carrierId = $state->carrierId;
 
-        return $this->formFactory->create(DeliveryChoiceType::class, $data, [
+        return $this->formFactory->createNamed(self::FORM_NAME, DeliveryChoiceType::class, $data, [
             'carriers' => $this->deliveryManager->getCarriers($state),
             'csrf_protection' => false,
         ]);
@@ -292,7 +299,7 @@ final class CheckoutComponent
 
     private function createDefaultForm(): FormInterface
     {
-        return $this->formFactory->create(GuestIdentityType::class, new GuestIdentityData(), [
+        return $this->formFactory->createNamed(self::FORM_NAME, GuestIdentityType::class, new GuestIdentityData(), [
             'csrf_protection' => false,
         ]);
     }

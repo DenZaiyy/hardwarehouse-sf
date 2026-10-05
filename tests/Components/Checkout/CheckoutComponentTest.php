@@ -36,7 +36,7 @@ final class CheckoutComponentTest extends WebTestCase
     {
         $checkout = $this->guestCheckout();
 
-        $checkout->submitForm(['guest_identity' => self::IDENTITY], 'saveGuest');
+        $checkout->submitForm(['checkout' => self::IDENTITY], 'saveGuest');
 
         self::assertTrue($checkout->response()->isSuccessful());
     }
@@ -46,16 +46,30 @@ final class CheckoutComponentTest extends WebTestCase
         $checkout = $this->guestCheckout();
 
         $this->expectException(UnprocessableEntityHttpException::class);
-        $checkout->submitForm(['guest_identity' => ['email' => 'jean.dupont'] + self::IDENTITY], 'saveGuest');
+        $checkout->submitForm(['checkout' => ['email' => 'jean.dupont'] + self::IDENTITY], 'saveGuest');
+    }
+
+    public function testGuestAddressIsSaved(): void
+    {
+        $checkout = $this->guestCheckout();
+        $checkout->submitForm(['checkout' => self::IDENTITY], 'saveGuest');
+
+        // Les étapes changent de type de formulaire : sous des noms différents, les champs de l'adresse
+        // n'étaient plus reliés au composant et l'adresse arrivait vide sur le serveur
+        $checkout->submitForm(['checkout' => self::ADDRESS], 'saveAddress');
+
+        $summary = $checkout->render()->crawler()->text();
+        self::assertStringContainsString('12 rue des Essais', $summary);
+        self::assertStringContainsString('68100 Mulhouse', $summary);
     }
 
     public function testOverlongPostcodeIsRejected(): void
     {
         $checkout = $this->guestCheckout();
-        $checkout->submitForm(['guest_identity' => self::IDENTITY], 'saveGuest');
+        $checkout->submitForm(['checkout' => self::IDENTITY], 'saveGuest');
 
         $this->expectException(UnprocessableEntityHttpException::class);
-        $checkout->submitForm(['checkout_address' => ['postcode' => '68100-68100'] + self::ADDRESS], 'saveAddress');
+        $checkout->submitForm(['checkout' => ['postcode' => '68100-68100'] + self::ADDRESS], 'saveAddress');
     }
 
     private function guestCheckout(): TestLiveComponent
