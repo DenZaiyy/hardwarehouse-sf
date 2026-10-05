@@ -88,6 +88,7 @@ form:
 listing:
     product:
         button: { add_to_cart: 'Ajouter au panier' }
+        title: 'La liste des produits'
         quantity: Quantité
         specs: { boolean_true: Oui, boolean_false: Non }
 app:

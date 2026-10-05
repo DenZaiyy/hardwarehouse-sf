@@ -11,6 +11,15 @@ final class ProductControllerTest extends WebTestCase
 {
     use FakesCatalogApi;
 
+    public function testProductListIsTitledInFrench(): void
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/fr/produits');
+
+        self::assertSelectorTextSame('h1', 'La liste des produits');
+    }
+
     public function testActiveProductPageIsDisplayed(): void
     {
         $client = static::createClient();

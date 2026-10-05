@@ -80,6 +80,7 @@ country:
 listing:
     product:
         button: { add_to_cart: 'Add to cart' }
+        title: Products
         quantity: Quantity
         specs: { boolean_true: 'Yes', boolean_false: 'No' }
 form:
