@@ -340,6 +340,7 @@ final class CheckoutComponent
         $state = $this->identityManager->saveGuestIdentity($this->getState(), $data);
 
         $this->stateManager->saveState($state);
+        $this->resetForm();
     }
 
     #[LiveAction]
