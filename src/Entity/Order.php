@@ -111,7 +111,9 @@ class Order
 
     public function setUserFullNameSnapshot(string $userFullNameSnapshot): static
     {
-        $this->userFullNameSnapshot = $userFullNameSnapshot;
+        // Simple copie pour l'affichage, bornée à sa colonne : un prénom et un nom de 50 caractères
+        // chacun, séparés par une espace, en font 101
+        $this->userFullNameSnapshot = mb_substr($userFullNameSnapshot, 0, 100);
 
         return $this;
     }
