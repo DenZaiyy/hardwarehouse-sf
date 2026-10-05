@@ -15,6 +15,8 @@
         <ini name="error_reporting" value="-1" />
         <server name="APP_ENV" value="test" force="true" />
         <server name="SHELL_VERBOSITY" value="-1" />
+        <!-- Secret de signature factice, utilisé par StripeWebhookControllerTest -->
+        <env name="STRIPE_WEBHOOK_SECRET" value="whsec_test_hardwarehouse" force="true" />
     </php>
 
     <testsuites>

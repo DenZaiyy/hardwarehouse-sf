@@ -22,7 +22,7 @@ class StripeWebhookController extends AbstractController
     public function __construct(
         private readonly StripePaymentEventHandler $paymentEventHandler,
         private readonly LoggerInterface $logger,
-        #[Autowire('%env(STRIPE_WEBHOOK_SECRET)')]
+        #[Autowire('%env(STRIPE_WEBHOOK_SECRET)%')]
         private readonly string $stripeWebhookSecret,
     ) {
     }
