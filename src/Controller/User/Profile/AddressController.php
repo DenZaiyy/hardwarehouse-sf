@@ -9,6 +9,7 @@ use App\Entity\User;
 use App\Enum\AddressType;
 use App\Form\User\UserAddressFormType;
 use App\Repository\AddressRepository;
+use App\Security\Voter\AddressVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -55,6 +56,7 @@ class AddressController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
+    #[IsGranted(AddressVoter::MANAGE, subject: 'address', statusCode: Response::HTTP_NOT_FOUND)]
     public function edit(Address $address, Request $request): Response
     {
         /** @var User $user */
@@ -64,6 +66,7 @@ class AddressController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
+    #[IsGranted(AddressVoter::MANAGE, subject: 'address', statusCode: Response::HTTP_NOT_FOUND)]
     public function delete(Address $address, Request $request): Response
     {
         if ($this->isCsrfTokenValid('delete'.$address->getId(), (string) $request->request->get('_token'))) {
