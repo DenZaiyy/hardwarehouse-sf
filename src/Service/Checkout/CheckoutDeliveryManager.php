@@ -31,6 +31,11 @@ final readonly class CheckoutDeliveryManager
 
     public function saveCarrier(CheckoutState $state, int $carrierId): CheckoutState
     {
+        // L'identifiant vient du navigateur : sans transporteur réel, OrderService compterait 0 € de port
+        if (null === $this->carrierRepository->find($carrierId)) {
+            return $state;
+        }
+
         $state->carrierId = $carrierId;
         $state->deliveryCompleted = true;
         $state->currentStep = 4;
