@@ -21,8 +21,10 @@ trait FakesCatalogApi
     /**
      * L'API renvoie cette fiche pour le slug donné. L'identifiant, dérivé du slug, est celui
      * que reprend la ligne de panier : une fiche enregistrée deux fois garde le même produit.
+     *
+     * @param list<array{name: string, type: string, value: string}> $attributes caractéristiques techniques
      */
-    private function apiHasProduct(string $slug, bool $active = true, int $stock = 3): string
+    private function apiHasProduct(string $slug, bool $active = true, int $stock = 3, array $attributes = []): string
     {
         $id = substr(hash('sha256', $slug), 0, 24);
 
@@ -39,7 +41,15 @@ trait FakesCatalogApi
             'category' => ['id' => 'cat-processeurs', 'name' => 'Processeurs', 'slug' => 'processeurs', 'active' => true, 'productsCount' => 1],
             'brand' => ['id' => 'brand-amd', 'name' => 'AMD', 'slug' => 'amd', 'active' => true, 'productsCount' => 1],
             'stock' => ['quantity' => $stock],
-            'productAttributeValues' => [],
+            'productAttributeValues' => array_map(static fn (int $index, array $attribute): array => [
+                'id' => 'valeur-'.$index,
+                'value' => $attribute['value'],
+                'categoryAttribute' => [
+                    'id' => 'attribut-categorie-'.$index,
+                    'displayOrder' => $index,
+                    'attribute' => ['id' => 'attribut-'.$index, 'name' => $attribute['name'], 'type' => $attribute['type']],
+                ],
+            ], array_keys($attributes), $attributes),
         ]);
 
         return $id;

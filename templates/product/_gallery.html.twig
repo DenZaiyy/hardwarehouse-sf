@@ -107,11 +107,11 @@
                                 data-full-src="{{ image }}"
                                 data-srcset="{{ image }} 800w, {{ image|replace({'800': '1200'}) }} 1200w"
                                 class="relative shrink-0 w-20 h-20 lg:w-[245px] lg:h-[245px] rounded-lg overflow-hidden snap-start border-2
-                               {{ loop.first ? 'border-blue-500 opacity-100' : 'border-transparent hover:border-blue-400 opacity-60' }}
-                               focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-2
+                               {{ loop.first ? 'border-primary opacity-100' : 'border-transparent hover:border-secondary opacity-60' }}
+                               focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2
                                active:scale-95 lg:hover:scale-105 transition-all duration-300 p-0"
                                 aria-label="Voir l'image {{ loop.index }}"
-                                aria-selected="{{ loop.first ? 'true' : 'false' }}"
+                                aria-current="{{ loop.first ? 'true' : 'false' }}"
                             >
                                 <img
                                     src="{{ image }}"

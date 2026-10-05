@@ -20,6 +20,7 @@ user:
         submit: { label: 'Se connecter' }
     profile:
         title: 'Mon profil'
+        avatar: { alt: 'Votre avatar' }
         informations: { title: 'Mes informations', email: { label: 'Adresse e-mail' }, username: { label: Pseudo }, addresses: { label: 'Adresse par défaut', default: { delivery: { label: 'Adresse de livraison par défaut' }, billing: { label: 'Adresse de facturation par défaut' } } }, password: { edit: { label: 'Modifier le mot de passe' } }, infos: { edit: { label: 'Modifier mes informations' } } }
         addresses: { label: "Liste d'adresses", add: { label: 'Ajouter une adresse' }, address: { label: Intitulé }, empty: { label: 'Aucune adresse enregistrée' } }
     update:
@@ -87,6 +88,8 @@ form:
 listing:
     product:
         button: { add_to_cart: 'Ajouter au panier' }
+        quantity: Quantité
+        specs: { boolean_true: Oui, boolean_false: Non }
 app:
     locale:
         en: Anglais
@@ -197,6 +200,17 @@ checkout:
         postcode: 'Code postal'
         city: Ville
         country: Pays
+error:
+    not_found:
+        title: 'Page introuvable'
+        text: "La page demandée n'existe pas ou n'est plus disponible. Vérifiez l'adresse ou poursuivez vos achats depuis l'accueil."
+    unavailable:
+        title: 'Catalogue momentanément indisponible'
+        text: "Nos fiches produits ne peuvent pas s'afficher pour le moment. Votre panier et votre compte restent accessibles : réessayez dans quelques minutes."
+    generic:
+        title: 'Une erreur est survenue'
+        text: "Cette page n'a pas pu s'afficher. Réessayez dans un instant ou revenez à l'accueil."
+    home: "Retour à l'accueil"
 cart:
     summary:
         title: Résumé du panier

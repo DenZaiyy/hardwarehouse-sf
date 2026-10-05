@@ -26,6 +26,13 @@ framework:
         App\Exception\Api\ApiNotFoundException:
             status_code: 404
             log_level: notice
+        # API en panne ou injoignable : service indisponible plutôt qu'une erreur de la boutique
+        App\Exception\Api\ApiServerException:
+            status_code: 503
+            log_level: error
+        App\Exception\Api\ApiUnavailableException:
+            status_code: 503
+            log_level: error
 
     #esi: true
     #fragments: true

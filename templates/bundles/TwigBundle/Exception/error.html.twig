@@ -1,11 +1,11 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ 'error.not_found.title'|trans }} - HardWareHouse{% endblock %}
+{% block title %}{{ 'error.generic.title'|trans }} - HardWareHouse{% endblock %}
 
 {% block body %}
     <div class="mx-auto my-12 flex max-w-2xl flex-col items-center gap-5 text-center">
-        <h1>{{ 'error.not_found.title'|trans }}</h1>
-        <p class="text-muted">{{ 'error.not_found.text'|trans }}</p>
+        <h1>{{ 'error.generic.title'|trans }}</h1>
+        <p class="text-muted">{{ 'error.generic.text'|trans }}</p>
         <a href="{{ path('homepage') }}" class="rounded-lg bg-primary px-6 py-2.5 font-title font-semibold text-paragraph no-underline hover:bg-primary-dark">
             {{ 'error.home'|trans }}
         </a>

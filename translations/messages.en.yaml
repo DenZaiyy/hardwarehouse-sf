@@ -24,6 +24,7 @@ user:
         submit: { label: Login }
     profile:
         title: 'My profile'
+        avatar: { alt: 'Your avatar' }
         informations: { title: 'My information', email: { label: 'Email address' }, username: { label: Nickname }, addresses: { label: 'Default address', default: { delivery: { label: "Default delivery address" }, billing: { label: "Default billing address" } } }, password: { edit: { label: 'Change password' } }, infos: { edit: { label: 'Edit my information' } } }
         addresses: { label: 'Address list', add: { label: 'Add an address' }, address: { label: Title }, empty: { label: 'No addresses saved' } }
     update:
@@ -57,7 +58,7 @@ header:
         empty: { label: 'Empty cart' }
         show: 'View my cart'
     nav:
-        profile: { label: Profil }
+        profile: { label: Profile }
         logout: { label: Logout }
         login: { label: Login }
         register: { label: Register }
@@ -79,6 +80,8 @@ country:
 listing:
     product:
         button: { add_to_cart: 'Add to cart' }
+        quantity: Quantity
+        specs: { boolean_true: 'Yes', boolean_false: 'No' }
 form:
     password:
         show: Show
@@ -195,6 +198,17 @@ checkout:
         postcode: Postcode
         city: City
         country: Country
+error:
+    not_found:
+        title: 'Page not found'
+        text: 'The page you requested does not exist or is no longer available. Check the address or continue shopping from the homepage.'
+    unavailable:
+        title: 'Catalogue temporarily unavailable'
+        text: 'Product pages cannot be displayed right now. Your cart and your account remain available: try again in a few minutes.'
+    generic:
+        title: 'Something went wrong'
+        text: 'This page could not be displayed. Try again in a moment or go back to the homepage.'
+    home: 'Back to the homepage'
 cart:
     summary:
         title: "Cart summary"
