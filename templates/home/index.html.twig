@@ -86,12 +86,12 @@
 
                             <div class="absolute bottom-4 left-4 right-4 grid gap-3 sm:grid-cols-2">
                                 <div class="rounded-2xl border border-white/10 bg-slate-950/55 p-4 backdrop-blur-md">
-                                    <p class="text-[11px] uppercase tracking-[0.22em] text-white/45">Focus</p>
+                                    <p class="text-[11px] uppercase tracking-[0.22em] text-white/70">Focus</p>
                                     <p class="mt-2 text-sm font-semibold text-white">Composants triés pour la performance</p>
                                 </div>
                                 <div class="rounded-2xl border border-white/10 bg-slate-950/55 p-4 backdrop-blur-md">
-                                    <p class="text-[11px] uppercase tracking-[0.22em] text-white/45">Objectif</p>
-                                    <p class="mt-2 text-sm font-semibold text-white">Une expérience e-commerce plus premium</p>
+                                    <p class="text-[11px] uppercase tracking-[0.22em] text-white/70">Configurateur</p>
+                                    <p class="mt-2 text-sm font-semibold text-white">Compatibilité vérifiée à chaque choix</p>
                                 </div>
                             </div>
                         </figure>
@@ -116,7 +116,7 @@
                             >
                                 0
                             </span>
-                            <span class="mt-1 text-xs uppercase tracking-[0.22em] text-white/52">{{ stat.label }}</span>
+                            <span class="mt-1 text-xs uppercase tracking-[0.22em] text-white/70">{{ stat.label }}</span>
                         </div>
                     {% endfor %}
                 </div>
@@ -134,7 +134,7 @@
                     <span class="text-xs font-semibold uppercase tracking-[0.22em] text-secondary">Catalogue</span>
                     <h2 class="mt-2">Explore les catégories les plus recherchées</h2>
                     <p class="mt-3 text-muted">
-                        Une entrée rapide vers les univers les plus demandés, avec une présentation plus premium et plus lisible.
+                        Accède directement aux univers les plus consultés de la boutique.
                     </p>
                 </div>
 
@@ -153,15 +153,9 @@
                         data-shared--reveal-target="item"
                         class="group relative min-h-[320px] overflow-hidden rounded-[24px] border border-slate-200/80 bg-slate-950 no-underline shadow-[0_14px_40px_rgba(15,23,42,.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(15,23,42,.16)]"
                     >
-                        {% if cat.logo %}
-                            <img
-                                src="{{ cat.logo }}"
-                                alt="{{ cat.name }}"
-                                class="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.06]"
-                            >
-                        {% else %}
-                            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,.14),transparent_30%),linear-gradient(135deg,rgba(22,32,51,1),rgba(82,111,184,.75))]"></div>
-                        {% endif %}
+                        {# Dégradé de la charte, comme la maquette : cat.logo ne contient pour l'instant que des
+                           photos de remplacement sans rapport avec la catégorie (voir B13, catalogue d'images) #}
+                        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,.14),transparent_30%)] bg-primary"></div>
 
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/45 to-transparent"></div>
                         <div class="absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100 bg-[linear-gradient(135deg,transparent,rgba(255,255,255,.08),transparent)]"></div>
@@ -176,7 +170,7 @@
 
                             <div>
                                 <h3 class="text-xl font-bold text-white">{{ cat.name }}</h3>
-                                <p class="mt-2 text-sm text-white/62">{{ cat.productsCount }} produits</p>
+                                <p class="mt-2 text-sm text-white/80">{{ cat.productsCount }} produits</p>
                             </div>
                         </div>
                     </a>
@@ -329,7 +323,7 @@
                 <span class="text-xs font-semibold uppercase tracking-[0.22em] text-secondary">Pourquoi HardWareHouse</span>
                 <h2 class="mt-2">Une expérience plus claire, plus technique, plus premium</h2>
                 <p class="mt-4 text-muted">
-                    Ce bloc garde ton angle e-commerce, mais le présente avec une hiérarchie plus premium et plus orientée confiance.
+                    Des composants sélectionnés, des fiches techniques détaillées et une livraison rapide pour monter ton setup en confiance.
                 </p>
             </div>
 

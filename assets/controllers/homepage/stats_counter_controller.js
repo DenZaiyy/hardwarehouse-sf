@@ -60,11 +60,11 @@ export default class extends Controller {
         });
     }
 
+    // Format de la langue de la page : « 2 000 » et « 4,9 » en français
     format(value, decimals) {
-        if (decimals > 0) {
-            return value.toFixed(decimals);
-        }
-
-        return Math.round(value).toLocaleString('fr-FR');
+        return value.toLocaleString(document.documentElement.lang || 'fr', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals,
+        });
     }
 }
