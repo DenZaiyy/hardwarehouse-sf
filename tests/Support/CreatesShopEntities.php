@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Support;
 
 use App\Entity\Address;
+use App\Entity\Order;
 use App\Entity\User;
 use App\Enum\AddressType;
 use App\Enum\CountryList;
@@ -55,5 +56,25 @@ trait CreatesShopEntities
         $this->entityManager()->flush();
 
         return $address;
+    }
+
+    /** Commande en attente de paiement ; $customer null pour une commande passée sans compte. */
+    private function createOrder(?User $customer): Order
+    {
+        $order = (new Order())
+            ->setReference('ORDTEST'.strtoupper(bin2hex(random_bytes(5))))
+            ->setUser($customer)
+            ->setUserFullNameSnapshot('Jean Dupont')
+            ->setSubtotal('100.00')
+            ->setShippingAmount('4.90')
+            ->setDiscountAmount('0.00')
+            ->setTaxAmount('20.00')
+            ->setTotalAmount('124.90')
+            ->setCurrency('EUR');
+
+        $this->entityManager()->persist($order);
+        $this->entityManager()->flush();
+
+        return $order;
     }
 }

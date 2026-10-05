@@ -9,6 +9,9 @@ final readonly class CheckoutStateManager
 {
     private const string SESSION_KEY = 'checkout_state';
 
+    /** Référence de la dernière commande passée dans cette session (achat sans compte). */
+    public const string ORDER_REFERENCE_KEY = 'checkout_order_reference';
+
     public function __construct(
         private RequestStack $requestStack,
     ) {
@@ -34,5 +37,19 @@ final readonly class CheckoutStateManager
     public function reset(): void
     {
         $this->requestStack->getSession()->remove(self::SESSION_KEY);
+    }
+
+    /**
+     * Conservée à part de l'état du tunnel : reset() ne l'efface pas, si bien qu'un client sans
+     * compte peut recharger sa page de confirmation pendant toute sa session.
+     */
+    public function rememberOrderReference(string $reference): void
+    {
+        $this->requestStack->getSession()->set(self::ORDER_REFERENCE_KEY, $reference);
+    }
+
+    public function remembersOrderReference(string $reference): bool
+    {
+        return $this->requestStack->getSession()->get(self::ORDER_REFERENCE_KEY) === $reference;
     }
 }

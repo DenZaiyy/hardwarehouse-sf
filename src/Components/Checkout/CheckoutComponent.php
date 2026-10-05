@@ -673,6 +673,9 @@ final class CheckoutComponent
             $user instanceof User ? $user : null
         );
 
+        // Seule cette session pourra afficher la confirmation d'une commande passée sans compte
+        $this->stateManager->rememberOrderReference((string) $order->getReference());
+
         // Create Stripe checkout session with order reference
         $orderTotals = $this->getOrderTotals();
         $carrierLabel = $this->getSelectedCarrierLabel();
