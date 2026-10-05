@@ -47,7 +47,9 @@
         </report>
     </coverage>
 
-    <!--<extensions>
-        <bootstrap class="Symfony\Component\Panther\ServerExtension" />
-    </extensions>-->
+    <extensions>
+        <!-- Chaque test s'exécute dans une transaction annulée à la fin : aucune donnée ne passe d'un test à l'autre -->
+        <bootstrap class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension" />
+        <!--<bootstrap class="Symfony\Component\Panther\ServerExtension" />-->
+    </extensions>
 </phpunit>
