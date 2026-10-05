@@ -9,7 +9,7 @@
                 </div>
                 <div>{{ state.identity.email ?? '' }}</div>
                 {% if isAuthenticatedStepSkipped %}
-                    <div class="text-xs text-green-600">Connecté</div>
+                    <div class="text-xs text-success">Connecté</div>
                 {% endif %}
             </div>
 
@@ -71,7 +71,7 @@
 
         {% elseif state.identityMode == 'login' %}
             {% if loginError %}
-                <div class="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">
+                <div class="rounded border border-red-300 bg-red-50 p-3 text-sm text-danger">
                     {{ loginError|trans([], 'security') }}
                 </div>
             {% endif %}
@@ -108,7 +108,7 @@
                 </button>
             </form>
         {% else %}
-            <div class="text-sm text-gray-500">
+            <div class="text-sm text-muted">
                 Choisis un mode pour continuer.
             </div>
         {% endif %}

@@ -175,3 +175,7 @@ cart:
     summary:
         title: __cart.summary.title
         articles: __cart.summary.articles
+    line:
+        decrease: 'Remove one'
+        increase: 'Add one'
+        remove: 'Remove this item from the cart'

@@ -178,3 +178,7 @@ cart:
     summary:
         title: Résumé du panier
         articles: Articles
+    line:
+        decrease: 'Retirer un exemplaire'
+        increase: 'Ajouter un exemplaire'
+        remove: 'Retirer cet article du panier'

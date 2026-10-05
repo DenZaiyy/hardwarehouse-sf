@@ -2,11 +2,11 @@
     <h2 class="text-lg font-semibold">4. Paiement</h2>
 
     {% if not state.deliveryCompleted %}
-        <div class="text-sm text-gray-500">
+        <div class="text-sm text-muted">
             Complète d'abord la livraison.
         </div>
     {% elseif state.paymentCompleted %}
-        <div class="text-sm font-medium text-green-600">
+        <div class="text-sm font-medium text-success">
             Commande finalisée.
         </div>
     {% elseif state.currentStep == 4 %}
