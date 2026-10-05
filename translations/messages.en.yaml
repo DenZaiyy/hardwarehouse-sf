@@ -62,14 +62,14 @@ header:
 country:
     french:
         label: France
-    english:
-        label: 'United States'
+    united_kingdom:
+        label: 'United Kingdom'
     german:
         label: Germany
     spanish:
-        label: Spanish
+        label: Spain
     italian:
-        label: Italian
+        label: Italy
 listing:
     product:
         button: { add_to_cart: 'Add to cart' }
@@ -171,6 +171,21 @@ shipmentStatus:
         label: 'In transit'
     delivered:
         label: Delivered
+checkout:
+    form:
+        title: Title
+        mr: Mr
+        mrs: Mrs
+        first_name: 'First name'
+        last_name: 'Last name'
+        email: Email
+        password: 'Password (optional, to create an account)'
+        password_placeholder: '12 characters minimum'
+        label: Label
+        address: Address
+        postcode: Postcode
+        city: City
+        country: Country
 cart:
     summary:
         title: "Cart summary"

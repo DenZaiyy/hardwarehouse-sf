@@ -14,7 +14,7 @@
                 </div>
                 <div>{{ state.deliveryAddress.address1 ?? '' }}</div>
                 <div>{{ state.deliveryAddress.postcode ?? '' }} {{ state.deliveryAddress.city ?? '' }}</div>
-                <div>{{ state.deliveryAddress.country ?? '' }}</div>
+                <div>{{ (state.deliveryAddress.country ?? null)|country|trans }}</div>
             </div>
 
             <button
@@ -48,7 +48,7 @@
                             </div>
                             <div>{{ state.billingAddress.address1 ?? '' }}</div>
                             <div>{{ state.billingAddress.postcode ?? '' }} {{ state.billingAddress.city ?? '' }}</div>
-                            <div>{{ state.billingAddress.country ?? '' }}</div>
+                            <div>{{ (state.billingAddress.country ?? null)|country|trans }}</div>
                         </div>
 
                         <button
@@ -82,7 +82,7 @@
                                         <div>{{ address.firstName }} {{ address.lastName }}</div>
                                         <div>{{ address.address1 }}</div>
                                         <div>{{ address.postcode }} {{ address.city }}</div>
-                                        <div>{{ address.country }}</div>
+                                        <div>{{ address.country|country|trans }}</div>
                                     </div>
                                 </button>
                             {% endfor %}
@@ -152,7 +152,7 @@
                             <div>{{ address.firstName }} {{ address.lastName }}</div>
                             <div>{{ address.address1 }}</div>
                             <div>{{ address.postcode }} {{ address.city }}</div>
-                            <div>{{ address.country }}</div>
+                            <div>{{ address.country|country|trans }}</div>
                         </div>
                     </button>
                 {% endfor %}

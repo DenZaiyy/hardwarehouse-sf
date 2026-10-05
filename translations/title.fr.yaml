@@ -12,3 +12,5 @@ user:
         home: { title: 'Mes adresses' }
 contact:
     title: 'Nous contacter'
+checkout:
+    title: Commande

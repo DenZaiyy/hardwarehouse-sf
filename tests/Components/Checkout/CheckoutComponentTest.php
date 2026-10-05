@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Components\Checkout;
 
+use App\Entity\Carrier;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -70,6 +73,47 @@ final class CheckoutComponentTest extends WebTestCase
 
         $this->expectException(UnprocessableEntityHttpException::class);
         $checkout->submitForm(['checkout' => ['postcode' => '68100-68100'] + self::ADDRESS], 'saveAddress');
+    }
+
+    public function testGuestIdentityFormIsLabelledInFrench(): void
+    {
+        $form = $this->guestCheckout()->render()->crawler()->filter('form');
+
+        self::assertSame('Prénom', $form->filter('label[for="checkout_firstName"]')->text());
+        self::assertSame('Nom', $form->filter('label[for="checkout_lastName"]')->text());
+        self::assertSame('E-mail', $form->filter('label[for="checkout_email"]')->text());
+        // Civilité facultative : M. ou Mme, sans la case « None » qu'ajoute un choix non obligatoire
+        self::assertSame(['M.', 'Mme'], $form->filter('input[name="checkout[title]"] + label')->each(static fn (Crawler $label): string => $label->text()));
+    }
+
+    public function testAddressFormListsCountriesByName(): void
+    {
+        $checkout = $this->guestCheckout();
+        $checkout->submitForm(['checkout' => self::IDENTITY], 'saveGuest');
+
+        $form = $checkout->render()->crawler()->filter('form');
+
+        self::assertSame('Code postal', $form->filter('label[for="checkout_postcode"]')->text());
+        $countries = $form->filter('#checkout_country option')->each(static fn (Crawler $option): string => $option->text());
+        self::assertContains('France', $countries);
+        self::assertContains('Royaume-Uni', $countries);
+    }
+
+    public function testDeliveryStepReopensWithTheChosenCarrier(): void
+    {
+        $checkout = $this->guestCheckout();
+        $carrier = (new Carrier())->setName('Colissimo')->setPrice('4.90');
+        $entityManager = static::getContainer()->get(EntityManagerInterface::class);
+        $entityManager->persist($carrier);
+        $entityManager->flush();
+
+        $checkout->submitForm(['checkout' => self::IDENTITY], 'saveGuest');
+        $checkout->submitForm(['checkout' => self::ADDRESS], 'saveAddress');
+        $checkout->call('saveDeliveryChoice', ['carrierId' => $carrier->getId()]);
+        $checkout->call('editDelivery');
+
+        $radio = $checkout->render()->crawler()->filter(\sprintf('input[type="radio"][value="%d"]', $carrier->getId()));
+        self::assertNotNull($radio->attr('checked'));
     }
 
     private function guestCheckout(): TestLiveComponent

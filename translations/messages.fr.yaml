@@ -65,8 +65,8 @@ header:
 country:
     french:
         label: France
-    english:
-        label: Amérique
+    united_kingdom:
+        label: Royaume-Uni
     german:
         label: Allemagne
     spanish:
@@ -174,6 +174,21 @@ shipmentStatus:
         label: 'En transit'
     delivered:
         label: Livré
+checkout:
+    form:
+        title: Civilité
+        mr: M.
+        mrs: Mme
+        first_name: Prénom
+        last_name: Nom
+        email: E-mail
+        password: 'Mot de passe (facultatif, pour créer un compte)'
+        password_placeholder: '12 caractères minimum'
+        label: Libellé
+        address: Adresse
+        postcode: 'Code postal'
+        city: Ville
+        country: Pays
 cart:
     summary:
         title: Résumé du panier

@@ -511,6 +511,7 @@ final class CheckoutComponent
         }
 
         $this->stateManager->saveState($state);
+        $this->resetForm();
     }
 
     #[LiveAction]
@@ -521,6 +522,7 @@ final class CheckoutComponent
         if ($state->identityCompleted) {
             $state->currentStep = 2;
             $this->stateManager->saveState($state);
+            $this->resetForm();
         }
     }
 
@@ -532,6 +534,9 @@ final class CheckoutComponent
         if ($state->identityCompleted && $state->addressCompleted) {
             $state->currentStep = 3;
             $this->stateManager->saveState($state);
+            // Sans réinitialisation, le formulaire de l'étape rouverte serait soumis avec les valeurs
+            // de l'étape précédente : le transporteur choisi ne serait plus coché
+            $this->resetForm();
         }
     }
 

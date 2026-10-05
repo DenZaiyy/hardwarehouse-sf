@@ -17,18 +17,23 @@ final class GuestIdentityType extends AbstractType
     {
         $builder
             ->add('title', ChoiceType::class, [
+                'label' => 'checkout.form.title',
                 'choices' => [
-                    'M.' => 'mr',
-                    'Mme' => 'mrs',
+                    'checkout.form.mr' => 'mr',
+                    'checkout.form.mrs' => 'mrs',
                 ],
                 'required' => false,
                 'expanded' => true,
+                // Civilité facultative, sans case « aucune » à côté de M. et Mme
+                'placeholder' => false,
             ])
-            ->add('firstName', TextType::class)
-            ->add('lastName', TextType::class)
-            ->add('email', EmailType::class)
+            ->add('firstName', TextType::class, ['label' => 'checkout.form.first_name'])
+            ->add('lastName', TextType::class, ['label' => 'checkout.form.last_name'])
+            ->add('email', EmailType::class, ['label' => 'checkout.form.email'])
             ->add('password', PasswordType::class, [
+                'label' => 'checkout.form.password',
                 'required' => false,
+                'attr' => ['placeholder' => 'checkout.form.password_placeholder'],
             ])
         ;
     }
