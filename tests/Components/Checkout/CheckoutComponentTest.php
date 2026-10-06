@@ -246,6 +246,19 @@ final class CheckoutComponentTest extends WebTestCase
         self::assertSame(PaymentMethod::PAYPAL, $orders[0]->getPaymentMethod());
     }
 
+    public function testOrderKeepsTheCustomerEmailForTheConfirmation(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $checkout = $this->readyToPay($client, $this->carrier('Colissimo'), $this->cartWith($this->apiHasProduct($slug), $slug));
+
+        $checkout->call('processPayment');
+
+        // Commande sans compte : seule l'adresse saisie dans le tunnel permet d'envoyer la confirmation
+        $orders = $this->entityManager()->getRepository(Order::class)->findBy(['userFullNameSnapshot' => 'Jean Dupont'], ['id' => 'DESC'], 1);
+        self::assertSame('jean.dupont@example.com', $orders[0]->getCustomerEmail());
+    }
+
     /** Tunnel rempli jusqu'au paiement par un visiteur, dont le panier est rangé sous ce jeton. */
     private function readyToPay(KernelBrowser $client, Carrier|int $carrier, ?string $cartToken): TestLiveComponent
     {

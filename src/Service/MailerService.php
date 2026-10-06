@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Order;
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -46,6 +47,31 @@ readonly class MailerService
         $this->logger->info('Email de bienvenue envoyé', [
             'recipient' => $userEmail,
         ]);
+
+        return true;
+    }
+
+    /**
+     * Confirmation envoyée une fois la commande payée ; une commande sans compte passée avant
+     * l'enregistrement de l'e-mail n'en reçoit pas.
+     */
+    public function sendOrderConfirmation(Order $order): bool
+    {
+        $email = $order->getCustomerEmail();
+        if (null === $email || !$this->validateEmail($email)) {
+            $this->logger->warning('Order confirmation not sent: no valid customer email', [
+                'reference' => $order->getReference(),
+            ]);
+
+            return false;
+        }
+
+        $this->sendTemplatedEmail(
+            $email,
+            sprintf('Confirmation de votre commande %s', $order->getReference()),
+            'emails/order/confirmation.html.twig',
+            ['order' => $order],
+        );
 
         return true;
     }

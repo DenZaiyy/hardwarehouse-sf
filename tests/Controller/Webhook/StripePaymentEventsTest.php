@@ -44,6 +44,28 @@ final class StripePaymentEventsTest extends WebTestCase
         self::assertSame('pi_paid_checkout', $order->getStripePaymentIntentId());
     }
 
+    public function testConfirmedOrderSendsTheConfirmationEmailOnce(): void
+    {
+        $order = $this->createOrder($this->createUser())->setCustomerEmail('jean.dupont@example.com');
+        $this->entityManager()->flush();
+        $metadata = ['order_reference' => $order->getReference()];
+
+        $this->send('payment_intent.succeeded', ['id' => 'pi_confirmation_email', 'object' => 'payment_intent', 'metadata' => $metadata]);
+
+        self::assertEmailCount(1);
+        $email = self::getMailerMessage();
+        self::assertNotNull($email);
+        self::assertEmailAddressContains($email, 'to', 'jean.dupont@example.com');
+        self::assertEmailSubjectContains($email, (string) $order->getReference());
+        // Commande d'un compte : le lien mène au détail dans l'espace client
+        self::assertEmailHtmlBodyContains($email, '/fr/profile/orders/'.$order->getReference());
+
+        // L'événement de session qui suit ne change plus le statut : pas de second e-mail
+        $this->send('checkout.session.completed', ['object' => 'checkout.session', 'payment_intent' => 'pi_confirmation_email', 'payment_status' => 'paid', 'metadata' => $metadata]);
+
+        self::assertEmailCount(0);
+    }
+
     public function testSucceededPaymentConfirmsTheOrderEvenBeforeTheSessionEvent(): void
     {
         $order = $this->createOrder(null);
