@@ -2,58 +2,69 @@
 
 {% block title %}{{ 'register.title'|trans(domain = "title") }} - HardWareHouse{% endblock %}
 
-{% block meta_description %}Crée votre compte client et profiter de notre catalogue de produits !{% endblock %}
-
-{% block javascripts %}
-    {{ parent() }}
-    <script src="https://www.google.com/recaptcha/api.js?render=6LfZM3AsAAAAAM7MnrYcb_kzS64NOf00p3UP1tHg"></script>
-{% endblock %}
+{% block meta_description %}Créez votre compte client et profitez de notre catalogue de composants PC.{% endblock %}
 
 {% block body %}
     {% for flash_error in app.flashes('verify_email_error') %}
         <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
     {% endfor %}
 
-    <div class="mx-auto flex flex-col p-4 gap-2 rounded border md:max-w-7xl">
+    <div class="mx-auto my-8 flex w-full max-w-[880px] flex-col gap-4 rounded-xl border border-secondary bg-white p-4 sm:p-8">
         <h1>{{ 'user.registration.title'|trans }}</h1>
 
         {{ form_start(registrationForm, { 'attr': {'class': 'flex flex-col gap-4', 'id': 'registration-form' }}) }}
-        <div class="flex flex-row gap-2 w-full">
-            <div class="w-1/2">
+        {# Erreurs du formulaire entier, dont le refus de la vérification anti-robot (champ caché) #}
+        {{ form_errors(registrationForm) }}
+
+        <div class="flex flex-col gap-4 sm:flex-row">
+            <div class="sm:w-1/2">
                 {{ form_label(registrationForm.email) }}
                 {{ form_widget(registrationForm.email) }}
                 {{ form_errors(registrationForm.email) }}
             </div>
-            <div class="w-1/2">
+            <div class="sm:w-1/2">
                 {{ form_label(registrationForm.username) }}
                 {{ form_widget(registrationForm.username) }}
                 {{ form_errors(registrationForm.username) }}
             </div>
         </div>
 
-        <div class="flex flex-row gap-2 w-full">
+        <div>
+            <div class="flex flex-col gap-4 sm:flex-row">
+                <div class="sm:w-1/2">
+                    {{ form_label(registrationForm.plainPassword.first) }}
+                    {{ form_widget(registrationForm.plainPassword.first) }}
+                </div>
+                <div class="sm:w-1/2">
+                    {{ form_label(registrationForm.plainPassword.second) }}
+                    {{ form_widget(registrationForm.plainPassword.second) }}
+                </div>
+            </div>
+            {{ form_help(registrationForm.plainPassword) }}
             {{ form_errors(registrationForm.plainPassword) }}
-            <div class="w-1/2">
-                {{ form_label(registrationForm.plainPassword.first) }}
-                {{ form_widget(registrationForm.plainPassword.first) }}
-            </div>
-            <div class="w-1/2">
-                {{ form_label(registrationForm.plainPassword.second) }}
-                {{ form_widget(registrationForm.plainPassword.second) }}
-            </div>
         </div>
 
         <div>
             {{ form_label(registrationForm.avatar) }}
             {{ form_widget(registrationForm.avatar) }}
+            {{ form_help(registrationForm.avatar) }}
+            {{ form_errors(registrationForm.avatar) }}
         </div>
 
-        <div class="flex gap-2 items-center flex-1">
-            {{ form_widget(registrationForm.agreeTerms, {attr: {class: 'size-5'}}) }}
-            {{ form_label(registrationForm.agreeTerms) }}
+        <div>
+            <div class="flex items-center gap-2">
+                {{ form_widget(registrationForm.agreeTerms, {attr: {class: 'size-5'}}) }}
+                {{ form_label(registrationForm.agreeTerms) }}
+            </div>
+            {{ form_errors(registrationForm.agreeTerms) }}
         </div>
 
-        <button type="submit" class="btn">{{ 'user.registration.submit'|trans }}</button>
+        <button type="submit" class="w-full">{{ 'user.registration.submit'|trans }}</button>
         {{ form_end(registrationForm) }}
+
+        <p class="text-sm">
+            {{ 'user.registration.already_registered'|trans }}
+            <a href="{{ path('app.login') }}" class="font-semibold underline">{{ 'user.login.submit.label'|trans }}</a>
+        </p>
     </div>
 {% endblock %}

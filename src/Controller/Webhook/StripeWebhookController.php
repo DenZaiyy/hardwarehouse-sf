@@ -14,15 +14,15 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * Thin adapter: verifies the Stripe signature, extracts the PaymentIntent id relevant to
- * each event type, and delegates the actual order mutation to StripePaymentEventHandler.
+ * Thin adapter: verifies the Stripe signature, extracts the order reference and the PaymentIntent id
+ * carried by each event type, and delegates the actual order mutation to StripePaymentEventHandler.
  */
 class StripeWebhookController extends AbstractController
 {
     public function __construct(
         private readonly StripePaymentEventHandler $paymentEventHandler,
         private readonly LoggerInterface $logger,
-        #[Autowire('%env(STRIPE_WEBHOOK_SECRET)')]
+        #[Autowire('%env(STRIPE_WEBHOOK_SECRET)%')]
         private readonly string $stripeWebhookSecret,
     ) {
     }
@@ -53,9 +53,10 @@ class StripeWebhookController extends AbstractController
 
             match ($event['type']) {
                 'checkout.session.completed' => $this->handleCheckoutSessionCompleted($object, $eventId),
-                'payment_intent.succeeded' => $this->handlePaymentIntentSucceeded($object, $eventId),
-                'payment_intent.payment_failed' => $this->handlePaymentIntentFailed($object, $eventId),
-                'payment_intent.canceled' => $this->handlePaymentIntentCanceled($object, $eventId),
+                'checkout.session.expired' => $this->paymentEventHandler->cancelPendingOrder($eventId, $this->orderReference($object), $this->paymentIntentId($object, 'payment_intent'), 'checkout session expired'),
+                'payment_intent.succeeded' => $this->paymentEventHandler->confirmPayment($eventId, $this->orderReference($object), $this->paymentIntentId($object, 'id')),
+                'payment_intent.payment_failed' => $this->paymentEventHandler->recordFailedAttempt($eventId, $this->orderReference($object), $this->paymentIntentId($object, 'id')),
+                'payment_intent.canceled' => $this->paymentEventHandler->cancelPendingOrder($eventId, $this->orderReference($object), $this->paymentIntentId($object, 'id'), 'payment canceled'),
                 'charge.refunded' => $this->handleChargeRefunded($object, $eventId),
                 'charge.dispute.created' => $this->handleChargeDispute($object, $eventId),
                 'payment_intent.amount_capturable_updated' => $this->logger->info('Payment intent amount capturable updated', ['payment_intent_id' => $object['id'] ?? null]),
@@ -79,54 +80,36 @@ class StripeWebhookController extends AbstractController
     /** @param array<string, mixed> $session */
     private function handleCheckoutSessionCompleted(array $session, string $eventId): void
     {
-        $paymentIntentId = $session['payment_intent'] ?? null;
-        if (!is_string($paymentIntentId)) {
-            $this->logger->warning('Checkout session completed without a payment_intent', ['session_id' => $session['id'] ?? null]);
+        // Moyens de paiement différés : la session est terminée mais l'argent n'est pas encore là
+        if ('paid' !== ($session['payment_status'] ?? null)) {
+            $this->logger->info('Checkout session completed without a collected payment', ['session_id' => $session['id'] ?? null]);
 
             return;
         }
 
-        $this->paymentEventHandler->markOrderPaid($paymentIntentId, $eventId);
+        $this->paymentEventHandler->confirmPayment($eventId, $this->orderReference($session), $this->paymentIntentId($session, 'payment_intent'));
     }
 
-    /** @param array<string, mixed> $paymentIntent */
-    private function handlePaymentIntentSucceeded(array $paymentIntent, string $eventId): void
+    /**
+     * Référence de commande transmise par StripeService dans les métadonnées de la session et du
+     * PaymentIntent : le seul lien avec la commande tant que le paiement n'a pas eu lieu.
+     *
+     * @param array<string, mixed> $object
+     */
+    private function orderReference(array $object): ?string
     {
-        $paymentIntentId = $this->extractPaymentIntentId($paymentIntent);
-        if (null !== $paymentIntentId) {
-            $this->paymentEventHandler->markOrderPaid($paymentIntentId, $eventId);
-        }
+        $metadata = $object['metadata'] ?? null;
+        $reference = \is_array($metadata) ? ($metadata['order_reference'] ?? null) : null;
+
+        return \is_string($reference) && '' !== $reference ? $reference : null;
     }
 
-    /** @param array<string, mixed> $paymentIntent */
-    private function handlePaymentIntentFailed(array $paymentIntent, string $eventId): void
+    /** @param array<string, mixed> $object */
+    private function paymentIntentId(array $object, string $field): ?string
     {
-        $paymentIntentId = $this->extractPaymentIntentId($paymentIntent);
-        if (null !== $paymentIntentId) {
-            $this->paymentEventHandler->markOrderFailed($paymentIntentId, $eventId);
-        }
-    }
+        $id = $object[$field] ?? null;
 
-    /** @param array<string, mixed> $paymentIntent */
-    private function handlePaymentIntentCanceled(array $paymentIntent, string $eventId): void
-    {
-        $paymentIntentId = $this->extractPaymentIntentId($paymentIntent);
-        if (null !== $paymentIntentId) {
-            $this->paymentEventHandler->markOrderCanceled($paymentIntentId, $eventId);
-        }
-    }
-
-    /** @param array<string, mixed> $paymentIntent */
-    private function extractPaymentIntentId(array $paymentIntent): ?string
-    {
-        $id = $paymentIntent['id'] ?? null;
-        if (is_string($id)) {
-            return $id;
-        }
-
-        $this->logger->warning('Stripe payment_intent event without a valid id', ['payload' => $paymentIntent]);
-
-        return null;
+        return \is_string($id) && '' !== $id ? $id : null;
     }
 
     /** @param array<string, mixed> $charge */
@@ -143,7 +126,7 @@ class StripeWebhookController extends AbstractController
         $totalAmount = $charge['amount'] ?? 0;
         $isFullRefund = (is_int($amountRefunded) ? $amountRefunded : 0) >= (is_int($totalAmount) ? $totalAmount : 0);
 
-        $this->paymentEventHandler->markOrderRefunded($paymentIntentId, $eventId, $isFullRefund);
+        $this->paymentEventHandler->recordRefund($paymentIntentId, $eventId, $isFullRefund);
     }
 
     /** @param array<string, mixed> $dispute */

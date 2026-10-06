@@ -28,13 +28,13 @@
                 <div class="mt-auto flex flex-col items-center gap-1">
 
                     {% if product.discountAmount %}
-                        <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-600">
+                        <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-danger">
                             -{{ product.discountAmount ~ '%' }}
                         </span>
                     {% endif %}
 
                     <div class="flex items-center justify-center gap-2">
-            <span class="text-sm text-gray-400 line-through">
+            <span class="text-sm text-muted line-through">
                 {{ product.price|format_currency('EUR') }}
             </span>
                         <span class="text-lg font-bold text-black lg:text-xl">
@@ -56,7 +56,7 @@
             <input type="hidden" name="slug" value="{{ product.slug }}">
             <input type="hidden" name="quantity" value="1">
             <input type="hidden" name="_turbo_stream" value="1">
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token('cart') }}">
+            <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('cart') }}">
 
             <button
                 type="submit"

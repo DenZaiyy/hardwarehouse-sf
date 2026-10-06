@@ -9,14 +9,15 @@ Ce guide vous explique comment configurer le déploiement automatique complet de
 ```mermaid
 graph LR
     A[dev] -->|Push + CI| B[test]
-    B -->|CI + Tests| C[PR to main]
+    B -->|CI + Tests| P[Préproduction]
+    P -->|Déploiement réussi| C[PR to main]
     C -->|Manual Merge| D[main]
     D -->|Auto Deploy| E[Production]
 ```
 
 ### Workflow Automatisé :
 1. **`dev`** → Push → Quality + Audit + Tests → Auto-merge vers `test`
-2. **`test`** → Re-tests → Création PR automatique vers `main`
+2. **`test`** → Re-tests → Déploiement en préproduction (`test.hardwarehouse.fr`) → Création PR automatique vers `main`
 3. **`main`** → Merge manuel → Triple validation → Déploiement production
 
 ## Prérequis
@@ -149,6 +150,12 @@ PROJECT_PATH=/var/www/hardwarehouse  # Chemin du projet
 > **Configuration PostgreSQL automatique**
 > Les tests utilisent maintenant une configuration PostgreSQL intégrée sans secrets requis.
 
+### **Préproduction** (environnement GitHub `preprod`)
+```env
+PREPROD_PROJECT_PATH=/var/www/hardwarehouse-test   # Chemin de la préproduction, distinct de PROJECT_PATH
+```
+> Si `HOST`, `USERNAME`, `PORT`, `SSH_PRIVATE_KEY` et `SSH_PASSWORD` sont rattachés à l'environnement `prod`, les recopier aussi dans `preprod`.
+
 ### **Auto-merge dev→test**
 ```env
 PAT_TOKEN=ghp_xxxxxxxxxxxx           # Personal Access Token GitHub
@@ -172,10 +179,11 @@ Jobs:
 **Déclenchement :** Push sur `test`
 ```
 Jobs:
-├── quality     # Re-validation qualité
-├── audit       # Re-audit sécurité
-├── tests       # Re-tests complets
-└── create-pr   # PR automatique vers main
+├── quality      # Re-validation qualité
+├── audit        # Re-audit sécurité
+├── tests        # Re-tests complets
+├── deploy-test  # Déploiement en préproduction (voir section dédiée)
+└── create-pr    # PR automatique vers main, seulement si la préproduction est à jour
 ```
 
 ### **ci-main.yml** - Branche `main`
@@ -187,6 +195,89 @@ Jobs:
 ├── tests            # Triple tests
 └── deploy-production # Déploiement VPS
 ```
+
+## Préproduction (`test.hardwarehouse.fr`)
+
+La branche `test` est déployée sur une seconde instance du même VPS avant toute PR vers `main` : la PR
+n'est créée que si ce déploiement réussit. La préproduction exécute le même `make prod` que la
+production, dans son propre dossier, avec sa propre base et ses propres clés (Stripe en mode test,
+aucun e-mail réel).
+
+### Mise en place sur le serveur (une seule fois)
+
+1. **DNS (Cloudflare)** : enregistrement `test` proxifié, comme le domaine principal et `api`.
+2. **Code** :
+   ```bash
+   sudo -u deploy git clone <url-du-depot> /var/www/hardwarehouse-test
+   cd /var/www/hardwarehouse-test && sudo -u deploy git checkout test
+   ```
+3. **Base PostgreSQL dédiée** :
+   ```bash
+   sudo -u postgres createuser --pwprompt hardwarehouse_test
+   sudo -u postgres createdb --owner=hardwarehouse_test hardwarehouse_test
+   ```
+4. **`.env.local`** (jamais versionné) :
+   ```env
+   APP_ENV=prod
+   APP_SECRET=<nouvelle valeur, différente de la production>
+   DEFAULT_URI=https://test.hardwarehouse.fr
+   DATABASE_URL="postgresql://hardwarehouse_test:<mot-de-passe>@127.0.0.1:5432/hardwarehouse_test?serverVersion=16&charset=utf8"
+   API_BASE_URL=https://api.hardwarehouse.fr   # API de production, lue seulement
+   MAILER_DSN=null://null                      # aucun e-mail réel depuis la préproduction
+   MESSENGER_TRANSPORT_DSN=<identique à la production>
+   STRIPE_SECRET_KEY=sk_test_...               # clés de test uniquement
+   STRIPE_WEBHOOK_SECRET=whsec_...             # secret du point de terminaison de test (étape 6)
+   RECAPTCHA3_KEY=...                          # clé autorisant test.hardwarehouse.fr (étape 7)
+   RECAPTCHA3_SECRET=...
+   SYMFONY_TRUSTED_PROXIES=<identique à la production>
+   ```
+5. **Nginx** : dupliquer le bloc serveur de production en remplaçant `server_name` par
+   `test.hardwarehouse.fr`, `root` par `/var/www/hardwarehouse-test/public` et le chemin du
+   `maintenance.flag`, avec un certificat valide pour ce domaine et la même configuration Cloudflare
+   (`real_ip`, Authenticated Origin Pulls, voir [INFRASTRUCTURE.md](INFRASTRUCTURE.md)). Ajouter :
+   ```nginx
+   # La préproduction ne doit pas être référencée
+   add_header X-Robots-Tag "noindex, nofollow" always;
+
+   # Accès réservé (fichier créé avec htpasswd)
+   auth_basic "Préproduction HardWareHouse";
+   auth_basic_user_file /etc/nginx/.htpasswd-hardwarehouse-test;
+
+   # Stripe doit pouvoir notifier les paiements sans authentification
+   location = /webhook/stripe {
+       auth_basic off;
+       try_files $uri /index.php$is_args$args;
+   }
+   ```
+6. **Stripe (environnement de test)** : dans Workbench, onglet **Webhooks**, ajouter une destination
+   « endpoint de webhook » vers `https://test.hardwarehouse.fr/webhook/stripe`, avec les événements
+   traités par `StripeWebhookController` (les mêmes qu'en production) : `checkout.session.completed`,
+   `checkout.session.expired`, `payment_intent.succeeded`, `payment_intent.payment_failed`,
+   `payment_intent.canceled`, `charge.refunded` et `charge.dispute.created`. Reporter ensuite son secret
+   `whsec_…` dans `STRIPE_WEBHOOK_SECRET`. Ce secret appartient au point de terminaison : changer les clés
+   API ne le modifie pas, mais chaque environnement Stripe (production, environnement de test) a ses
+   propres points de terminaison. En local, Stripe ne peut pas joindre `127.0.0.1` : la CLI Stripe relaie
+   les événements et affiche son secret (`stripe listen --print-secret`), à mettre dans `.env.dev`, le
+   fichier local du développement, ignoré par Git et chargé après `.env.local` (`--skip-verify` si le
+   certificat local de Symfony est refusé) :
+   ```bash
+   # Depuis la CLI 1.5x, les événements relayés doivent être nommés (ou --all-snapshot pour tous)
+   stripe listen \
+     --events checkout.session.completed,checkout.session.expired,payment_intent.succeeded,payment_intent.payment_failed,payment_intent.canceled,charge.refunded,charge.dispute.created \
+     --forward-to https://127.0.0.1:8000/webhook/stripe
+   ```
+7. **reCAPTCHA** : ajouter `test.hardwarehouse.fr` aux domaines autorisés de la clé, ou créer une clé dédiée.
+8. **GitHub** : créer l'environnement `preprod` (Settings > Environments) et ses secrets (voir
+   [Secrets GitHub Requis](#secrets-github-requis)). Le job refuse de s'exécuter si
+   `PREPROD_PROJECT_PATH` est vide ou identique à `PROJECT_PATH`.
+9. **Premier déploiement** : lancer `make prod` à la main dans le dossier (création de la base et
+   migrations), puis vérifier le site avant de pousser sur `test`.
+
+### Limite connue
+
+La préproduction lit l'API de production. C'est sans risque tant que la boutique ne fait que lire le
+catalogue ; le jour où elle modifiera le stock de l'API après un paiement, la préproduction devra
+pointer vers une API de préproduction ou ne pas déclencher ce décrément.
 
 ## Processus de Déploiement Production
 

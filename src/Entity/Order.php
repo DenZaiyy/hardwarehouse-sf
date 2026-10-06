@@ -66,7 +66,8 @@ class Order
     private ?string $currency = null;
 
     /**
-     * Stripe PaymentIntent id attached right after the Checkout Session is created.
+     * Stripe PaymentIntent id, recorded from the first webhook event that carries it: since Stripe
+     * API 2022-08-01, a Checkout Session is created without a PaymentIntent.
      * The single reliable key to resolve charge/refund/dispute webhook events, which
      * carry no order_reference metadata of their own (see StripePaymentEventHandler).
      */
@@ -111,7 +112,9 @@ class Order
 
     public function setUserFullNameSnapshot(string $userFullNameSnapshot): static
     {
-        $this->userFullNameSnapshot = $userFullNameSnapshot;
+        // Simple copie pour l'affichage, bornée à sa colonne : un prénom et un nom de 50 caractères
+        // chacun, séparés par une espace, en font 101
+        $this->userFullNameSnapshot = mb_substr($userFullNameSnapshot, 0, 100);
 
         return $this;
     }

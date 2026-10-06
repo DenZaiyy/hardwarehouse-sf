@@ -194,7 +194,7 @@ readonly class ApiService
      */
     public function search(string $searchTerm, array $params = []): array
     {
-        $allParams = array_merge(['search' => $searchTerm], $params);
+        $allParams = array_merge(['search' => $searchTerm, 'active' => 'true'], $params);
         $queryString = http_build_query($allParams);
         $endpoint = 'products?'.$queryString;
 
@@ -214,7 +214,9 @@ readonly class ApiService
     {
         try {
             $response = $this->apiClient->request($method, $url);
-            $response->getStatusCode();
+            // getStatusCode() ne lève rien sur un 4xx/5xx : getContent() contrôle le statut et attend
+            // la réponse complète, pour que toute erreur (HTTP, réseau, délai dépassé) soit traduite ici.
+            $response->getContent();
 
             return $response;
         } catch (ClientExceptionInterface $e) {

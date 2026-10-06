@@ -9,6 +9,7 @@ use App\DTO\Checkout\GuestIdentityData;
 use App\Entity\Address;
 use App\Entity\User;
 use App\Enum\AddressType;
+use App\Enum\OrderStatus;
 use App\Form\Checkout\CheckoutAddressType;
 use App\Form\Checkout\DeliveryChoiceType;
 use App\Form\Checkout\GuestIdentityType;
@@ -19,6 +20,8 @@ use App\Service\Checkout\CheckoutIdentityManager;
 use App\Service\Checkout\CheckoutStateManager;
 use App\Service\OrderService;
 use App\Service\StripeService;
+use Psr\Log\LoggerInterface;
+use Stripe\Exception\ExceptionInterface as StripeException;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
@@ -37,6 +40,21 @@ final class CheckoutComponent
     use DefaultActionTrait;
     use ComponentWithFormTrait;
 
+    /**
+     * Chaque étape a son type de formulaire, mais ComponentWithFormTrait retient le nom du premier
+     * formulaire (LiveProp formName) et y rattache les saisies : sous des noms différents, les champs
+     * des étapes suivantes n'étaient plus reliés au composant et arrivaient vides sur le serveur.
+     */
+    private const string FORM_NAME = 'checkout';
+
+    /**
+     * Ce que la revérification du panier a corrigé au moment de payer : affiché au-dessus du paiement
+     * le temps du rendu qui suit l'action (ce n'est pas une LiveProp).
+     *
+     * @var list<string>
+     */
+    public array $paymentNotices = [];
+
     public function __construct(
         private readonly CheckoutStateManager $stateManager,
         private readonly CheckoutIdentityManager $identityManager,
@@ -49,6 +67,7 @@ final class CheckoutComponent
         private readonly FormFactoryInterface $formFactory,
         private readonly AuthenticationUtils $authenticationUtils,
         private readonly Security $security,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -236,7 +255,7 @@ final class CheckoutComponent
         $data->lastName = $identity['lastName'] ?? null;
         $data->email = $identity['email'] ?? null;
 
-        return $this->formFactory->create(GuestIdentityType::class, $data, [
+        return $this->formFactory->createNamed(self::FORM_NAME, GuestIdentityType::class, $data, [
             'csrf_protection' => false,
         ]);
     }
@@ -255,7 +274,7 @@ final class CheckoutComponent
         $data->city = $deliveryAddress['city'] ?? null;
         $data->country = $deliveryAddress['country'] ?? 'FR';
 
-        return $this->formFactory->create(CheckoutAddressType::class, $data, [
+        return $this->formFactory->createNamed(self::FORM_NAME, CheckoutAddressType::class, $data, [
             'csrf_protection' => false,
         ]);
     }
@@ -274,7 +293,7 @@ final class CheckoutComponent
         $data->city = $billingAddress['city'] ?? null;
         $data->country = $billingAddress['country'] ?? 'FR';
 
-        return $this->formFactory->create(CheckoutAddressType::class, $data, [
+        return $this->formFactory->createNamed(self::FORM_NAME, CheckoutAddressType::class, $data, [
             'csrf_protection' => false,
         ]);
     }
@@ -284,7 +303,7 @@ final class CheckoutComponent
         $data = new DeliveryChoiceData();
         $data->carrierId = $state->carrierId;
 
-        return $this->formFactory->create(DeliveryChoiceType::class, $data, [
+        return $this->formFactory->createNamed(self::FORM_NAME, DeliveryChoiceType::class, $data, [
             'carriers' => $this->deliveryManager->getCarriers($state),
             'csrf_protection' => false,
         ]);
@@ -292,7 +311,7 @@ final class CheckoutComponent
 
     private function createDefaultForm(): FormInterface
     {
-        return $this->formFactory->create(GuestIdentityType::class, new GuestIdentityData(), [
+        return $this->formFactory->createNamed(self::FORM_NAME, GuestIdentityType::class, new GuestIdentityData(), [
             'csrf_protection' => false,
         ]);
     }
@@ -340,6 +359,7 @@ final class CheckoutComponent
         $state = $this->identityManager->saveGuestIdentity($this->getState(), $data);
 
         $this->stateManager->saveState($state);
+        $this->resetForm();
     }
 
     #[LiveAction]
@@ -503,6 +523,7 @@ final class CheckoutComponent
         }
 
         $this->stateManager->saveState($state);
+        $this->resetForm();
     }
 
     #[LiveAction]
@@ -513,6 +534,7 @@ final class CheckoutComponent
         if ($state->identityCompleted) {
             $state->currentStep = 2;
             $this->stateManager->saveState($state);
+            $this->resetForm();
         }
     }
 
@@ -524,6 +546,9 @@ final class CheckoutComponent
         if ($state->identityCompleted && $state->addressCompleted) {
             $state->currentStep = 3;
             $this->stateManager->saveState($state);
+            // Sans réinitialisation, le formulaire de l'étape rouverte serait soumis avec les valeurs
+            // de l'étape précédente : le transporteur choisi ne serait plus coché
+            $this->resetForm();
         }
     }
 
@@ -532,21 +557,13 @@ final class CheckoutComponent
     {
         $state = $this->getState();
 
-        if ($state->identityCompleted && $state->addressCompleted && $state->deliveryCompleted) {
-            $state->paymentMethod = empty($method) ? null : $method;
-            $state->currentStep = 4;
-
-            $this->stateManager->saveState($state);
+        // La valeur vient du navigateur : seuls les moyens proposés sont retenus
+        if (!isset($this->getAvailablePaymentMethods()[$method])) {
+            return;
         }
-    }
-
-    #[LiveAction]
-    public function finalizePayment(): void
-    {
-        $state = $this->getState();
 
         if ($state->identityCompleted && $state->addressCompleted && $state->deliveryCompleted) {
-            $state->paymentCompleted = true;
+            $state->paymentMethod = $method;
             $state->currentStep = 4;
 
             $this->stateManager->saveState($state);
@@ -554,15 +571,25 @@ final class CheckoutComponent
     }
 
     /**
+     * Moyens de paiement proposés, tous encaissés par Stripe : les clés sont les types de moyens de
+     * paiement Stripe (payment_method_types).
+     *
      * @return array<string, string>
      */
     public function getAvailablePaymentMethods(): array
     {
         return [
-            'stripe' => 'Carte bancaire (Stripe)',
-            // 'paypal' => 'PayPal',
-            // 'bank_transfer' => 'Virement bancaire',
+            'card' => 'Carte bancaire',
+            'paypal' => 'PayPal',
         ];
+    }
+
+    /** Moyen choisi par le client ; la carte bancaire est présélectionnée, comme sur la maquette. */
+    public function getSelectedPaymentMethod(): string
+    {
+        $method = $this->getState()->paymentMethod;
+
+        return null !== $method && isset($this->getAvailablePaymentMethods()[$method]) ? $method : 'card';
     }
 
     public function getSelectedCarrierLabel(): ?string
@@ -649,8 +676,12 @@ final class CheckoutComponent
         return 0.0;
     }
 
+    /**
+     * @return RedirectResponse|null null quand le panier ou le transporteur a changé depuis qu'ils ont
+     *                               été choisis : le composant se réaffiche avec paymentNotices
+     */
     #[LiveAction]
-    public function processPayment(): RedirectResponse
+    public function processPayment(): ?RedirectResponse
     {
         $state = $this->getState();
 
@@ -659,10 +690,29 @@ final class CheckoutComponent
             throw new \LogicException('Checkout is not complete');
         }
 
-        // Verify cart is not empty
-        $cartItems = $this->getCartItems();
-        if (empty($cartItems)) {
-            throw new \LogicException('Cart is empty');
+        // Panier vidé entre-temps (autre onglet, revérification précédente) : retour au panier
+        if ([] === $this->getCartItems()) {
+            return new RedirectResponse($this->urlGenerator->generate('cart.index'));
+        }
+
+        // Le catalogue et les transporteurs ont pu changer depuis que le panier a été rempli : le client
+        // paie ce qu'il a vu, sinon il en est prévenu et aucune session Stripe n'est créée
+        try {
+            $this->paymentNotices = $this->cartService->revalidate();
+        } catch (\RuntimeException $e) {
+            $this->paymentNotices = [$e->getMessage()];
+
+            return null;
+        }
+
+        if (!$this->deliveryManager->ensureCarrierStillAvailable($state)) {
+            $this->stateManager->saveState($state);
+            $this->resetForm();
+            $this->paymentNotices[] = "Le transporteur choisi n'est plus disponible : merci d'en choisir un autre.";
+        }
+
+        if ([] !== $this->paymentNotices) {
+            return null;
         }
 
         // Create order with PENDING status before payment
@@ -672,30 +722,32 @@ final class CheckoutComponent
             $user instanceof User ? $user : null
         );
 
-        // Create Stripe checkout session with order reference
-        $orderTotals = $this->getOrderTotals();
-        $carrierLabel = $this->getSelectedCarrierLabel();
+        // Seule cette session pourra afficher la confirmation d'une commande passée sans compte
+        $this->stateManager->rememberOrderReference((string) $order->getReference());
 
+        // Create Stripe checkout session from the order: it bills the order's own amounts
         $successUrl = $this->urlGenerator->generate('payment.success', ['reference' => $order->getReference()], UrlGeneratorInterface::ABSOLUTE_URL);
         $cancelUrl = $this->urlGenerator->generate('checkout.index', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $session = $this->stripeService->createCheckoutSession(
-            $orderTotals,
-            $cartItems,
-            $carrierLabel,
-            $successUrl,
-            $cancelUrl,
-            $order->getReference()
-        );
+        try {
+            $session = $this->stripeService->createCheckoutSession($order, $this->getSelectedCarrierLabel(), $this->getSelectedPaymentMethod(), $successUrl, $cancelUrl);
+        } catch (StripeException $e) {
+            // Moyen de paiement non activé dans le Dashboard, Stripe injoignable, clé invalide : la commande
+            // ne sera jamais payée, elle est annulée plutôt que de rester en attente
+            $this->orderService->updateOrderStatus($order, OrderStatus::CANCELLED);
+            $this->logger->error('Stripe refused the checkout session', [
+                'reference' => $order->getReference(),
+                'payment_method' => $this->getSelectedPaymentMethod(),
+                'exception' => $e,
+            ]);
+            $this->paymentNotices = ["Le paiement n'a pas pu démarrer. Merci de réessayer dans quelques instants."];
+
+            return null;
+        }
 
         $sessionUrl = $session->url;
         if (null === $sessionUrl) {
             throw new \RuntimeException('Stripe checkout session URL is missing');
-        }
-
-        $paymentIntentId = $session->payment_intent;
-        if (is_string($paymentIntentId)) {
-            $this->orderService->attachStripeSession($order, $paymentIntentId);
         }
 
         return new RedirectResponse($sessionUrl);

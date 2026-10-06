@@ -1,7 +1,7 @@
 {% macro tabs(items, default = 0) %}
     <div data-controller="tabs" data-tabs-index-value="{{ default }}" class="bg-paragraph text-primary rounded-section w-full">
-        <div class="border-b border-secondary" role="tablist">
-            <nav class="flex gap-x-1">
+        <div class="border-b border-secondary">
+            <div class="flex gap-x-1" role="tablist">
                 {% for item in items %}
                     <button
                         type="button"
@@ -13,7 +13,7 @@
                         {{ item.label }}
                     </button>
                 {% endfor %}
-            </nav>
+            </div>
         </div>
         <div class="p-5">
             {% for item in items %}

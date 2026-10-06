@@ -1,5 +1,13 @@
 <div class="flex flex-col gap-2 w-full">
     {% for attribute in attributes %}
-        <span>{{ attribute.categoryAttribute.attribute.name }}: <strong>{{ attribute.value }}</strong></span>
+        {% set definition = attribute.categoryAttribute.attribute %}
+        <span>{{ definition.name }}&nbsp;: <strong>
+            {#- L'API transmet les caractéristiques booléennes sous forme de texte, « true » ou « false » -#}
+            {%- if definition.type.value == 'BOOLEAN' -%}
+                {{ (attribute.value == 'true' ? 'listing.product.specs.boolean_true' : 'listing.product.specs.boolean_false')|trans }}
+            {%- else -%}
+                {{ attribute.value }}
+            {%- endif -%}
+        </strong></span>
     {% endfor %}
 </div>
