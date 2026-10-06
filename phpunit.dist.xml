@@ -19,6 +19,8 @@
         <env name="STRIPE_WEBHOOK_SECRET" value="whsec_test_hardwarehouse" force="true" />
         <!-- Clé vide : les tests n'appellent jamais Stripe, qui refuse de créer une session sans clé -->
         <env name="STRIPE_SECRET_KEY" value="" force="true" />
+        <!-- Jeton factice que la boutique présente à l'API pour les sorties de stock -->
+        <env name="SHOP_API_TOKEN" value="test-shop-token" force="true" />
     </php>
 
     <testsuites>

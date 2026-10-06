@@ -82,6 +82,19 @@ final class StripePaymentEventsTest extends WebTestCase
         self::assertSame('facture-'.$invoice->getReference().'.pdf', $attachments[0]->getFilename());
     }
 
+    public function testConfirmedOrderQueuesItsStockExit(): void
+    {
+        $order = $this->createOrder($this->createUser());
+
+        $this->send('payment_intent.succeeded', ['id' => 'pi_stock_exit', 'object' => 'payment_intent', 'metadata' => ['order_reference' => $order->getReference()]]);
+
+        // Traité par le worker : la réponse au webhook n'attend pas l'API
+        /** @var \Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport $transport */
+        $transport = static::getContainer()->get('messenger.transport.async');
+        $messages = array_map(static fn ($envelope): object => $envelope->getMessage(), $transport->getSent());
+        self::assertEquals([new \App\Message\RecordOrderStockExit((string) $order->getReference())], $messages);
+    }
+
     public function testSucceededPaymentConfirmsTheOrderEvenBeforeTheSessionEvent(): void
     {
         $order = $this->createOrder(null);
