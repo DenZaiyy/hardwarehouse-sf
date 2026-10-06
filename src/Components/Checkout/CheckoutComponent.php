@@ -688,21 +688,11 @@ final class CheckoutComponent
         // Seule cette session pourra afficher la confirmation d'une commande passée sans compte
         $this->stateManager->rememberOrderReference((string) $order->getReference());
 
-        // Create Stripe checkout session with order reference
-        $orderTotals = $this->getOrderTotals();
-        $carrierLabel = $this->getSelectedCarrierLabel();
-
+        // Create Stripe checkout session from the order: it bills the order's own amounts
         $successUrl = $this->urlGenerator->generate('payment.success', ['reference' => $order->getReference()], UrlGeneratorInterface::ABSOLUTE_URL);
         $cancelUrl = $this->urlGenerator->generate('checkout.index', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $session = $this->stripeService->createCheckoutSession(
-            $orderTotals,
-            $cartItems,
-            $carrierLabel,
-            $successUrl,
-            $cancelUrl,
-            $order->getReference()
-        );
+        $session = $this->stripeService->createCheckoutSession($order, $this->getSelectedCarrierLabel(), $successUrl, $cancelUrl);
 
         $sessionUrl = $session->url;
         if (null === $sessionUrl) {

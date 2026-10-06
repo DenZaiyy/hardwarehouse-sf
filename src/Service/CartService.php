@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Exception\Api\ApiException;
 use App\Exception\Api\ApiNotFoundException;
 use App\Repository\CartRepository;
+use App\Service\Pricing\PriceCalculator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -17,8 +18,6 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 class CartService
 {
-    private const float VAT_RATE = 0.20;
-
     /**
      * Per-request memoization of getCurrentCart(): getCart()/getCount()/computeTotals() are
      * routinely called several times in the same request (header badge, cart dropdown, page
@@ -33,6 +32,7 @@ class CartService
         private readonly RequestStack $requestStack,
         private readonly ApiService $apiService,
         private readonly Security $security,
+        private readonly PriceCalculator $priceCalculator,
     ) {
     }
 
@@ -151,9 +151,9 @@ class CartService
                 'category' => $category,
                 'name' => $name,
                 'price_ht' => $priceHt,
-                'price_ttc' => $priceHt * (1 + self::VAT_RATE),
+                'price_ttc' => $this->priceCalculator->unitPriceIncludingTax($priceHt) / 100,
                 'effective_ht' => $effectivePriceHt,
-                'effective_ttc' => $effectivePriceHt * (1 + self::VAT_RATE),
+                'effective_ttc' => $this->priceCalculator->unitPriceIncludingTax($effectivePriceHt) / 100,
                 'imageUrl' => $cartLine->getProductImageSnapshot() ?? '',
                 'slug' => $slug,
                 'discount_price' => $discountPrice,
@@ -170,20 +170,16 @@ class CartService
      */
     public function computeTotals(): array
     {
-        $subtotal = 0.0;
-
-        foreach ($this->getCart() as $item) {
-            $effectivePrice = $item['discount_price'] ?? $item['price_ht'];
-            $subtotal += $effectivePrice * $item['quantity'];
-        }
-
-        $vatAmount = $subtotal * self::VAT_RATE;
+        $cents = $this->priceCalculator->totals(array_map(
+            static fn (array $item): array => ['unit_price' => $item['effective_ht'], 'quantity' => $item['quantity']],
+            array_values($this->getCart()),
+        ));
 
         return [
-            'subtotal' => $subtotal,
-            'vat_rate' => self::VAT_RATE,
-            'vat_amount' => $vatAmount,
-            'total' => $subtotal + $vatAmount,
+            'subtotal' => $cents['subtotal'] / 100,
+            'vat_rate' => PriceCalculator::VAT_RATE,
+            'vat_amount' => $cents['vat'] / 100,
+            'total' => $cents['total'] / 100,
         ];
     }
 

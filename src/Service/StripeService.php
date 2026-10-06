@@ -2,6 +2,9 @@
 
 namespace App\Service;
 
+use App\Entity\Order;
+use App\Service\Pricing\PriceCalculator;
+use Stripe\Checkout\Session;
 use Stripe\Stripe;
 use Stripe\StripeClient;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -11,65 +14,69 @@ class StripeService
     public function __construct(
         #[Autowire('%env(STRIPE_SECRET_KEY)%')]
         private readonly string $stripeSecretKey,
+        private readonly PriceCalculator $priceCalculator,
     ) {
         Stripe::setApiKey($this->stripeSecretKey);
         Stripe::setApiVersion('');
     }
 
+    public function createCheckoutSession(Order $order, ?string $carrierLabel, string $successUrl, string $cancelUrl): Session
+    {
+        return (new StripeClient($this->stripeSecretKey))->checkout->sessions->create(
+            $this->checkoutSessionParameters($order, $carrierLabel, $successUrl, $cancelUrl),
+        );
+    }
+
     /**
-     * Create Stripe checkout session with cart items and carrier costs.
+     * Built from the order, not from the cart: Stripe bills the discounted unit prices recorded on the
+     * order lines, rounded like the order totals, so the amount charged is the order total to the cent.
      *
-     * @param array{subtotal: float, vat_rate: float, vat_amount: float, carrier_cost: float, total: float}                                                                                   $orderTotals
-     * @param array<string, array{productId: string, quantity: int, remaining_stock: int, category: string, name: string, price_ht: float, price_ttc: float, imageUrl: string, slug: string}> $cartItems
+     * @return array{
+     *     payment_method_types: list<string>,
+     *     line_items: list<array{price_data: array{currency: string, product_data: array{name: string, description?: string}, unit_amount: int}, quantity: int}>,
+     *     mode: string,
+     *     success_url: string,
+     *     cancel_url: string,
+     *     metadata: array<string, string>,
+     *     payment_intent_data: array{metadata: array<string, string>}
+     * }
      */
-    public function createCheckoutSession(array $orderTotals, array $cartItems, ?string $carrierLabel, string $successUrl, string $cancelUrl, ?string $orderReference = null): \Stripe\Checkout\Session
+    public function checkoutSessionParameters(Order $order, ?string $carrierLabel, string $successUrl, string $cancelUrl): array
     {
         $lineItems = [];
 
-        // Add cart items
-        foreach ($cartItems as $item) {
-            $priceTTC = (int) round($item['price_ttc'] * 100); // Convert to cents
+        foreach ($order->getOrderLines() as $line) {
             $lineItems[] = [
                 'price_data' => [
                     'currency' => 'eur',
-                    'product_data' => [
-                        'name' => $item['name'],
-                        'description' => "Catégorie: {$item['category']}",
-                    ],
-                    'unit_amount' => $priceTTC,
+                    'product_data' => ['name' => (string) $line->getProductName()],
+                    'unit_amount' => $this->priceCalculator->unitPriceIncludingTax((float) $line->getUnitPrice()),
                 ],
-                'quantity' => $item['quantity'],
+                'quantity' => (int) $line->getQuantity(),
             ];
         }
 
-        // Add carrier cost if exists
-        if ($orderTotals['carrier_cost'] > 0 && $carrierLabel) {
-            $carrierCostCents = (int) round($orderTotals['carrier_cost'] * 100);
+        $shipping = (int) round((float) $order->getShippingAmount() * 100);
+        if ($shipping > 0) {
             $lineItems[] = [
                 'price_data' => [
                     'currency' => 'eur',
-                    'product_data' => [
-                        'name' => 'Frais de livraison',
-                        'description' => $carrierLabel,
-                    ],
-                    'unit_amount' => $carrierCostCents,
+                    'product_data' => ['name' => 'Frais de livraison', 'description' => (string) $carrierLabel],
+                    'unit_amount' => $shipping,
                 ],
                 'quantity' => 1,
             ];
         }
 
         $metadata = [
-            'subtotal_ht' => (string) $orderTotals['subtotal'],
-            'vat_amount' => (string) $orderTotals['vat_amount'],
-            'carrier_cost' => (string) $orderTotals['carrier_cost'],
-            'total_ttc' => (string) $orderTotals['total'],
+            'order_reference' => (string) $order->getReference(),
+            'subtotal_ht' => (string) $order->getSubtotal(),
+            'vat_amount' => (string) $order->getTaxAmount(),
+            'carrier_cost' => (string) $order->getShippingAmount(),
+            'total_ttc' => (string) $order->getTotalAmount(),
         ];
 
-        if ($orderReference) {
-            $metadata['order_reference'] = $orderReference;
-        }
-
-        return (new StripeClient($this->stripeSecretKey))->checkout->sessions->create([
+        return [
             'payment_method_types' => ['card'],
             'line_items' => $lineItems,
             'mode' => 'payment',
@@ -82,6 +89,6 @@ class StripeService
             'payment_intent_data' => [
                 'metadata' => $metadata,
             ],
-        ]);
+        ];
     }
 }
