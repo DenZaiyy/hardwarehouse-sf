@@ -2,6 +2,8 @@
 
 namespace App\DTO\Checkout;
 
+use App\Enum\PaymentMethod;
+
 /**
  * @phpstan-type IdentityMode 'choice'|'guest'|'login'|'authenticated'
  * @phpstan-type CheckoutIdentity array{
@@ -93,6 +95,15 @@ final class CheckoutState
             'deliveryCompleted' => $this->deliveryCompleted,
             'paymentCompleted' => $this->paymentCompleted,
         ];
+    }
+
+    /**
+     * Moyen choisi par le client ; la carte est présélectionnée, comme sur la maquette. Une valeur
+     * inconnue (enregistrée avant l'ajout de PayPal, par exemple « stripe ») revient aussi à la carte.
+     */
+    public function selectedPaymentMethod(): PaymentMethod
+    {
+        return PaymentMethod::tryFrom($this->paymentMethod ?? '') ?? PaymentMethod::CARD;
     }
 
     /**

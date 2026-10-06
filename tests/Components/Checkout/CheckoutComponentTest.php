@@ -8,6 +8,7 @@ use App\DTO\Checkout\CheckoutState;
 use App\Entity\Carrier;
 use App\Entity\Order;
 use App\Enum\OrderStatus;
+use App\Enum\PaymentMethod;
 use App\Tests\Support\CreatesShopEntities;
 use App\Tests\Support\FakesCatalogApi;
 use Doctrine\ORM\EntityManagerInterface;
@@ -135,6 +136,7 @@ final class CheckoutComponentTest extends WebTestCase
 
         $methods = $page->filter('button[data-live-action-param="selectPaymentMethod"]');
         self::assertSame(['card', 'paypal'], $methods->each(static fn (Crawler $button): string => (string) $button->attr('data-live-method-param')));
+        self::assertSame(['Carte bancaire', 'PayPal'], $methods->each(static fn (Crawler $button): string => trim($button->text())));
         // Carte bancaire présélectionnée, comme sur la maquette
         self::assertSame(['true', 'false'], $methods->each(static fn (Crawler $button): string => (string) $button->attr('aria-pressed')));
         // 449,90 € HT, soit 539,88 € TTC, et 4,90 € de port
@@ -228,6 +230,20 @@ final class CheckoutComponentTest extends WebTestCase
         // La commande ne sera jamais payée : elle ne reste pas en attente
         $orders = $this->entityManager()->getRepository(Order::class)->findBy(['userFullNameSnapshot' => 'Jean Dupont'], ['id' => 'DESC'], 1);
         self::assertSame(OrderStatus::CANCELLED, $orders[0]->getStatus());
+    }
+
+    public function testOrderRecordsThePaymentMethodChosenInTheShop(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $checkout = $this->readyToPay($client, $this->carrier('Colissimo'), $this->cartWith($this->apiHasProduct($slug), $slug));
+
+        $checkout->call('selectPaymentMethod', ['method' => 'paypal']);
+        $checkout->call('processPayment');
+
+        // La session Stripe ne propose que ce moyen : c'est celui avec lequel la commande est payée
+        $orders = $this->entityManager()->getRepository(Order::class)->findBy(['userFullNameSnapshot' => 'Jean Dupont'], ['id' => 'DESC'], 1);
+        self::assertSame(PaymentMethod::PAYPAL, $orders[0]->getPaymentMethod());
     }
 
     /** Tunnel rempli jusqu'au paiement par un visiteur, dont le panier est rangé sous ce jeton. */

@@ -145,6 +145,11 @@ footer:
         mastercard: { alt: { message: 'Mastercard ID Check' } }
         cb: { alt: { message: 'Cartes Bancaires (CB)' } }
         paypal: { alt: { message: PayPal } }
+paymentMethod:
+    card:
+        label: 'Carte bancaire'
+    paypal:
+        label: PayPal
 orderStatus:
     pending:
         label: 'En attente de paiement'

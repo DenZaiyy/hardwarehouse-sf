@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Enum\OrderStatus;
+use App\Enum\PaymentMethod;
 use App\Repository\OrderRepository;
 use App\Trait\TimestampTrait;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -40,6 +41,10 @@ class Order
 
     #[ORM\Column(length: 50, enumType: OrderStatus::class)]
     private OrderStatus $status = OrderStatus::PENDING;
+
+    /** Choisi dans la boutique ; la session Stripe ne propose que ce moyen. */
+    #[ORM\Column(length: 20, enumType: PaymentMethod::class)]
+    private PaymentMethod $paymentMethod = PaymentMethod::CARD;
 
     #[ORM\OneToOne(mappedBy: 'order', cascade: ['persist', 'remove'])]
     private ?Invoice $invoice = null;
@@ -169,6 +174,18 @@ class Order
     public function setStatus(OrderStatus $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getPaymentMethod(): PaymentMethod
+    {
+        return $this->paymentMethod;
+    }
+
+    public function setPaymentMethod(PaymentMethod $paymentMethod): static
+    {
+        $this->paymentMethod = $paymentMethod;
 
         return $this;
     }
