@@ -53,6 +53,8 @@ class CartService
         $this->assertStockCovers($product, $quantity, $existingCartLine?->getQuantity() ?? 0);
 
         if ($existingCartLine) {
+            // Le produit vient d'être relu : prix et stock connus du panier suivent (réassort, nouvelle remise)
+            $this->applyCatalogueSnapshots($existingCartLine, $product);
             $existingCartLine->setQuantity($existingCartLine->getQuantity() + $quantity);
         } else {
             $cart = $this->getOrCreateCart();
@@ -79,6 +81,9 @@ class CartService
         }
     }
 
+    /**
+     * @throws \RuntimeException message destiné au client si la quantité augmente au-delà du stock connu
+     */
     public function updateQuantity(string $productId, int $quantity): void
     {
         if ($quantity <= 0) {
@@ -88,25 +93,85 @@ class CartService
         }
 
         $cart = $this->getCurrentCart();
-        if (!$cart) {
+        $cartLine = $cart ? $this->findCartLineByProductId($cart, $productId) : null;
+        if (null === $cartLine) {
             return;
         }
 
-        $cartLine = $this->findCartLineByProductId($cart, $productId);
-        if ($cartLine) {
-            $cartLine->setQuantity($quantity);
-            $this->entityManager->flush();
+        // Stock relevé à l'ajout au panier, relu dans l'API avant le paiement (revalidate). Une baisse
+        // reste toujours permise : elle rapproche la ligne du stock
+        $stock = $cartLine->getStockSnapshot() ?? 0;
+        if ($quantity > $cartLine->getQuantity() && $quantity > $stock) {
+            throw new \RuntimeException(sprintf('Stock insuffisant : il ne reste que %d exemplaire(s).', $stock));
         }
+
+        $cartLine->setQuantity($quantity);
+        $this->entityManager->flush();
     }
 
-    public function decrease(string $productId, int $currentQty): void
+    /** Part de la quantité enregistrée : celle qu'envoyait le navigateur pouvait être forgée. */
+    public function decrease(string $productId): void
     {
-        $this->updateQuantity($productId, $currentQty - 1);
+        $this->updateQuantity($productId, $this->quantityInCart($productId) - 1);
     }
 
-    public function increase(string $productId, int $currentQty): void
+    /**
+     * @throws \RuntimeException message destiné au client si le stock est atteint
+     */
+    public function increase(string $productId): void
     {
-        $this->updateQuantity($productId, $currentQty + 1);
+        $this->updateQuantity($productId, $this->quantityInCart($productId) + 1);
+    }
+
+    /**
+     * Relit dans l'API chaque produit du panier avant le paiement : un produit retiré de la vente, un
+     * stock devenu insuffisant ou un prix modifié depuis l'ajout corrige le panier et prévient le client.
+     *
+     * @return list<string> messages destinés au client, vide si le panier n'a pas changé
+     *
+     * @throws \RuntimeException si l'API du catalogue ne répond pas (message destiné au client)
+     */
+    public function revalidate(): array
+    {
+        $cart = $this->getCurrentCart();
+        if (null === $cart) {
+            return [];
+        }
+
+        $notices = [];
+
+        foreach ($cart->getCartLines()->toArray() as $cartLine) {
+            $name = (string) $cartLine->getProductNameSnapshot();
+            $product = $this->fetchCatalogueProduct((string) $cartLine->getProductSlugSnapshot());
+            $stock = $product->stock->quantity ?? 0;
+
+            if (null === $product || $stock <= 0) {
+                $cart->removeCartLine($cartLine);
+                $this->entityManager->remove($cartLine);
+                $notices[] = sprintf("« %s » n'est plus disponible et a été retiré de votre panier.", $name);
+
+                continue;
+            }
+
+            $previousPrice = $this->effectiveUnitPrice($cartLine);
+            $this->applyCatalogueSnapshots($cartLine, $product);
+            $currentPrice = $this->effectiveUnitPrice($cartLine);
+
+            if ($cartLine->getQuantity() > $stock) {
+                $cartLine->setQuantity($stock);
+                $notices[] = sprintf('Il ne reste que %d exemplaire(s) de « %s » : la quantité a été ajustée.', $stock, $name);
+            }
+
+            $before = $this->priceCalculator->unitPriceIncludingTax($previousPrice);
+            $after = $this->priceCalculator->unitPriceIncludingTax($currentPrice);
+            if ($before !== $after) {
+                $notices[] = sprintf('Le prix de « %s » est passé de %s à %s.', $name, $this->formatPrice($before), $this->formatPrice($after));
+            }
+        }
+
+        $this->entityManager->flush();
+
+        return $notices;
     }
 
     /**
@@ -303,19 +368,55 @@ class CartService
      */
     private function fetchProductForSale(string $productSlug): ProductDto
     {
+        return $this->fetchCatalogueProduct($productSlug) ?? throw new \RuntimeException("Ce produit n'est plus disponible.");
+    }
+
+    /**
+     * Produit en vente, ou null s'il est inconnu de l'API ou désactivé : l'API renvoie aussi les
+     * fiches désactivées.
+     *
+     * @throws \RuntimeException si l'API ne répond pas (message destiné au client)
+     */
+    private function fetchCatalogueProduct(string $productSlug): ?ProductDto
+    {
         try {
             $product = $this->apiService->fetchOne("products/$productSlug", ProductDto::class);
         } catch (ApiNotFoundException) {
-            $product = null;
+            return null;
         } catch (ApiException $e) {
             throw new \RuntimeException('Le catalogue est momentanément indisponible, merci de réessayer.', 0, $e);
         }
 
-        if (null === $product || !$product->active) {
-            throw new \RuntimeException("Ce produit n'est plus disponible.");
-        }
+        return $product->active ? $product : null;
+    }
 
-        return $product;
+    private function quantityInCart(string $productId): int
+    {
+        $cart = $this->getCurrentCart();
+
+        return ($cart ? $this->findCartLineByProductId($cart, $productId)?->getQuantity() : null) ?? 0;
+    }
+
+    /** Prix unitaire hors taxe payé par le client : la remise s'il y en a une. */
+    private function effectiveUnitPrice(CartLine $cartLine): float
+    {
+        return (float) ($cartLine->getDiscountPriceSnapshot() ?? $cartLine->getUnitPriceSnapshot());
+    }
+
+    /** Prix, remise et stock du catalogue, recopiés à l'ajout au panier puis avant le paiement. */
+    private function applyCatalogueSnapshots(CartLine $cartLine, ProductDto $product): void
+    {
+        $isDiscounted = $product->promote && null !== $product->discountPrice && null !== $product->discountAmount;
+
+        $cartLine->setUnitPriceSnapshot((string) $product->price);
+        $cartLine->setDiscountPriceSnapshot($isDiscounted ? (string) $product->discountPrice : null);
+        $cartLine->setDiscountAmountSnapshot($isDiscounted ? (string) $product->discountAmount : null);
+        $cartLine->setStockSnapshot($product->stock->quantity ?? 0);
+    }
+
+    private function formatPrice(int $cents): string
+    {
+        return (string) (new \NumberFormatter('fr_FR', \NumberFormatter::CURRENCY))->formatCurrency($cents / 100, 'EUR');
     }
 
     /** Le stock porte sur la quantité totale du panier, pas seulement sur celle qu'on ajoute. */
@@ -355,18 +456,12 @@ class CartService
         $cartLine = new CartLine();
         $cartLine->setProductId($product->getId());
         $cartLine->setQuantity($quantity);
-        $cartLine->setUnitPriceSnapshot((string) $product->price);
         $cartLine->setProductNameSnapshot($product->name);
         $cartLine->setProductSlugSnapshot($product->getSlug());
         $cartLine->setProductImageSnapshot($product->thumbnail ?? '');
         $cartLine->setProductCategorySnapshot($category->getName());
-        $cartLine->setStockSnapshot($product->stock->quantity ?? 0);
         $cartLine->setCart($cart);
-
-        if ($product->promote && null !== $product->discountPrice && null !== $product->discountAmount) {
-            $cartLine->setDiscountPriceSnapshot((string) $product->discountPrice);
-            $cartLine->setDiscountAmountSnapshot((string) $product->discountAmount);
-        }
+        $this->applyCatalogueSnapshots($cartLine, $product);
 
         return $cartLine;
     }

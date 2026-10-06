@@ -88,6 +88,62 @@ final class CartControllerTest extends WebTestCase
         self::assertNotEmpty($this->flashes('danger'));
     }
 
+    public function testIncreaseStartsFromTheQuantityInTheCart(): void
+    {
+        $slug = self::newProductSlug();
+        $productId = $this->apiHasProduct($slug, stock: 5);
+        $this->client->submit($this->addToCartForm($slug), ['quantity' => '1']);
+
+        // Le navigateur envoyait la quantité affichée : une valeur forgée passait outre le stock
+        $this->client->request('POST', '/fr/cart/increase/'.$productId, ['current_qtt' => '1000', '_csrf_token' => 'csrf-token']);
+
+        self::assertSame(2, $this->quantityInCarts($productId));
+    }
+
+    public function testIncreaseStopsAtTheStock(): void
+    {
+        $slug = self::newProductSlug();
+        $productId = $this->apiHasProduct($slug, stock: 2);
+        $this->client->submit($this->addToCartForm($slug), ['quantity' => '2']);
+
+        $this->client->request('POST', '/fr/cart/increase/'.$productId, ['_csrf_token' => 'csrf-token']);
+
+        self::assertSame(2, $this->quantityInCarts($productId));
+        self::assertStringContainsString('il ne reste que 2', implode(' ', $this->flashes('danger')));
+    }
+
+    public function testIncreaseFollowsARestockSeenWhenAddingAgain(): void
+    {
+        $slug = self::newProductSlug();
+        $productId = $this->apiHasProduct($slug, stock: 2);
+        $form = $this->addToCartForm($slug);
+        $this->client->submit($form, ['quantity' => '2']);
+
+        // Le réassort est lu à l'ajout suivant : le stock connu de la ligne doit suivre
+        $this->apiHasProduct($slug, stock: 10);
+        $this->client->submit($form, ['quantity' => '3']);
+        $this->client->request('POST', '/fr/cart/increase/'.$productId, ['_csrf_token' => 'csrf-token']);
+
+        self::assertSame(6, $this->quantityInCarts($productId));
+    }
+
+    public function testDecreaseIsAllowedAboveTheKnownStock(): void
+    {
+        $slug = self::newProductSlug();
+        $productId = $this->apiHasProduct($slug, stock: 3);
+        $this->client->submit($this->addToCartForm($slug), ['quantity' => '3']);
+
+        // Ligne antérieure au plafonnement : « − » la rapproche du stock, il ne doit jamais être refusé
+        $line = $this->entityManager()->getRepository(CartLine::class)->findOneBy(['productId' => $productId]);
+        self::assertInstanceOf(CartLine::class, $line);
+        $line->setStockSnapshot(1);
+        $this->entityManager()->flush();
+
+        $this->client->request('POST', '/fr/cart/decrease/'.$productId, ['_csrf_token' => 'csrf-token']);
+
+        self::assertSame(2, $this->quantityInCarts($productId));
+    }
+
     public function testCartPageStaysAvailableWhenTheCatalogApiFails(): void
     {
         $this->apiFailsOn('categories');

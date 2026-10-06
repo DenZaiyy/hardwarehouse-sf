@@ -61,10 +61,8 @@ class CartController extends AbstractController
             return $invalid;
         }
 
-        $currentQtt = $request->request->getInt('current_qtt');
-
         try {
-            $this->cartService->decrease($productId, $currentQtt);
+            $this->cartService->decrease($productId);
 
             $this->addFlash('success', 'Quantité mise à jour.');
 
@@ -83,9 +81,8 @@ class CartController extends AbstractController
             return $invalid;
         }
 
-        $currentQtt = $request->request->getInt('current_qtt');
         try {
-            $this->cartService->increase($productId, $currentQtt);
+            $this->cartService->increase($productId);
 
             $this->addFlash('success', 'Quantité mise à jour.');
 

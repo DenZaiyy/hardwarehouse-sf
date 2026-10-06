@@ -1,6 +1,14 @@
 <section class="rounded-lg border p-4 space-y-4">
     <h2 class="text-lg font-semibold">4. Paiement</h2>
 
+    {% if paymentNotices is not empty %}
+        <ul class="flash-warning space-y-1 text-sm" role="alert">
+            {% for notice in paymentNotices %}
+                <li>{{ notice }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     {% if not state.deliveryCompleted %}
         <div class="text-sm text-muted">
             Complète d'abord la livraison.

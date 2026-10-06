@@ -24,7 +24,7 @@ trait FakesCatalogApi
      *
      * @param list<array{name: string, type: string, value: string}> $attributes caractéristiques techniques
      */
-    private function apiHasProduct(string $slug, bool $active = true, int $stock = 3, array $attributes = []): string
+    private function apiHasProduct(string $slug, bool $active = true, int $stock = 3, array $attributes = [], float $price = 449.9): string
     {
         $id = substr(hash('sha256', $slug), 0, 24);
 
@@ -32,7 +32,7 @@ trait FakesCatalogApi
             'id' => $id,
             'name' => 'AMD Ryzen 7 7800X3D',
             'slug' => $slug,
-            'price' => 449.9,
+            'price' => $price,
             'active' => $active,
             'thumbnail' => 'https://example.com/ryzen-7-7800x3d.webp',
             'images' => [],

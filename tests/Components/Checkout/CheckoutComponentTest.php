@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace App\Tests\Components\Checkout;
 
+use App\DTO\Checkout\CheckoutState;
 use App\Entity\Carrier;
+use App\Tests\Support\CreatesShopEntities;
+use App\Tests\Support\FakesCatalogApi;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\SessionFactoryInterface;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\UX\LiveComponent\Test\InteractsWithLiveComponents;
@@ -22,6 +28,8 @@ use Symfony\UX\LiveComponent\Test\TestLiveComponent;
  */
 final class CheckoutComponentTest extends WebTestCase
 {
+    use CreatesShopEntities;
+    use FakesCatalogApi;
     use InteractsWithLiveComponents;
 
     private const array IDENTITY = ['firstName' => 'Jean', 'lastName' => 'Dupont', 'email' => 'jean.dupont@example.com'];
@@ -114,6 +122,118 @@ final class CheckoutComponentTest extends WebTestCase
 
         $radio = $checkout->render()->crawler()->filter(\sprintf('input[type="radio"][value="%d"]', $carrier->getId()));
         self::assertNotNull($radio->attr('checked'));
+    }
+
+    public function testPaymentIsNotStartedWhenTheCartChangedSinceItWasFilled(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        // Produit désactivé depuis son ajout au panier
+        $productId = $this->apiHasProduct($slug, active: false);
+
+        $checkout = $this->readyToPay($client, $this->carrier('Colissimo'), $this->cartWith($productId, $slug));
+        $checkout->call('processPayment');
+
+        // Pas de redirection vers Stripe : le composant se réaffiche avec le message
+        self::assertTrue($checkout->response()->isSuccessful());
+        self::assertStringContainsString("n'est plus disponible et a été retiré de votre panier", $checkout->render()->crawler()->text());
+    }
+
+    public function testPaymentIsNotStartedWhenTheCarrierWasRemoved(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $productId = $this->apiHasProduct($slug);
+        $remaining = $this->carrier('Colissimo');
+        $removed = $this->carrier('Chronopost');
+        $removedId = $removed->getId();
+        $this->entityManager()->remove($removed);
+        $this->entityManager()->flush();
+
+        $checkout = $this->readyToPay($client, (int) $removedId, $this->cartWith($productId, $slug));
+        $checkout->call('processPayment');
+
+        self::assertTrue($checkout->response()->isSuccessful());
+        $page = $checkout->render()->crawler();
+        self::assertStringContainsString("Le transporteur choisi n'est plus disponible", $page->text());
+        // L'étape de livraison est rouverte : le client choisit un autre transporteur
+        self::assertCount(1, $page->filter(\sprintf('input[type="radio"][value="%d"]', $remaining->getId())));
+    }
+
+    public function testPaymentOfAnEmptyCartLeadsBackToTheCart(): void
+    {
+        $client = static::createClient();
+
+        // Panier vidé entre-temps, depuis un autre onglet ou par la revérification précédente
+        $checkout = $this->readyToPay($client, $this->carrier('Colissimo'), cartToken: null);
+        $checkout->call('processPayment');
+
+        self::assertTrue($checkout->response()->isRedirect());
+        self::assertStringEndsWith('/cart', (string) $checkout->response()->headers->get('Location'));
+    }
+
+    /** Tunnel rempli jusqu'au paiement par un visiteur, dont le panier est rangé sous ce jeton. */
+    private function readyToPay(KernelBrowser $client, Carrier|int $carrier, ?string $cartToken): TestLiveComponent
+    {
+        $session = ['checkout_state' => (new CheckoutState(
+            currentStep: 4,
+            identityMode: 'guest',
+            identity: self::IDENTITY,
+            deliveryAddress: self::ADDRESS,
+            carrierId: $carrier instanceof Carrier ? $carrier->getId() : $carrier,
+            paymentMethod: 'stripe',
+            identityCompleted: true,
+            addressCompleted: true,
+            deliveryCompleted: true,
+        ))->toArray()];
+        if (null !== $cartToken) {
+            $session['cart_session_token'] = $cartToken;
+        }
+        $this->prepareSession($client, $session);
+
+        $checkout = $this->createLiveComponent('Checkout:CheckoutComponent', client: $client);
+        $this->mountOutsideOfARequest();
+
+        return $checkout;
+    }
+
+    /** @return string le jeton de session du panier */
+    private function cartWith(string $productId, string $slug): string
+    {
+        $token = bin2hex(random_bytes(16));
+        $this->createGuestCart($token, $productId, $slug, 1, '449.90');
+
+        return $token;
+    }
+
+    private function carrier(string $name): Carrier
+    {
+        $carrier = (new Carrier())->setName($name)->setPrice('4.90');
+        $this->entityManager()->persist($carrier);
+        $this->entityManager()->flush();
+
+        return $carrier;
+    }
+
+    /** @param array<string, mixed> $values */
+    private function prepareSession(KernelBrowser $client, array $values): void
+    {
+        /** @var SessionFactoryInterface $factory */
+        $factory = static::getContainer()->get('session.factory');
+        $session = $factory->createSession();
+        foreach ($values as $key => $value) {
+            $session->set($key, $value);
+        }
+        $session->save();
+
+        $client->getCookieJar()->set(new Cookie($session->getName(), $session->getId()));
+    }
+
+    private function mountOutsideOfARequest(): void
+    {
+        $request = new Request();
+        $request->setSession(new Session(new MockArraySessionStorage()));
+        static::getContainer()->get(RequestStack::class)->push($request);
     }
 
     private function guestCheckout(): TestLiveComponent

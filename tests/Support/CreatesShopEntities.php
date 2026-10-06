@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Support;
 
 use App\Entity\Address;
+use App\Entity\Cart;
+use App\Entity\CartLine;
 use App\Entity\Order;
 use App\Entity\User;
 use App\Enum\AddressType;
@@ -56,6 +58,32 @@ trait CreatesShopEntities
         $this->entityManager()->flush();
 
         return $address;
+    }
+
+    /**
+     * Panier d'un visiteur (retrouvé par le jeton de session) contenant une ligne pour ce produit,
+     * avec les instantanés d'un ajout au panier passé : nom, prix et stock au moment de l'ajout.
+     */
+    private function createGuestCart(string $sessionToken, string $productId, string $slug, int $quantity, string $unitPrice): Cart
+    {
+        $cart = (new Cart())->setSessionToken($sessionToken);
+        $line = (new CartLine())
+            ->setProductId($productId)
+            ->setQuantity($quantity)
+            ->setUnitPriceSnapshot($unitPrice)
+            ->setProductNameSnapshot('AMD Ryzen 7 7800X3D')
+            ->setProductSlugSnapshot($slug)
+            ->setProductImageSnapshot('https://example.com/ryzen-7-7800x3d.webp')
+            ->setProductCategorySnapshot('Processeurs')
+            ->setStockSnapshot(10)
+            ->setCart($cart);
+        $cart->addCartLine($line);
+
+        $this->entityManager()->persist($cart);
+        $this->entityManager()->persist($line);
+        $this->entityManager()->flush();
+
+        return $cart;
     }
 
     /** Commande en attente de paiement ; $customer null pour une commande passée sans compte. */

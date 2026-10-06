@@ -44,6 +44,14 @@ final class CheckoutComponent
      */
     private const string FORM_NAME = 'checkout';
 
+    /**
+     * Ce que la revérification du panier a corrigé au moment de payer : affiché au-dessus du paiement
+     * le temps du rendu qui suit l'action (ce n'est pas une LiveProp).
+     *
+     * @var list<string>
+     */
+    public array $paymentNotices = [];
+
     public function __construct(
         private readonly CheckoutStateManager $stateManager,
         private readonly CheckoutIdentityManager $identityManager,
@@ -662,8 +670,12 @@ final class CheckoutComponent
         return 0.0;
     }
 
+    /**
+     * @return RedirectResponse|null null quand le panier ou le transporteur a changé depuis qu'ils ont
+     *                               été choisis : le composant se réaffiche avec paymentNotices
+     */
     #[LiveAction]
-    public function processPayment(): RedirectResponse
+    public function processPayment(): ?RedirectResponse
     {
         $state = $this->getState();
 
@@ -672,10 +684,29 @@ final class CheckoutComponent
             throw new \LogicException('Checkout is not complete');
         }
 
-        // Verify cart is not empty
-        $cartItems = $this->getCartItems();
-        if (empty($cartItems)) {
-            throw new \LogicException('Cart is empty');
+        // Panier vidé entre-temps (autre onglet, revérification précédente) : retour au panier
+        if ([] === $this->getCartItems()) {
+            return new RedirectResponse($this->urlGenerator->generate('cart.index'));
+        }
+
+        // Le catalogue et les transporteurs ont pu changer depuis que le panier a été rempli : le client
+        // paie ce qu'il a vu, sinon il en est prévenu et aucune session Stripe n'est créée
+        try {
+            $this->paymentNotices = $this->cartService->revalidate();
+        } catch (\RuntimeException $e) {
+            $this->paymentNotices = [$e->getMessage()];
+
+            return null;
+        }
+
+        if (!$this->deliveryManager->ensureCarrierStillAvailable($state)) {
+            $this->stateManager->saveState($state);
+            $this->resetForm();
+            $this->paymentNotices[] = "Le transporteur choisi n'est plus disponible : merci d'en choisir un autre.";
+        }
+
+        if ([] !== $this->paymentNotices) {
+            return null;
         }
 
         // Create order with PENDING status before payment

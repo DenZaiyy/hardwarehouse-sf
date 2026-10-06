@@ -30,13 +30,11 @@
 
             <div class="flex items-center gap-2">
                 <form action="{{ path('cart.decrease', {productId: item.productId}) }}" method="POST">
-                    <input type="hidden" name="current_qtt" value="{{ item.quantity }}">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token('cart') }}">
                     <button type="submit" class="rounded-md p-2 bg-primary" aria-label="{{ 'cart.line.decrease'|trans }}">{{ ux_icon('heroicons:minus', {class: 'size-5'}) }}</button>
                 </form>
                 <span class="p-2">{{ item.quantity }}</span>
                 <form action="{{ path('cart.increase', {productId: item.productId}) }}" method="POST">
-                    <input type="hidden" name="current_qtt" value="{{ item.quantity }}">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token('cart') }}">
                     <button type="submit" class="rounded-md p-2 bg-primary" aria-label="{{ 'cart.line.increase'|trans }}">{{ ux_icon('heroicons:plus', {class: 'size-5'}) }}</button>
                 </form>

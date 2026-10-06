@@ -43,6 +43,25 @@ final readonly class CheckoutDeliveryManager
         return $state;
     }
 
+    /**
+     * Le transporteur choisi a pu être supprimé depuis : plutôt que de compter 0 € de port, l'étape
+     * de livraison est rouverte.
+     *
+     * @return bool false si le client doit choisir un autre transporteur
+     */
+    public function ensureCarrierStillAvailable(CheckoutState $state): bool
+    {
+        if (null !== $state->carrierId && null !== $this->carrierRepository->find($state->carrierId)) {
+            return true;
+        }
+
+        $state->carrierId = null;
+        $state->deliveryCompleted = false;
+        $state->currentStep = 3;
+
+        return false;
+    }
+
     public function getCarrierLabel(CheckoutState $state): ?string
     {
         if (!$state->carrierId) {

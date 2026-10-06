@@ -30,7 +30,8 @@
         {% include 'components/Checkout/steps/_step_payment.html.twig' with {
             state: state,
             selectedCarrierLabel: this.selectedCarrierLabel,
-            availablePaymentMethods: this.availablePaymentMethods
+            availablePaymentMethods: this.availablePaymentMethods,
+            paymentNotices: this.paymentNotices
         } only %}
     </div>
 
