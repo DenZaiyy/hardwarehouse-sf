@@ -249,9 +249,19 @@ aucun e-mail réel).
        try_files $uri /index.php$is_args$args;
    }
    ```
-6. **Stripe (mode test)** : créer un point de terminaison `https://test.hardwarehouse.fr/webhook/stripe`
-   avec les mêmes événements que la production, puis reporter son secret `whsec_…` dans
-   `STRIPE_WEBHOOK_SECRET`.
+6. **Stripe (environnement de test)** : dans Workbench, onglet **Webhooks**, ajouter une destination
+   « endpoint de webhook » vers `https://test.hardwarehouse.fr/webhook/stripe`, avec les événements
+   traités par `StripeWebhookController` (les mêmes qu'en production) : `checkout.session.completed`,
+   `checkout.session.expired`, `payment_intent.succeeded`, `payment_intent.payment_failed`,
+   `payment_intent.canceled`, `charge.refunded` et `charge.dispute.created`. Reporter ensuite son secret
+   `whsec_…` dans `STRIPE_WEBHOOK_SECRET`. Ce secret appartient au point de terminaison : changer les clés
+   API ne le modifie pas, mais chaque environnement Stripe (production, environnement de test) a ses
+   propres points de terminaison. En local, Stripe ne peut pas joindre `127.0.0.1` : la CLI Stripe relaie
+   les événements et affiche le secret à mettre dans `.env.local` (`--skip-verify` si le certificat local
+   de Symfony est refusé) :
+   ```bash
+   stripe listen --forward-to https://127.0.0.1:8000/webhook/stripe
+   ```
 7. **reCAPTCHA** : ajouter `test.hardwarehouse.fr` aux domaines autorisés de la clé, ou créer une clé dédiée.
 8. **GitHub** : créer l'environnement `preprod` (Settings > Environments) et ses secrets (voir
    [Secrets GitHub Requis](#secrets-github-requis)). Le job refuse de s'exécuter si
