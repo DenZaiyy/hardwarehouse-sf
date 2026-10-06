@@ -709,11 +709,6 @@ final class CheckoutComponent
             throw new \RuntimeException('Stripe checkout session URL is missing');
         }
 
-        $paymentIntentId = $session->payment_intent;
-        if (is_string($paymentIntentId)) {
-            $this->orderService->attachStripeSession($order, $paymentIntentId);
-        }
-
         return new RedirectResponse($sessionUrl);
     }
 }

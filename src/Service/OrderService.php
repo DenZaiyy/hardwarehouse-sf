@@ -173,14 +173,4 @@ class OrderService
         $order->setStatus($status);
         $this->entityManager->flush();
     }
-
-    /**
-     * Link the order to the Stripe PaymentIntent created for it, so webhook events can
-     * resolve the order strictly (see StripePaymentEventHandler) instead of guessing.
-     */
-    public function attachStripeSession(Order $order, string $stripePaymentIntentId): void
-    {
-        $order->setStripePaymentIntentId($stripePaymentIntentId);
-        $this->entityManager->flush();
-    }
 }
