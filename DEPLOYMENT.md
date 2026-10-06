@@ -261,7 +261,10 @@ aucun e-mail réel).
    fichier local du développement, ignoré par Git et chargé après `.env.local` (`--skip-verify` si le
    certificat local de Symfony est refusé) :
    ```bash
-   stripe listen --forward-to https://127.0.0.1:8000/webhook/stripe
+   # Depuis la CLI 1.5x, les événements relayés doivent être nommés (ou --all-snapshot pour tous)
+   stripe listen \
+     --events checkout.session.completed,checkout.session.expired,payment_intent.succeeded,payment_intent.payment_failed,payment_intent.canceled,charge.refunded,charge.dispute.created \
+     --forward-to https://127.0.0.1:8000/webhook/stripe
    ```
 7. **reCAPTCHA** : ajouter `test.hardwarehouse.fr` aux domaines autorisés de la clé, ou créer une clé dédiée.
 8. **GitHub** : créer l'environnement `preprod` (Settings > Environments) et ses secrets (voir
