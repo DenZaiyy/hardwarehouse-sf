@@ -55,7 +55,7 @@
                     <div><strong>{{ billing.firstName }} {{ billing.lastName }}</strong></div>
                     <div>{{ billing.address }}</div>
                     <div>{{ billing.postalCode }} {{ billing.city }}</div>
-                    <div>{{ billing.country|country }}</div>
+                    <div>{{ billing.country|country|trans }}</div>
                 {% else %}
                     <div><strong>{{ order.userFullNameSnapshot }}</strong></div>
                 {% endif %}

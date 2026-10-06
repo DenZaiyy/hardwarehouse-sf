@@ -47,7 +47,7 @@ final class InvoiceGeneratorTest extends KernelTestCase
 
     private function confirmedOrder(): Order
     {
-        $order = $this->createOrder($this->createUser())->setStatus(OrderStatus::CONFIRMED);
+        $order = $this->withAddresses($this->createOrder($this->createUser())->setStatus(OrderStatus::CONFIRMED));
         $order->addOrderLine((new OrderLine())
             ->setProductId('produit-test')
             ->setProductName('AMD Ryzen 7 7800X3D')

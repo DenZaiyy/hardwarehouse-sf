@@ -84,7 +84,7 @@
                     <p>{{ address.firstName }} {{ address.lastName }}</p>
                     <p>{{ address.address }}</p>
                     <p>{{ address.postalCode }} {{ address.city }}</p>
-                    <p>{{ address.country|country }}</p>
+                    <p>{{ address.country|country|trans }}</p>
                 </section>
             {% endif %}
         {% endfor %}

@@ -46,8 +46,7 @@ final class StripePaymentEventsTest extends WebTestCase
 
     public function testConfirmedOrderSendsTheConfirmationEmailOnce(): void
     {
-        $order = $this->createOrder($this->createUser())->setCustomerEmail('jean.dupont@example.com');
-        $this->entityManager()->flush();
+        $order = $this->withAddresses($this->createOrder($this->createUser())->setCustomerEmail('jean.dupont@example.com'));
         $metadata = ['order_reference' => $order->getReference()];
 
         $this->send('payment_intent.succeeded', ['id' => 'pi_confirmation_email', 'object' => 'payment_intent', 'metadata' => $metadata]);
@@ -68,8 +67,7 @@ final class StripePaymentEventsTest extends WebTestCase
 
     public function testConfirmedOrderGetsItsInvoiceAttachedToTheEmail(): void
     {
-        $order = $this->createOrder($this->createUser())->setCustomerEmail('jean.dupont@example.com');
-        $this->entityManager()->flush();
+        $order = $this->withAddresses($this->createOrder($this->createUser())->setCustomerEmail('jean.dupont@example.com'));
 
         $this->send('payment_intent.succeeded', ['id' => 'pi_invoice', 'object' => 'payment_intent', 'metadata' => ['order_reference' => $order->getReference()]]);
 
@@ -84,7 +82,7 @@ final class StripePaymentEventsTest extends WebTestCase
 
     public function testConfirmedOrderQueuesItsStockExit(): void
     {
-        $order = $this->createOrder($this->createUser());
+        $order = $this->withAddresses($this->createOrder($this->createUser())->setCustomerEmail('jean.dupont@example.com'));
 
         $this->send('payment_intent.succeeded', ['id' => 'pi_stock_exit', 'object' => 'payment_intent', 'metadata' => ['order_reference' => $order->getReference()]]);
 

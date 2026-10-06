@@ -70,7 +70,7 @@
             {{ delivery.firstName }} {{ delivery.lastName }}<br>
             {{ delivery.address }}<br>
             {{ delivery.postalCode }} {{ delivery.city }}<br>
-            {{ delivery.country|country }}
+            {{ delivery.country|country|trans }}
         </p>
     {% endif %}
 

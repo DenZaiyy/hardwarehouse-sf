@@ -55,6 +55,8 @@ final class OrderControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
         self::assertStringContainsString('AMD Ryzen 7 7800X3D', $page->text());
         self::assertStringContainsString('124,90', $page->text());
+        // Le pays est un code ISO converti par le filtre country, à traduire ensuite
+        self::assertStringContainsString('France', $page->filter('main')->text());
     }
 
     public function testOrderOfAnotherCustomerIsNotFound(): void
@@ -103,7 +105,7 @@ final class OrderControllerTest extends WebTestCase
     /** Commande confirmée de 124,90 € TTC, port compris. */
     private function orderWithLine(User $customer, int $quantity): Order
     {
-        $order = $this->createOrder($customer)->setStatus(OrderStatus::CONFIRMED);
+        $order = $this->withAddresses($this->createOrder($customer)->setStatus(OrderStatus::CONFIRMED));
         $order->addOrderLine((new OrderLine())
             ->setProductId('produit-test')
             ->setProductName('AMD Ryzen 7 7800X3D')
