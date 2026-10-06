@@ -257,8 +257,9 @@ aucun e-mail réel).
    `whsec_…` dans `STRIPE_WEBHOOK_SECRET`. Ce secret appartient au point de terminaison : changer les clés
    API ne le modifie pas, mais chaque environnement Stripe (production, environnement de test) a ses
    propres points de terminaison. En local, Stripe ne peut pas joindre `127.0.0.1` : la CLI Stripe relaie
-   les événements et affiche le secret à mettre dans `.env.local` (`--skip-verify` si le certificat local
-   de Symfony est refusé) :
+   les événements et affiche son secret (`stripe listen --print-secret`), à mettre dans `.env.dev`, le
+   fichier local du développement, ignoré par Git et chargé après `.env.local` (`--skip-verify` si le
+   certificat local de Symfony est refusé) :
    ```bash
    stripe listen --forward-to https://127.0.0.1:8000/webhook/stripe
    ```
