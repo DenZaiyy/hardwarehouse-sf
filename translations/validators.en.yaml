@@ -216,26 +216,23 @@ Error: Error
 'Please select a valid option.': 'Please select a valid option.'
 'Please select a valid range.': 'Please select a valid range.'
 'Please enter a valid week.': 'Please enter a valid week.'
-'Please enter a password': 'Please enter a password'
-'Your password should be at least {{ limit }} characters': 'Your password should be at least {{ limit }} characters'
 user:
+    password:
+        not_blank: 'Please enter a password.'
+        requirements: 'The password must be 12 to 32 characters long and include at least one uppercase letter, one lowercase letter, one digit and one special character.'
     reset_password:
         email: { not_blank: 'Email field cannot be blank, please enter your email address' }
     registration:
-        password: { not_blank: 'Password cannot be blank, please enter your password', min_length: 'Your password should be at least {{ limit }} characters' }
-        agree_terms: { is_true: 'You should agree to our terms.' }
+        agree_terms: { is_true: 'You must accept the terms of use.' }
+        captcha: { invalid: 'The anti-bot check failed. Reload the page and try again; if the problem persists, contact us.' }
     assert:
         password: { not_blank: 'Password cannot be blank, please enter your password', min_length: 'Your password should be at least {{ limit }} characters' }
         username: { unique: 'This username is already taken.' }
-'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.': 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.'
 'There is already an account with this email': 'There is already an account with this email'
 "Format d'adresse invalide":
     ' Ex: 12 rue de la Paix': 'Invalid address format. Ex: 12 rue de la Paix'
 'Le code postal doit contenir 5 chiffres.': 'The postal code must contain 5 digits.'
-'There were problems with your captcha':
-    ' Please try again or contact with support and provide following code(s): {{ errorCodes }}': 'There were problems with your captcha. Please try again or contact with support and provide following code(s): {{ errorCodes }}'
 'La note doit être comprise entre {{ min }} et {{ max }}.': 'The rating must be between {{ min }} and {{ max }}.'
-'There is already an address of this type for this order': '__There is already an address of this type for this order'
-'There is already an order with this reference': '__There is already an order with this reference'
-'There is already a carrier with this name': '__There is already a carrier with this name'
-'There is already a product with this reference': '__There is already a product with this reference'
+'There is already an address of this type for this order': 'There is already an address of this type for this order.'
+'There is already an order with this reference': 'There is already an order with this reference.'
+'There is already a carrier with this name': 'There is already a carrier with this name.'

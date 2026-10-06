@@ -22,3 +22,13 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+when@test:
+    services:
+        # Seul le client de l'API du catalogue est simulé : les autres (Iconify…) restent réels
+        App\Tests\Http\ApiMockResponseFactory: ~
+
+        api.client.mock:
+            class: Symfony\Component\HttpClient\MockHttpClient
+            decorates: api.client
+            arguments: ['@App\Tests\Http\ApiMockResponseFactory', '%env(API_BASE_URL)%']

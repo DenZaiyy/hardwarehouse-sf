@@ -2,7 +2,7 @@
     <h2 class="text-lg font-semibold">3. Livraison</h2>
 
     {% if not state.addressCompleted %}
-        <div class="text-sm text-gray-500">
+        <div class="text-sm text-muted">
             Complète d'abord l'adresse.
         </div>
     {% elseif state.deliveryCompleted and state.currentStep != 3 %}
@@ -21,12 +21,6 @@
             </button>
         </div>
     {% elseif state.currentStep == 3 %}
-        {% if app.environment == 'dev' %}
-            <div class="text-xs bg-yellow-100 p-2 mb-2">
-                DEBUG: Step={{ state.currentStep }}, Form type={{ form.vars.block_prefixes|last }}
-            </div>
-        {% endif %}
-
         {{ form_start(form) }}
         <div class="space-y-3">
             {% if form.carrierId is defined %}
@@ -48,14 +42,5 @@
             {% endif %}
         </div>
         {{ form_end(form, {render_rest: false}) }}
-    {% endif %}
-
-    {% if app.environment == 'dev' %}
-        <div class="text-xs bg-yellow-100 p-2 mb-2">
-            DEBUG: Step={{ state.currentStep }},
-            addressCompleted={{ state.addressCompleted ? 'oui' : 'non' }},
-            Form type={{ form.vars.block_prefixes|last }},
-            carrierId field exists={{ form.carrierId is defined ? 'oui' : 'non' }}
-        </div>
     {% endif %}
 </section>

@@ -21,6 +21,8 @@ framework:
 when@test:
     framework:
         cache:
+            # Cache en mémoire : une réponse simulée de l'API ne survit pas d'un test à l'autre
+            app: cache.adapter.array
             pools:
                 cache.rate_limiter:
                     adapter: cache.adapter.array

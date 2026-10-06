@@ -4,14 +4,14 @@
     {% if cartItems is not empty %}
         {# Cart Items #}
         <div class="space-y-3">
-            <h4 class="font-medium text-gray-700">Articles ({{ cartCount }})</h4>
+            <h4 class="font-medium text-ink">Articles ({{ cartCount }})</h4>
             {% for item in cartItems %}
                 <div class="flex justify-between items-start text-sm">
                     <div class="flex-1">
                         <div class="font-medium">{{ item.name }}</div>
-                        <div class="text-gray-500">Qté: {{ item.quantity }}</div>
+                        <div class="text-muted">Qté: {{ item.quantity }}</div>
                         {% if item.promote and item.discount_amount %}
-                            <span class="inline-flex items-center mt-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-600">
+                            <span class="inline-flex items-center mt-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-danger">
                     -{{ item.discount_amount|round }}%
                 </span>
                         {% endif %}
@@ -19,9 +19,9 @@
                     <div class="text-right">
                         <div class="font-medium">{{ (item.effective_ttc * item.quantity)|format_currency('EUR') }}</div>
                         {% if item.promote %}
-                            <div class="text-gray-400 text-xs line-through">{{ (item.price_ttc * item.quantity)|format_currency('EUR') }}</div>
+                            <div class="text-muted text-xs line-through">{{ (item.price_ttc * item.quantity)|format_currency('EUR') }}</div>
                         {% endif %}
-                        <div class="text-gray-500 text-xs">{{ item.effective_ht|format_currency('EUR') }} HT/unité</div>
+                        <div class="text-muted text-xs">{{ item.effective_ht|format_currency('EUR') }} HT/unité</div>
                     </div>
                 </div>
             {% endfor %}
@@ -52,9 +52,9 @@
             </div>
         </div>
     {% else %}
-        <div class="text-center text-gray-500 py-8">
+        <div class="text-center text-muted py-8">
             <p>Votre panier est vide.</p>
-            <a href="{{ path('homepage') }}" class="text-blue-600 hover:underline">Continuer mes achats</a>
+            <a href="{{ path('homepage') }}" class="text-primary hover:underline">Continuer mes achats</a>
         </div>
     {% endif %}
 </div>

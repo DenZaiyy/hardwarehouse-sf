@@ -27,8 +27,8 @@ final class TogglePasswordTypeExtension extends AbstractTypeExtension
         // TODO: Restyling button for better integration with Tailwind
         $resolver->setDefaults([
             'toggle' => false,
-            'hidden_label' => 'Hide',
-            'visible_label' => 'Show',
+            'hidden_label' => 'form.password.hide',
+            'visible_label' => 'form.password.show',
             'hidden_icon' => 'Default',
             'visible_icon' => 'Default',
             'button_classes' => ['toggle-password-button'],

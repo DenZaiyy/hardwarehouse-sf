@@ -3,7 +3,7 @@
         <h2 class="text-lg font-semibold text-slate-900">
             Filtres
             <span
-                class="ml-1 hidden text-sm font-normal text-slate-500"
+                class="ml-1 hidden text-sm font-normal text-muted"
                 data-filter-target="count"
             ></span>
         </h2>
@@ -37,7 +37,7 @@
                             min="0"
                             step="0.01"
                             placeholder="0"
-                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                            class="w-full rounded-xl border border-secondary bg-white px-3 py-2 text-sm text-ink outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
                         >
                     </div>
 
@@ -53,7 +53,7 @@
                             min="0"
                             step="0.01"
                             placeholder="9999"
-                            class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                            class="w-full rounded-xl border border-secondary bg-white px-3 py-2 text-sm text-ink outline-none transition placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
                         >
                     </div>
                 </div>
@@ -81,7 +81,7 @@
                                 <span class="text-sm font-medium text-slate-800">
                                         {{ category.name }}
                                     {% if category.productsCount is defined and category.productsCount %}
-                                        <span class="text-slate-500">({{ category.productsCount }})</span>
+                                        <span class="text-muted">({{ category.productsCount }})</span>
                                     {% endif %}
                                     </span>
                             </label>
@@ -112,7 +112,7 @@
                                 <span class="text-sm font-medium text-slate-800">
                                         {{ brand.name }}
                                     {% if brand.productsCount is defined and brand.productsCount %}
-                                        <span class="text-slate-500">({{ brand.productsCount }})</span>
+                                        <span class="text-muted">({{ brand.productsCount }})</span>
                                     {% endif %}
                                     </span>
                             </label>

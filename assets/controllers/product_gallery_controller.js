@@ -70,7 +70,8 @@ export default class extends Controller {
 
         const newSrc = activeImages.dataset.fullSrc
         const newSrcset = activeImages.dataset.srcset || ''
-        const newAlt = activeImages.alt
+        // La cible est le bouton de la miniature : le texte alternatif est celui de son image
+        const newAlt = activeImages.querySelector('img')?.alt ?? ''
 
         this.mainImageTarget.style.opacity = '0'
 
@@ -96,11 +97,12 @@ export default class extends Controller {
     updateActiveState() {
         this.imagesTargets.forEach((thumb, index) => {
             const isActive = index === this.indexValue
-            thumb.classList.toggle('border-blue-500', isActive)
+            thumb.classList.toggle('border-primary', isActive)
             thumb.classList.toggle('border-transparent', !isActive)
             thumb.classList.toggle('opacity-100', isActive)
             thumb.classList.toggle('opacity-60', !isActive)
-            thumb.setAttribute('aria-selected', isActive)
+            // aria-selected n'est pas permis sur un bouton : aria-current désigne l'image affichée
+            thumb.setAttribute('aria-current', isActive)
         })
 
         // Scroll la miniature active dans la vue (desktop)
@@ -198,7 +200,7 @@ export default class extends Controller {
         const activeImages = this.imagesTargets[this.indexValue]
         if (activeImages) {
             this.lightboxImageTarget.src = activeImages.dataset.fullSrc
-            this.lightboxImageTarget.alt = activeImages.alt
+            this.lightboxImageTarget.alt = activeImages.querySelector('img')?.alt ?? ''
         }
 
         this.lightboxTarget.classList.remove('hidden')

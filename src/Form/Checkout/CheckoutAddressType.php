@@ -15,14 +15,17 @@ final class CheckoutAddressType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('label', TextType::class)
-            ->add('firstName', TextType::class)
-            ->add('lastName', TextType::class)
-            ->add('address1', TextType::class)
-            ->add('postcode', TextType::class)
-            ->add('city', TextType::class)
+            ->add('label', TextType::class, ['label' => 'checkout.form.label'])
+            ->add('firstName', TextType::class, ['label' => 'checkout.form.first_name'])
+            ->add('lastName', TextType::class, ['label' => 'checkout.form.last_name'])
+            ->add('address1', TextType::class, ['label' => 'checkout.form.address'])
+            ->add('postcode', TextType::class, ['label' => 'checkout.form.postcode'])
+            ->add('city', TextType::class, ['label' => 'checkout.form.city'])
             ->add('country', ChoiceType::class, [
+                'label' => 'checkout.form.country',
                 'choices' => $this->getCountryChoices(),
+                // Le code ISO reste la valeur enregistrée ; le client lit le nom du pays
+                'choice_label' => static fn (string $code): CountryList => CountryList::from($code),
             ])
         ;
     }

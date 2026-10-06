@@ -1,5 +1,6 @@
 <div {{ attributes }} class="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
     {% set state = this.state %}
+    {% set totals = this.orderTotals %}
 
     <div class="space-y-4">
         {% include 'components/Checkout/steps/_step_identity.html.twig' with {
@@ -29,8 +30,10 @@
 
         {% include 'components/Checkout/steps/_step_payment.html.twig' with {
             state: state,
-            selectedCarrierLabel: this.selectedCarrierLabel,
-            availablePaymentMethods: this.availablePaymentMethods
+            availablePaymentMethods: this.availablePaymentMethods,
+            selectedPaymentMethod: this.selectedPaymentMethod,
+            paymentNotices: this.paymentNotices,
+            orderTotal: totals.total
         } only %}
     </div>
 
@@ -39,22 +42,7 @@
             state: state,
             cartItems: this.cartItems,
             cartCount: this.cartCount,
-            totals: this.orderTotals
+            totals: totals
         } only %}
-
-        {% if app.environment == 'dev' %}
-            <div class="space-y-2 text-sm bg-gray-100 p-3 rounded">
-                <div><strong>Debug Info:</strong></div>
-                <div>Étape courante : {{ state.currentStep }}</div>
-                <div>Mode identité : {{ state.identityMode }}</div>
-                <div>Identité validée : {{ state.identityCompleted ? 'Oui' : 'Non' }}</div>
-                <div>Adresse validée : {{ state.addressCompleted ? 'Oui' : 'Non' }}</div>
-                <div>Livraison validée : {{ state.deliveryCompleted ? 'Oui' : 'Non' }}</div>
-                <div>Paiement validé : {{ state.paymentCompleted ? 'Oui' : 'Non' }}</div>
-                <form action="{{ path('checkout.reset') }}" method="POST">
-                    <button type="submit" class="text-red-600 underline">Reset</button>
-                </form>
-            </div>
-        {% endif %}
     </div>
 </div>

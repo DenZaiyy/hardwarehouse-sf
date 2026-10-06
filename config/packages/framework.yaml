@@ -6,6 +6,10 @@ framework:
         scoped_clients:
             api.client:
                 base_uri:  '%env(API_BASE_URL)%'
+                # Une API qui ne répond plus ne doit pas bloquer la boutique : au-delà de 3 s sans
+                # données ou de 5 s au total, ApiService lève ApiUnavailableException
+                timeout: 3
+                max_duration: 5
                 # caching géré automatiquement si tu utilises HttpCache
 
     # Note that the session will be started ONLY if you read or write from it.
@@ -15,6 +19,20 @@ framework:
         cookie_secure: auto
         cookie_httponly: true
         cookie_samesite: lax
+
+    # Une ressource absente de l'API du catalogue (slug inconnu, fiche supprimée) est une page
+    # introuvable pour le visiteur, pas une erreur serveur : produit, catégorie et marque.
+    exceptions:
+        App\Exception\Api\ApiNotFoundException:
+            status_code: 404
+            log_level: notice
+        # API en panne ou injoignable : service indisponible plutôt qu'une erreur de la boutique
+        App\Exception\Api\ApiServerException:
+            status_code: 503
+            log_level: error
+        App\Exception\Api\ApiUnavailableException:
+            status_code: 503
+            log_level: error
 
     #esi: true
     #fragments: true

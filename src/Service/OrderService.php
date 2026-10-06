@@ -10,16 +10,16 @@ use App\Entity\User;
 use App\Enum\AddressType;
 use App\Enum\OrderStatus;
 use App\Repository\CarrierRepository;
+use App\Service\Pricing\PriceCalculator;
 use Doctrine\ORM\EntityManagerInterface;
 
 class OrderService
 {
-    private const float VAT_RATE = 0.20;
-
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly CartService $cartService,
         private readonly CarrierRepository $carrierRepository,
+        private readonly PriceCalculator $priceCalculator,
     ) {
     }
 
@@ -39,9 +39,12 @@ class OrderService
             throw new \LogicException('Cart is empty');
         }
 
-        // Calculate totals
-        $cartTotals = $this->cartService->computeTotals();
-        $carrierCost = $this->getCarrierCost($checkoutState->carrierId);
+        // Totaux en centimes, calculés comme ceux du panier et de la session Stripe
+        $totals = $this->priceCalculator->totals(array_map(
+            static fn (array $item): array => ['unit_price' => $item['effective_ht'], 'quantity' => $item['quantity']],
+            array_values($cartItems),
+        ));
+        $shipping = (int) round($this->getCarrierCost($checkoutState->carrierId) * 100);
 
         // Create order
         $order = new Order();
@@ -58,11 +61,11 @@ class OrderService
         }
 
         // Set financial data
-        $order->setSubtotal((string) $cartTotals['subtotal']);
-        $order->setTaxAmount((string) $cartTotals['vat_amount']);
-        $order->setShippingAmount((string) $carrierCost);
+        $order->setSubtotal(PriceCalculator::toDecimal($totals['subtotal']));
+        $order->setTaxAmount(PriceCalculator::toDecimal($totals['vat']));
+        $order->setShippingAmount(PriceCalculator::toDecimal($shipping));
         $order->setDiscountAmount('0.00');
-        $order->setTotalAmount((string) ($cartTotals['total'] + $carrierCost));
+        $order->setTotalAmount(PriceCalculator::toDecimal($totals['total'] + $shipping));
         $order->setCurrency('EUR');
         $order->setStatus(OrderStatus::PENDING);
 
@@ -77,16 +80,11 @@ class OrderService
             $orderLine->setProductSlug($cartItem['slug']);
             $orderLine->setQuantity($cartItem['quantity']);
 
-            // Effective (discounted, if any) unit price — must match the price used by
-            // CartService::computeTotals() so that Order::subtotal/totalAmount reconcile
-            // with the sum of the order lines.
-            $effectiveUnitPrice = $cartItem['discount_price'] ?? $cartItem['price_ht'];
-            $orderLine->setUnitPrice((string) $effectiveUnitPrice);
-            $orderLine->setTaxRate((string) self::VAT_RATE);
-
-            $lineSubtotal = $effectiveUnitPrice * $cartItem['quantity'];
-            $lineTaxAmount = $lineSubtotal * self::VAT_RATE;
-            $orderLine->setLineTotal((string) ($lineSubtotal + $lineTaxAmount));
+            // Prix unitaire remisé s'il y a lieu ; le total TTC de la ligne est celui que Stripe facture
+            $unitPrice = $cartItem['effective_ht'];
+            $orderLine->setUnitPrice(PriceCalculator::toDecimal((int) round($unitPrice * 100)));
+            $orderLine->setTaxRate((string) PriceCalculator::VAT_RATE);
+            $orderLine->setLineTotal(PriceCalculator::toDecimal($this->priceCalculator->unitPriceIncludingTax($unitPrice) * $cartItem['quantity']));
 
             $order->addOrderLine($orderLine);
             $this->entityManager->persist($orderLine);
@@ -171,16 +169,6 @@ class OrderService
     public function updateOrderStatus(Order $order, OrderStatus $status): void
     {
         $order->setStatus($status);
-        $this->entityManager->flush();
-    }
-
-    /**
-     * Link the order to the Stripe PaymentIntent created for it, so webhook events can
-     * resolve the order strictly (see StripePaymentEventHandler) instead of guessing.
-     */
-    public function attachStripeSession(Order $order, string $stripePaymentIntentId): void
-    {
-        $order->setStripePaymentIntentId($stripePaymentIntentId);
         $this->entityManager->flush();
     }
 }

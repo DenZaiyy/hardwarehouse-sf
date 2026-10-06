@@ -4,6 +4,8 @@ namespace App\Form;
 
 use App\Entity\User;
 use App\EventSubscriber\HoneypotSubscriber;
+use App\Service\CspNonceService;
+use App\Validator\PasswordRequirements;
 use Karser\Recaptcha3Bundle\Form\Recaptcha3Type;
 use Karser\Recaptcha3Bundle\Validator\Constraints\Recaptcha3;
 use Symfony\Component\Form\AbstractType;
@@ -13,15 +15,20 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\IsTrue;
-use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\UX\Dropzone\Form\DropzoneType;
 
 class RegistrationFormType extends AbstractType
 {
+    public function __construct(
+        private readonly CspNonceService $cspNonceService,
+        private readonly RequestStack $requestStack,
+    ) {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -66,24 +73,14 @@ class RegistrationFormType extends AbstractType
                     ],
                     'toggle' => true,
                 ],
+                'help' => 'user.registration.password.help',
                 'constraints' => [
-                    new NotBlank(
-                        message: 'user.registration.password.not_blank',
-                    ),
-                    new Length(
-                        min: 6,
-                        max: 4096,
-                        minMessage: 'user.registration.password.min_length',
-                    ),
-                    new Regex(
-                        pattern: '/^(?=.*\d)(?=.*[!-\/:-@[-`{-~À-ÿ§µ²°£])(?=.*[a-z])(?=.*[A-Z])(?=.*[A-Za-z]).{12,32}$/',
-                        message: 'Le mot de passe doit contenir au moins 1 majuscule, 1 minuscule, 1 nombre, 1 caractère spéciale et doit faire au moins 12 caractères.',
-                        match: true,
-                    ),
+                    new PasswordRequirements(),
                 ],
             ])
             ->add('avatar', DropzoneType::class, [
                 'label' => 'user.registration.avatar.label',
+                'help' => 'user.registration.avatar.help',
                 'attr' => [
                     'placeholder' => 'user.registration.avatar.placeholder',
                     'class' => 'w-full',
@@ -111,9 +108,15 @@ class RegistrationFormType extends AbstractType
                 ],
             ])
             ->add('captcha', Recaptcha3Type::class, [
-                'constraints' => new Recaptcha3(message: 'There were problems with your captcha. Please try again or contact with support and provide following code(s): {{ errorCodes }}'),
+                'constraints' => new Recaptcha3(
+                    message: 'user.registration.captcha.invalid',
+                    messageMissingValue: 'user.registration.captcha.invalid',
+                ),
                 'action_name' => 'homepage',
-                'locale' => 'fr',
+                'locale' => $this->requestStack->getCurrentRequest()?->getLocale() ?? 'fr',
+                // La CSP n'exécute que les scripts portant le nonce de la requête : sans lui, le script
+                // reCAPTCHA était bloqué, aucun jeton n'était produit et toute inscription refusée
+                'script_nonce_csp' => $this->cspNonceService->getNonce(),
             ])
             ->addEventSubscriber(new HoneypotSubscriber())
         ;

@@ -19,10 +19,64 @@ jobs:
     tests:
         uses: ./.github/workflows/test.yml
 
-    # Crée PR vers master
+    # Déploie la branche test sur la préproduction (test.hardwarehouse.fr)
+    deploy-test:
+        name: Deploy to preprod
+        needs: [audit, quality, tests]
+        runs-on: ubuntu-latest
+        environment: preprod
+        timeout-minutes: 15
+        concurrency:
+            group: preprod-deployment
+            cancel-in-progress: false
+        steps:
+            - name: Deploy to preprod server
+              uses: appleboy/ssh-action@v1.2.0
+              with:
+                  host: ${{ secrets.HOST }}
+                  username: ${{ secrets.USERNAME }}
+                  port: ${{ secrets.PORT }}
+                  key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  password: ${{ secrets.SSH_PASSWORD }}
+                  timeout: 300s
+                  script_stop: true
+                  script: |
+                      set -e
+                      echo "🚀 Starting preprod deployment..."
+
+                      # Secret distinct de PROJECT_PATH : un oubli de configuration ne doit jamais
+                      # déployer la branche test dans le dossier de production.
+                      PROJECT_PATH="${{ secrets.PREPROD_PROJECT_PATH }}"
+                      PROD_PATH="${{ secrets.PROJECT_PATH }}"
+                      if [ -z "$PROJECT_PATH" ] || [ "$PROJECT_PATH" = "$PROD_PATH" ]; then
+                          echo "❌ PREPROD_PROJECT_PATH manquant ou identique au chemin de production"
+                          exit 1
+                      fi
+
+                      cd "$PROJECT_PATH"
+
+                      echo "🔧 Enabling maintenance mode..."
+                      touch var/maintenance.flag || true
+
+                      echo "📥 Fetching latest code..."
+                      git fetch origin --prune
+                      git reset --hard origin/test
+
+                      echo "📦 Running production build..."
+                      make prod
+
+                      echo "✅ Disabling maintenance mode..."
+                      rm -f var/maintenance.flag || true
+
+                      echo "🩺 Running health check..."
+                      php bin/console about --env=prod > /dev/null
+
+                      echo "🎉 Preprod deployment completed successfully!"
+
+    # Crée PR vers master, seulement si la préproduction est à jour
     create-pr-to-master:
         name: Create PR to Master
-        needs: [audit, quality, tests]
+        needs: [deploy-test]
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
@@ -44,5 +98,5 @@ jobs:
                       ✅ **Tests passés sur :** dev → test
                       ✅ **Déploiement test :** Réussi
 
-                      **Environnement de test :** [test.mtf-storage.fr]
+                      **Environnement de test :** [test.hardwarehouse.fr](https://test.hardwarehouse.fr)
                   pr_draft: false

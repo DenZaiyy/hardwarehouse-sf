@@ -15,7 +15,7 @@
                 <p class="mt-2 text-gray-600">Filtrage en cours...</p>
             </div>
 
-            <h1>Products list</h1>
+            <h1>{{ 'listing.product.title'|trans }}</h1>
 
             {% if products is not null %}
                 {% include '_partials/_products_grid.html.twig' with { products: products } only %}

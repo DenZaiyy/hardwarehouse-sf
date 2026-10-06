@@ -10,8 +10,9 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: RatingRepository::class)]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_PRODUCTID', fields: ['productId'])]
-#[UniqueEntity(fields: ['productId'], message: 'There is already a product with this reference')]
+// Un client donne un seul avis par produit ; chaque client peut noter le même produit
+#[ORM\UniqueConstraint(name: 'UNIQ_RATING_USER_PRODUCT', fields: ['user', 'productId'])]
+#[UniqueEntity(fields: ['user', 'productId'], message: 'Vous avez déjà donné votre avis sur ce produit.')]
 class Rating
 {
     use TimestampTrait;

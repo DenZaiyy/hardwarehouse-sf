@@ -11,10 +11,12 @@ use Psr\Log\LoggerInterface;
 /**
  * Applies Stripe webhook events to orders.
  *
- * Every mutation is resolved strictly via Order::stripePaymentIntentId, set right after
- * the Checkout Session is created (see CheckoutComponent::processPayment()). There is no
- * fallback onto "the most recent order": if a PaymentIntent id doesn't match any order,
- * nothing is mutated — the event is logged and dropped.
+ * Since Stripe API 2022-08-01, a Checkout Session is created without a PaymentIntent: the order is
+ * found by the reference sent in the session and PaymentIntent metadata, and the PaymentIntent id is
+ * recorded on the first event that carries it. Refunds and disputes only carry the PaymentIntent id.
+ *
+ * Statuses only move forward: a late failure or cancellation never undoes a paid order, and a failed
+ * attempt leaves the order pending, since the customer can try again until the session expires.
  */
 final readonly class StripePaymentEventHandler
 {
@@ -25,30 +27,70 @@ final readonly class StripePaymentEventHandler
     ) {
     }
 
-    public function markOrderPaid(string $paymentIntentId, string $eventId): void
+    public function confirmPayment(string $eventId, ?string $orderReference, ?string $paymentIntentId): void
     {
-        $this->transition($paymentIntentId, $eventId, OrderStatus::CONFIRMED, 'payment succeeded');
+        $order = $this->resolveOrder($eventId, $orderReference, $paymentIntentId);
+        if (null === $order) {
+            return;
+        }
+
+        if (OrderStatus::PENDING !== $order->getStatus()) {
+            $this->skip($order, $eventId, 'payment confirmed for an order that is no longer pending');
+
+            return;
+        }
+
+        $this->apply($order, $eventId, OrderStatus::CONFIRMED, 'payment succeeded');
     }
 
-    public function markOrderFailed(string $paymentIntentId, string $eventId): void
+    /**
+     * Abandoned session or canceled PaymentIntent: only a pending order is cancelled.
+     */
+    public function cancelPendingOrder(string $eventId, ?string $orderReference, ?string $paymentIntentId, string $reason): void
     {
-        $this->transition($paymentIntentId, $eventId, OrderStatus::CANCELLED, 'payment failed');
+        $order = $this->resolveOrder($eventId, $orderReference, $paymentIntentId);
+        if (null === $order) {
+            return;
+        }
+
+        if (OrderStatus::PENDING !== $order->getStatus()) {
+            $this->skip($order, $eventId, $reason.' after the order left the pending status');
+
+            return;
+        }
+
+        $this->apply($order, $eventId, OrderStatus::CANCELLED, $reason);
     }
 
-    public function markOrderCanceled(string $paymentIntentId, string $eventId): void
+    public function recordFailedAttempt(string $eventId, ?string $orderReference, ?string $paymentIntentId): void
     {
-        $this->transition($paymentIntentId, $eventId, OrderStatus::CANCELLED, 'payment canceled');
+        $order = $this->resolveOrder($eventId, $orderReference, $paymentIntentId);
+        if (null === $order) {
+            return;
+        }
+
+        $this->skip($order, $eventId, 'payment attempt failed, the customer can try again');
     }
 
-    public function markOrderRefunded(string $paymentIntentId, string $eventId, bool $isFullRefund): void
+    public function recordRefund(string $paymentIntentId, string $eventId, bool $isFullRefund): void
     {
-        $status = $isFullRefund ? OrderStatus::CANCELLED : OrderStatus::PROCESSING;
-        $this->transition($paymentIntentId, $eventId, $status, $isFullRefund ? 'full refund' : 'partial refund');
+        $order = $this->resolveOrder($eventId, null, $paymentIntentId);
+        if (null === $order) {
+            return;
+        }
+
+        if (!$isFullRefund || OrderStatus::CANCELLED === $order->getStatus()) {
+            $this->skip($order, $eventId, $isFullRefund ? 'full refund of a cancelled order' : 'partial refund, status unchanged');
+
+            return;
+        }
+
+        $this->apply($order, $eventId, OrderStatus::CANCELLED, 'full refund');
     }
 
     public function recordDispute(string $paymentIntentId, string $eventId): void
     {
-        $order = $this->resolveOrder($paymentIntentId, $eventId);
+        $order = $this->resolveOrder($eventId, null, $paymentIntentId);
         if (null === $order) {
             return;
         }
@@ -63,13 +105,8 @@ final readonly class StripePaymentEventHandler
         $this->entityManager->flush();
     }
 
-    private function transition(string $paymentIntentId, string $eventId, OrderStatus $status, string $reason): void
+    private function apply(Order $order, string $eventId, OrderStatus $status, string $reason): void
     {
-        $order = $this->resolveOrder($paymentIntentId, $eventId);
-        if (null === $order) {
-            return;
-        }
-
         $order->setStatus($status);
         $order->setLastStripeEventId($eventId);
         $this->entityManager->flush();
@@ -83,16 +120,33 @@ final readonly class StripePaymentEventHandler
         ]);
     }
 
-    /**
-     * @return Order|null the order to mutate, or null if there is nothing to do
-     *                     (unknown PaymentIntent, or event already processed)
-     */
-    private function resolveOrder(string $paymentIntentId, string $eventId): ?Order
+    /** Records the event (and a PaymentIntent id attached on the way) without changing the status. */
+    private function skip(Order $order, string $eventId, string $reason): void
     {
-        $order = $this->orderRepository->findOneByStripePaymentIntentId($paymentIntentId);
+        $order->setLastStripeEventId($eventId);
+        $this->entityManager->flush();
+
+        $this->logger->info('Stripe event recorded without status change', [
+            'order_id' => $order->getId(),
+            'reference' => $order->getReference(),
+            'status' => $order->getStatus()->value,
+            'reason' => $reason,
+            'stripe_event_id' => $eventId,
+        ]);
+    }
+
+    /**
+     * @return Order|null the order to update, or null if there is nothing to do (unknown order,
+     *                    event already processed, or a PaymentIntent that belongs to another payment)
+     */
+    private function resolveOrder(string $eventId, ?string $orderReference, ?string $paymentIntentId): ?Order
+    {
+        $order = null !== $paymentIntentId ? $this->orderRepository->findOneByStripePaymentIntentId($paymentIntentId) : null;
+        $order ??= null !== $orderReference ? $this->orderRepository->findOneByReference($orderReference) : null;
 
         if (null === $order) {
-            $this->logger->warning('Stripe event references an unknown PaymentIntent, no order matched', [
+            $this->logger->warning('Stripe event matches no order', [
+                'order_reference' => $orderReference,
                 'stripe_payment_intent_id' => $paymentIntentId,
                 'stripe_event_id' => $eventId,
             ]);
@@ -107,6 +161,23 @@ final readonly class StripePaymentEventHandler
             ]);
 
             return null;
+        }
+
+        if (null !== $paymentIntentId) {
+            $recorded = $order->getStripePaymentIntentId();
+
+            if (null === $recorded) {
+                $order->setStripePaymentIntentId($paymentIntentId);
+            } elseif ($recorded !== $paymentIntentId) {
+                $this->logger->critical('Stripe event carries another PaymentIntent than the one recorded on the order', [
+                    'order_id' => $order->getId(),
+                    'recorded_payment_intent_id' => $recorded,
+                    'stripe_payment_intent_id' => $paymentIntentId,
+                    'stripe_event_id' => $eventId,
+                ]);
+
+                return null;
+            }
         }
 
         return $order;

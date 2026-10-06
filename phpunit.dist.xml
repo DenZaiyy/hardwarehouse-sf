@@ -15,6 +15,10 @@
         <ini name="error_reporting" value="-1" />
         <server name="APP_ENV" value="test" force="true" />
         <server name="SHELL_VERBOSITY" value="-1" />
+        <!-- Secret de signature factice, utilisé par StripeWebhookControllerTest -->
+        <env name="STRIPE_WEBHOOK_SECRET" value="whsec_test_hardwarehouse" force="true" />
+        <!-- Clé vide : les tests n'appellent jamais Stripe, qui refuse de créer une session sans clé -->
+        <env name="STRIPE_SECRET_KEY" value="" force="true" />
     </php>
 
     <testsuites>
@@ -45,7 +49,9 @@
         </report>
     </coverage>
 
-    <!--<extensions>
-        <bootstrap class="Symfony\Component\Panther\ServerExtension" />
-    </extensions>-->
+    <extensions>
+        <!-- Chaque test s'exécute dans une transaction annulée à la fin : aucune donnée ne passe d'un test à l'autre -->
+        <bootstrap class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension" />
+        <!--<bootstrap class="Symfony\Component\Panther\ServerExtension" />-->
+    </extensions>
 </phpunit>
