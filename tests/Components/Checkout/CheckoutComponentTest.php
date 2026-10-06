@@ -133,10 +133,10 @@ final class CheckoutComponentTest extends WebTestCase
 
         $page = $this->readyToPay($client, $this->carrier('Colissimo'), $this->cartWith($this->apiHasProduct($slug), $slug))->render()->crawler();
 
-        $methods = $page->filter('input[name="payment_method"]');
-        self::assertSame(['card', 'paypal'], $methods->each(static fn (Crawler $radio): string => (string) $radio->attr('value')));
+        $methods = $page->filter('button[data-live-action-param="selectPaymentMethod"]');
+        self::assertSame(['card', 'paypal'], $methods->each(static fn (Crawler $button): string => (string) $button->attr('data-live-method-param')));
         // Carte bancaire présélectionnée, comme sur la maquette
-        self::assertNotNull($methods->first()->attr('checked'));
+        self::assertSame(['true', 'false'], $methods->each(static fn (Crawler $button): string => (string) $button->attr('aria-pressed')));
         // 449,90 € HT, soit 539,88 € TTC, et 4,90 € de port
         self::assertStringContainsString('544,78', $page->filter('button[data-live-action-param="processPayment"]')->text());
     }
@@ -163,7 +163,7 @@ final class CheckoutComponentTest extends WebTestCase
         // Valeur envoyée par le navigateur, hors de la liste proposée
         $checkout->call('selectPaymentMethod', ['method' => 'virement']);
 
-        self::assertNotNull($checkout->render()->crawler()->filter('input[name="payment_method"][value="paypal"]')->attr('checked'));
+        self::assertSame('true', $checkout->render()->crawler()->filter('button[data-live-method-param="paypal"]')->attr('aria-pressed'));
     }
 
     public function testPaymentIsNotStartedWhenTheCartChangedSinceItWasFilled(): void

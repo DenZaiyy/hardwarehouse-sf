@@ -19,21 +19,19 @@
 
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {% for method, label in availablePaymentMethods %}
-                    {# Vrais boutons radio, stylés en boutons : le choix reste un groupe au clavier et au lecteur d'écran #}
-                    <label class="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-primary bg-white px-4 py-3 font-title font-semibold text-primary transition-colors has-[:checked]:bg-primary has-[:checked]:text-paragraph has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary has-[:focus-visible]:ring-offset-2">
-                        <input
-                            type="radio"
-                            name="payment_method"
-                            value="{{ method }}"
-                            class="sr-only"
-                            {% if method == selectedPaymentMethod %}checked{% endif %}
-                            data-action="change->live#action"
-                            data-live-action-param="selectPaymentMethod"
-                            data-live-method-param="{{ method }}"
-                        >
+                    {# Boutons bascule plutôt que des boutons radio : Live Components recoche à chaque rendu tout
+                       bouton radio cliqué qui n'est relié à aucun modèle, et le dernier de la page l'emportait #}
+                    <button
+                        type="button"
+                        aria-pressed="{{ method == selectedPaymentMethod ? 'true' : 'false' }}"
+                        class="border border-primary bg-white px-4 py-3 text-primary hover:bg-paragraph aria-pressed:bg-primary aria-pressed:text-paragraph aria-pressed:hover:bg-primary-dark"
+                        data-action="live#action"
+                        data-live-action-param="selectPaymentMethod"
+                        data-live-method-param="{{ method }}"
+                    >
                         {{ ux_icon(method == 'paypal' ? 'simple-icons:paypal' : 'lucide:credit-card', {height: '20px', width: '20px'}) }}
                         <span>{{ label }}</span>
-                    </label>
+                    </button>
                 {% endfor %}
             </div>
         </fieldset>
