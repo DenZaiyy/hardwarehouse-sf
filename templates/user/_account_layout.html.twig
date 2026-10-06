@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{# Espace client des maquettes : menu latéral et colonne principale. La page enfant nomme son entrée
+   active dans accountMenuActive. #}
+{% block body %}
+    <div class="hh-section flex flex-col gap-8 py-10 lg:flex-row lg:items-start">
+        {% include 'user/_account_menu.html.twig' with {active: accountMenuActive ?? null} only %}
+
+        <div class="flex min-w-0 flex-1 flex-col gap-6">
+            {% block account_content %}{% endblock %}
+        </div>
+    </div>
+{% endblock %}

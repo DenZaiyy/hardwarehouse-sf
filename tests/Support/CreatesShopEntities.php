@@ -8,6 +8,7 @@ use App\Entity\Address;
 use App\Entity\Cart;
 use App\Entity\CartLine;
 use App\Entity\Order;
+use App\Entity\OrderAddress;
 use App\Entity\User;
 use App\Enum\AddressType;
 use App\Enum\CountryList;
@@ -84,6 +85,24 @@ trait CreatesShopEntities
         $this->entityManager()->flush();
 
         return $cart;
+    }
+
+    /** Adresses de livraison et de facturation d'une vraie commande (le pays est un code ISO). */
+    private function withAddresses(Order $order): Order
+    {
+        foreach ([AddressType::DELIVERY, AddressType::BILLING] as $type) {
+            $order->addOrderAddress((new OrderAddress())
+                ->setType($type)
+                ->setFirstName('Jean')
+                ->setLastName('Dupont')
+                ->setAddress('12 rue des Essais')
+                ->setPostalCode('68100')
+                ->setCity('Mulhouse')
+                ->setCountry('FR'));
+        }
+        $this->entityManager()->flush();
+
+        return $order;
     }
 
     /** Commande en attente de paiement ; $customer null pour une commande passée sans compte. */

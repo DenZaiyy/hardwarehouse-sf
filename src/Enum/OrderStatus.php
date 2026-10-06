@@ -14,6 +14,12 @@ enum OrderStatus: string implements TranslatableInterface
     case DELIVERED = 'DELIVERED';
     case CANCELLED = 'CANCELLED';
 
+    /** Payée : la facture existe ou peut être émise. */
+    public function isPaid(): bool
+    {
+        return \in_array($this, [self::CONFIRMED, self::PROCESSING, self::SHIPPED, self::DELIVERED], true);
+    }
+
     public function trans(TranslatorInterface $translator, ?string $locale = null): string
     {
         return match ($this) {

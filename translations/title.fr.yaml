@@ -5,6 +5,9 @@ register:
 login:
     title: Connexion
 user:
+    orders:
+        title: 'Mes commandes'
+        detail: { title: 'Commande %reference%' }
     profile:
         title: Profil
     address:

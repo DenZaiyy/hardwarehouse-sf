@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Order;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,26 @@ class OrderRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Order::class);
+    }
+
+    /**
+     * Commandes du client, la plus récente d'abord, avec leurs lignes : le nombre d'articles de chaque
+     * commande est affiché sans une requête par commande.
+     *
+     * @return list<Order>
+     */
+    public function findForCustomer(User $customer): array
+    {
+        /** @var list<Order> */
+        return $this->createQueryBuilder('o')
+            ->addSelect('l')
+            ->leftJoin('o.orderLines', 'l')
+            ->andWhere('o.user = :customer')
+            ->setParameter('customer', $customer)
+            ->orderBy('o.created_at', 'DESC')
+            ->addOrderBy('o.id', 'DESC')
+            ->getQuery()
+            ->getResult();
     }
 
     public function findOneByReference(string $reference): ?Order

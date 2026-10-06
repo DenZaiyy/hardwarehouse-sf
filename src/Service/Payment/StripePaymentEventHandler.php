@@ -4,8 +4,10 @@ namespace App\Service\Payment;
 
 use App\Entity\Order;
 use App\Enum\OrderStatus;
+use App\Event\OrderConfirmedEvent;
 use App\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -24,6 +26,7 @@ final readonly class StripePaymentEventHandler
         private OrderRepository $orderRepository,
         private EntityManagerInterface $entityManager,
         private LoggerInterface $logger,
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
@@ -41,6 +44,17 @@ final readonly class StripePaymentEventHandler
         }
 
         $this->apply($order, $eventId, OrderStatus::CONFIRMED, 'payment succeeded');
+
+        // La commande est confirmée et l'événement Stripe enregistré : une suite du paiement en échec
+        // (e-mail, facture, stock) ne doit pas faire répondre une erreur, Stripe ignorerait sa reprise
+        try {
+            $this->eventDispatcher->dispatch(new OrderConfirmedEvent($order));
+        } catch (\Throwable $e) {
+            $this->logger->critical('A follow-up of a confirmed order failed', [
+                'reference' => $order->getReference(),
+                'exception' => $e,
+            ]);
+        }
     }
 
     /**

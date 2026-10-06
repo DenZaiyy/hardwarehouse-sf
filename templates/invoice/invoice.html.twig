@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Facture {{ invoice.reference }}</title>
+    {# Mise en page pour dompdf (CSS 2.1, tableaux) ; DejaVu Sans pour le signe € et les accents #}
+    <style>
+        @page { margin: 18mm 16mm; }
+        body { font-family: 'DejaVu Sans', sans-serif; font-size: 10pt; color: #212121; }
+        h1 { margin: 0; font-size: 20pt; color: #064789; }
+        .layout { width: 100%; border-collapse: collapse; }
+        .layout td { vertical-align: top; padding: 0; }
+        .muted { color: #4b5563; }
+        .brand { font-size: 14pt; font-weight: bold; color: #064789; }
+        .box { border: 1px solid #427aa1; padding: 8pt; }
+        .lines { width: 100%; border-collapse: collapse; margin-top: 16pt; }
+        .lines th { background-color: #ebf2fa; color: #064789; font-size: 8pt; text-transform: uppercase; text-align: left; padding: 6pt; }
+        .lines td { padding: 6pt; border-bottom: 1px solid #dbe4ee; }
+        .number { text-align: right; white-space: nowrap; }
+        .totals { width: 45%; margin-left: 55%; border-collapse: collapse; margin-top: 12pt; }
+        .totals td { padding: 4pt 6pt; }
+        .grand-total td { font-weight: bold; color: #064789; border-top: 1px solid #064789; font-size: 11pt; }
+        .paid { margin-top: 12pt; font-weight: bold; color: #166534; }
+        .notice { margin-top: 24pt; font-size: 8pt; color: #4b5563; }
+    </style>
+</head>
+<body>
+{% set billing = order.orderAddresses|filter(address => address.type and address.type.value == 'BILLING')|first %}
+{% set billing = billing ?: order.orderAddresses|filter(address => address.type and address.type.value == 'DELIVERY')|first %}
+
+<table class="layout">
+    <tr>
+        <td style="width: 55%;">
+            <div class="brand">{{ seller.name }}</div>
+            <div>{{ seller.address }}</div>
+            <div class="muted">SIRET : {{ seller.siret }}</div>
+            <div class="muted">TVA intracommunautaire : {{ seller.vat_number }}</div>
+        </td>
+        <td style="width: 45%; text-align: right;">
+            <h1>Facture</h1>
+            <div><strong>N° {{ invoice.reference }}</strong></div>
+            <div>Date : {{ invoice.createdAt|date('d/m/Y') }}</div>
+            <div class="muted">Commande {{ order.reference }} du {{ order.createdAt|date('d/m/Y') }}</div>
+        </td>
+    </tr>
+</table>
+
+<table class="layout" style="margin-top: 16pt;">
+    <tr>
+        <td style="width: 55%;"></td>
+        <td style="width: 45%;">
+            <div class="box">
+                <div class="muted">Facturé à</div>
+                {% if billing %}
+                    <div><strong>{{ billing.firstName }} {{ billing.lastName }}</strong></div>
+                    <div>{{ billing.address }}</div>
+                    <div>{{ billing.postalCode }} {{ billing.city }}</div>
+                    <div>{{ billing.country|country|trans }}</div>
+                {% else %}
+                    <div><strong>{{ order.userFullNameSnapshot }}</strong></div>
+                {% endif %}
+            </div>
+        </td>
+    </tr>
+</table>
+
+<table class="lines">
+    <thead>
+        <tr>
+            <th>Désignation</th>
+            <th class="number">Qté</th>
+            <th class="number">Prix unitaire HT</th>
+            <th class="number">TVA</th>
+            <th class="number">Total HT</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for line in order.orderLines %}
+            <tr>
+                <td>{{ line.productName }}</td>
+                <td class="number">{{ line.quantity }}</td>
+                <td class="number">{{ line.unitPrice|format_currency('EUR', locale = 'fr') }}</td>
+                <td class="number">{{ (line.taxRate * 100)|round }} %</td>
+                <td class="number">{{ (line.unitPrice * line.quantity)|format_currency('EUR', locale = 'fr') }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<table class="totals">
+    <tr>
+        <td>Total HT</td>
+        <td class="number">{{ order.subtotal|format_currency('EUR', locale = 'fr') }}</td>
+    </tr>
+    <tr>
+        <td>TVA 20 %</td>
+        <td class="number">{{ order.taxAmount|format_currency('EUR', locale = 'fr') }}</td>
+    </tr>
+    <tr>
+        <td>Frais de livraison</td>
+        <td class="number">{{ order.shippingAmount|format_currency('EUR', locale = 'fr') }}</td>
+    </tr>
+    <tr class="grand-total">
+        <td>Total TTC</td>
+        <td class="number">{{ order.totalAmount|format_currency('EUR', locale = 'fr') }}</td>
+    </tr>
+</table>
+
+<div class="paid">
+    Facture acquittée : réglée par {{ order.paymentMethod.value == 'paypal' ? 'PayPal' : 'carte bancaire' }}.
+</div>
+
+{% if seller.notice is not empty %}
+    <div class="notice">{{ seller.notice }}</div>
+{% endif %}
+</body>
+</html>

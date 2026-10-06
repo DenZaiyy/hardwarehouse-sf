@@ -19,6 +19,9 @@ final class ApiMockResponseFactory
     /** @var array<string, array{int, mixed}> */
     private static array $responses = [];
 
+    /** @var list<array{method: string, path: string, options: array<string, mixed>}> */
+    private static array $requests = [];
+
     public static function respondWith(string $path, mixed $body, int $status = 200): void
     {
         self::$responses[trim($path, '/')] = [$status, $body];
@@ -27,12 +30,24 @@ final class ApiMockResponseFactory
     public static function reset(): void
     {
         self::$responses = [];
+        self::$requests = [];
+    }
+
+    /**
+     * Requêtes reçues depuis le dernier reset(), pour vérifier ce que la boutique envoie à l'API.
+     *
+     * @return list<array{method: string, path: string, options: array<string, mixed>}>
+     */
+    public static function requests(): array
+    {
+        return self::$requests;
     }
 
     /** @param array<string, mixed> $options */
     public function __invoke(string $method, string $url, array $options = []): ResponseInterface
     {
         $path = trim((string) parse_url($url, PHP_URL_PATH), '/');
+        self::$requests[] = ['method' => $method, 'path' => $path, 'options' => $options];
 
         foreach (self::$responses as $registered => [$status, $body]) {
             if ($path === $registered || str_ends_with($path, '/'.$registered)) {

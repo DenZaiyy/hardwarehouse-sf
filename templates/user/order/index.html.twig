@@ -1,0 +1,46 @@
+{% extends 'user/_account_layout.html.twig' %}
+
+{% set accountMenuActive = 'orders' %}
+
+{% block title %}{{ 'user.orders.title'|trans(domain = 'title') }} - HardWareHouse{% endblock %}
+
+{% block account_content %}
+    <h1 class="mb-0">{{ 'user.orders.title'|trans }}</h1>
+
+    {% if orders is empty %}
+        <p class="rounded-xl border border-secondary bg-white p-6">{{ 'user.orders.empty'|trans }}</p>
+    {% else %}
+        <div class="overflow-x-auto rounded-xl border border-secondary bg-white">
+            <table class="w-full">
+                <thead class="border-b-0 bg-paragraph">
+                    <tr>
+                        <th scope="col" class="px-5 py-3 text-left text-xs text-primary">{{ 'user.orders.columns.reference'|trans }}</th>
+                        <th scope="col" class="px-5 py-3 text-left text-xs text-primary">{{ 'user.orders.columns.date'|trans }}</th>
+                        <th scope="col" class="px-5 py-3 text-left text-xs text-primary">{{ 'user.orders.columns.status'|trans }}</th>
+                        <th scope="col" class="px-5 py-3 text-left text-xs text-primary">{{ 'user.orders.columns.items'|trans }}</th>
+                        <th scope="col" class="px-5 py-3 text-left text-xs text-primary">{{ 'user.orders.columns.total'|trans }}</th>
+                        <th scope="col" class="px-5 py-3"><span class="sr-only">{{ 'user.orders.columns.action'|trans }}</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr class="border-secondary/20 hover:bg-transparent">
+                            <td class="px-5 py-4 text-sm font-semibold text-ink">{{ order.reference }}</td>
+                            <td class="px-5 py-4 text-sm text-ink">{{ order.createdAt|date('d/m/Y') }}</td>
+                            <td class="px-5 py-4">{% include 'user/order/_status_badge.html.twig' with {status: order.status} only %}</td>
+                            <td class="px-5 py-4 text-sm text-ink">{{ order.itemCount }}</td>
+                            <td class="px-5 py-4 text-sm font-semibold text-ink">{{ order.totalAmount|format_currency('EUR') }}</td>
+                            <td class="px-5 py-4 text-right">
+                                <a href="{{ path('order.show', {reference: order.reference}) }}" class="whitespace-nowrap text-sm font-semibold underline">
+                                    {{ 'user.orders.show'|trans }}<span class="sr-only"> {{ order.reference }}</span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+    <p class="text-xs text-muted">{{ 'user.orders.guest_notice'|trans }}</p>
+{% endblock %}

@@ -38,6 +38,20 @@ final readonly class CheckoutIdentityManager
         return $state;
     }
 
+    /** Compte créé depuis le tunnel : client connecté, mais le prénom et le nom saisis restent connus. */
+    public function saveNewAccountIdentity(CheckoutState $state, GuestIdentityData $data): CheckoutState
+    {
+        $state = $this->syncAuthenticatedUser($state);
+        $state->identity = [
+            ...$state->identity ?? [],
+            'title' => $data->title,
+            'firstName' => $data->firstName,
+            'lastName' => $data->lastName,
+        ];
+
+        return $state;
+    }
+
     public function saveGuestIdentity(CheckoutState $state, GuestIdentityData $data): CheckoutState
     {
         $state->identityMode = 'guest';

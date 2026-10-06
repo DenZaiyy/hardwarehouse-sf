@@ -3,7 +3,6 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Shipment;
-use App\Enum\ShipmentStatus;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
@@ -26,7 +25,8 @@ class ShipmentCrudController extends AbstractSecuredCrudController
         return [
             IdField::new('id', 'ID')
                 ->hideOnForm(),
-            ChoiceField::new('status', 'Statut')->setChoices([ShipmentStatus::class]),
+            // Choix déduits de l'enumType du mapping
+            ChoiceField::new('status', 'Statut'),
             DateTimeField::new('expedition_date', 'Date d\'expédition'),
             DateTimeField::new('delivery_date', 'Date de livraison'),
             TextField::new('tracking_number', 'Numéro de suivi'),
@@ -36,7 +36,8 @@ class ShipmentCrudController extends AbstractSecuredCrudController
                 ->hideOnForm(),
             AssociationField::new('carrier', 'Transporteur')
                 ->onlyOnIndex()
-                ->formatValue(static fn (?string $value, Shipment $entity): string => $entity->getCarrier()?->getName() ?? '-'),
+                // La valeur reçue est le transporteur lui-même, pas une chaîne
+                ->formatValue(static fn (mixed $value, Shipment $entity): string => $entity->getCarrier()?->getName() ?? '-'),
         ];
     }
 }

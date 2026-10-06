@@ -33,6 +33,7 @@ final class GuestIdentityType extends AbstractType
             ->add('password', PasswordType::class, [
                 'label' => 'checkout.form.password',
                 'required' => false,
+                'help' => 'user.registration.password.help',
                 'attr' => ['placeholder' => 'checkout.form.password_placeholder'],
             ])
         ;

@@ -10,6 +10,7 @@ use App\Entity\Address;
 use App\Entity\User;
 use App\Enum\AddressType;
 use App\Enum\OrderStatus;
+use App\Enum\PaymentMethod;
 use App\Form\Checkout\CheckoutAddressType;
 use App\Form\Checkout\DeliveryChoiceType;
 use App\Form\Checkout\GuestIdentityType;
@@ -18,6 +19,7 @@ use App\Service\Checkout\CheckoutAddressManager;
 use App\Service\Checkout\CheckoutDeliveryManager;
 use App\Service\Checkout\CheckoutIdentityManager;
 use App\Service\Checkout\CheckoutStateManager;
+use App\Service\Checkout\GuestAccountCreator;
 use App\Service\OrderService;
 use App\Service\StripeService;
 use Psr\Log\LoggerInterface;
@@ -68,6 +70,7 @@ final class CheckoutComponent
         private readonly AuthenticationUtils $authenticationUtils,
         private readonly Security $security,
         private readonly LoggerInterface $logger,
+        private readonly GuestAccountCreator $guestAccountCreator,
     ) {
     }
 
@@ -356,7 +359,14 @@ final class CheckoutComponent
 
         /** @var GuestIdentityData $data */
         $data = $this->getForm()->getData();
-        $state = $this->identityManager->saveGuestIdentity($this->getState(), $data);
+
+        if ($data->wantsAnAccount()) {
+            // Connecté dans la foulée, comme après l'inscription : le panier et la commande rejoignent le compte
+            $this->security->login($this->guestAccountCreator->create($data), 'form_login', 'main');
+            $state = $this->identityManager->saveNewAccountIdentity($this->getState(), $data);
+        } else {
+            $state = $this->identityManager->saveGuestIdentity($this->getState(), $data);
+        }
 
         $this->stateManager->saveState($state);
         $this->resetForm();
@@ -558,12 +568,13 @@ final class CheckoutComponent
         $state = $this->getState();
 
         // La valeur vient du navigateur : seuls les moyens proposés sont retenus
-        if (!isset($this->getAvailablePaymentMethods()[$method])) {
+        $paymentMethod = PaymentMethod::tryFrom($method);
+        if (null === $paymentMethod) {
             return;
         }
 
         if ($state->identityCompleted && $state->addressCompleted && $state->deliveryCompleted) {
-            $state->paymentMethod = $method;
+            $state->paymentMethod = $paymentMethod->value;
             $state->currentStep = 4;
 
             $this->stateManager->saveState($state);
@@ -571,25 +582,16 @@ final class CheckoutComponent
     }
 
     /**
-     * Moyens de paiement proposés, tous encaissés par Stripe : les clés sont les types de moyens de
-     * paiement Stripe (payment_method_types).
-     *
-     * @return array<string, string>
+     * @return list<PaymentMethod>
      */
     public function getAvailablePaymentMethods(): array
     {
-        return [
-            'card' => 'Carte bancaire',
-            'paypal' => 'PayPal',
-        ];
+        return PaymentMethod::cases();
     }
 
-    /** Moyen choisi par le client ; la carte bancaire est présélectionnée, comme sur la maquette. */
-    public function getSelectedPaymentMethod(): string
+    public function getSelectedPaymentMethod(): PaymentMethod
     {
-        $method = $this->getState()->paymentMethod;
-
-        return null !== $method && isset($this->getAvailablePaymentMethods()[$method]) ? $method : 'card';
+        return $this->getState()->selectedPaymentMethod();
     }
 
     public function getSelectedCarrierLabel(): ?string
@@ -730,14 +732,14 @@ final class CheckoutComponent
         $cancelUrl = $this->urlGenerator->generate('checkout.index', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
         try {
-            $session = $this->stripeService->createCheckoutSession($order, $this->getSelectedCarrierLabel(), $this->getSelectedPaymentMethod(), $successUrl, $cancelUrl);
+            $session = $this->stripeService->createCheckoutSession($order, $this->getSelectedCarrierLabel(), $successUrl, $cancelUrl);
         } catch (StripeException $e) {
             // Moyen de paiement non activé dans le Dashboard, Stripe injoignable, clé invalide : la commande
             // ne sera jamais payée, elle est annulée plutôt que de rester en attente
             $this->orderService->updateOrderStatus($order, OrderStatus::CANCELLED);
             $this->logger->error('Stripe refused the checkout session', [
                 'reference' => $order->getReference(),
-                'payment_method' => $this->getSelectedPaymentMethod(),
+                'payment_method' => $order->getPaymentMethod()->value,
                 'exception' => $e,
             ]);
             $this->paymentNotices = ["Le paiement n'a pas pu démarrer. Merci de réessayer dans quelques instants."];

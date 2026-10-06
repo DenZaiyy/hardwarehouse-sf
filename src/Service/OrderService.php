@@ -68,6 +68,8 @@ class OrderService
         $order->setTotalAmount(PriceCalculator::toDecimal($totals['total'] + $shipping));
         $order->setCurrency('EUR');
         $order->setStatus(OrderStatus::PENDING);
+        $order->setPaymentMethod($checkoutState->selectedPaymentMethod());
+        $order->setCustomerEmail($user?->getEmail() ?? $checkoutState->identity['email'] ?? null);
 
         $this->entityManager->persist($order);
 

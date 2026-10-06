@@ -275,9 +275,10 @@ aucun e-mail réel).
 
 ### Limite connue
 
-La préproduction lit l'API de production. C'est sans risque tant que la boutique ne fait que lire le
-catalogue ; le jour où elle modifiera le stock de l'API après un paiement, la préproduction devra
-pointer vers une API de préproduction ou ne pas déclencher ce décrément.
+La préproduction lit l'API de production. Depuis que la boutique fait sortir du stock les articles
+des commandes payées (`POST /api/v1/stock-exits`), une commande de test en préproduction décrémenterait
+le stock réel : **laisser `SHOP_API_TOKEN` vide en préproduction**. Les sorties de stock y partent alors
+dans la file des échecs avec un message explicite, jusqu'à ce qu'une API de préproduction existe.
 
 ## Processus de Déploiement Production
 
@@ -348,8 +349,14 @@ Créez `/var/www/hardwarehouse/.env.local` :
 # Production Environment
 APP_ENV=prod
 APP_SECRET=votre-secret-32-caracteres-aleatoires
-DATABASE_URL="mysql://user:password@127.0.0.1:3306/hardwarehouse_prod"
+DATABASE_URL="postgresql://user:password@127.0.0.1:5432/hardwarehouse_prod?serverVersion=16&charset=utf8"
 MAILER_DSN=smtp://localhost:587
+
+# Sorties de stock : même valeur que la variable SHOP_API_TOKEN de l'API (openssl rand -hex 32)
+SHOP_API_TOKEN=...
+
+# Facultatif : identité du vendeur sur les factures (valeurs fictives par défaut, voir config/services.yaml)
+# INVOICE_SELLER_NAME, INVOICE_SELLER_ADDRESS, INVOICE_SELLER_SIRET, INVOICE_SELLER_VAT_NUMBER, INVOICE_NOTICE
 
 # Cache & Performance
 REDIS_URL=redis://localhost:6379
@@ -505,3 +512,67 @@ En cas de problème, vérifiez dans l'ordre :
 ---
 
 **Votre pipeline CI/CD est maintenant complètement automatisé et optimisé.**
+
+## Worker Messenger (sorties de stock)
+
+Quand une commande est payée, le webhook Stripe met en file un message `RecordOrderStockExit` (transport
+`async`) : la réponse à Stripe n'attend pas l'API du catalogue. Un worker envoie ensuite les lignes de la
+commande à `POST /api/v1/stock-exits`. **Sans worker, les messages restent dans `messenger_messages` et
+le stock ne baisse jamais.**
+
+Créer le service avec l'éditeur de systemd, qui évite les pièges du copier-coller dans le shell (lignes
+repliées, espaces ajoutés) :
+```bash
+sudo systemctl edit --force --full hardwarehouse-messenger.service
+```
+Contenu, en remplaçant `/chemin/du/projet` par le chemin **absolu** du projet sur le serveur (systemd ne
+comprend pas `~`) ; un `\` doit être le dernier caractère de sa ligne :
+```ini
+[Unit]
+Description=HardWareHouse worker Messenger
+After=network.target postgresql.service
+
+[Service]
+User=www-data
+WorkingDirectory=/chemin/du/projet
+ExecStart=/usr/bin/php8.4 \
+  /chemin/du/projet/bin/console \
+  messenger:consume async \
+  --time-limit=3600 \
+  --memory-limit=128M --env=prod
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+```bash
+sudo systemd-analyze verify /etc/systemd/system/hardwarehouse-messenger.service   # rien = valide
+systemctl show hardwarehouse-messenger -p ExecStart --no-pager                    # commande lancée
+sudo systemctl enable --now hardwarehouse-messenger
+systemctl status hardwarehouse-messenger --no-pager                              # active (running)
+sudo journalctl -u hardwarehouse-messenger -n 50 --no-pager                      # sudo : groupe adm requis sinon
+php bin/console messenger:stats --env=prod                                       # messages en attente
+```
+`www-data` (l'utilisateur de PHP-FPM) doit pouvoir lire le projet et écrire dans `var/`. En production,
+le worker ne journalise que les erreurs ; `messenger:stats` montre la file.
+
+`make prod` termine par `messenger:stop-workers` : le worker s'arrête proprement après son message en
+cours et systemd le relance avec le nouveau code.
+
+**Reprises et échecs.** Une API injoignable ou en erreur fait réessayer le message 3 fois, avec un délai
+croissant ; il passe ensuite dans la file `failed`. Un refus n'est pas réessayé : un stock insuffisant
+(409) envoie aussi une alerte à `ADMIN_EMAIL`, pour décider entre réassort et remboursement ; un jeton
+refusé ou absent part directement dans la file `failed`. Après correction :
+```bash
+php bin/console messenger:failed:show --env=prod
+php bin/console messenger:failed:retry --env=prod
+```
+
+**Côté API**, une seule fois : définir `SHOP_API_TOKEN` (même valeur que la boutique) dans les variables
+d'environnement Vercel, puis créer l'index unique qui rend la sortie idempotente avec
+`npm run db:push` sur la base de production.
+
+**Factures.** Les PDF sont rangés dans `var/invoices/prod/AAAA/`, hors de `public/` : ils sont servis
+uniquement à leur titulaire par `/profile/orders/{référence}/invoice`. Le dossier `var/` fait partie de
+la sauvegarde automatique du déploiement.
