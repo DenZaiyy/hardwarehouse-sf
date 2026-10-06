@@ -24,7 +24,7 @@
                     </div>
                     <form class="flex flex-col gap-2" data-turbo-stream="" action="{{ path('cart.add') }}" method="POST">
                         <input type="hidden" name="slug" value="{{ product.slug }}">
-                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('cart') }}">
+                        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('cart') }}">
                         <label for="quantity" class="sr-only">{{ 'listing.product.quantity'|trans }}</label>
                         <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.stock.quantity }}" class="border rounded px-3 py-2">
                         <button type="submit" class="text-center text-paragraph rounded-md bg-primary font-title px-4 py-2 hover:bg-primary-dark">

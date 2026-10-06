@@ -56,7 +56,7 @@
             <input type="hidden" name="slug" value="{{ product.slug }}">
             <input type="hidden" name="quantity" value="1">
             <input type="hidden" name="_turbo_stream" value="1">
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token('cart') }}">
+            <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('cart') }}">
 
             <button
                 type="submit"
