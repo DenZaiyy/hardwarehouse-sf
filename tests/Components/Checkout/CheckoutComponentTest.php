@@ -141,6 +141,18 @@ final class CheckoutComponentTest extends WebTestCase
         self::assertStringContainsString('544,78', $page->filter('button[data-live-action-param="processPayment"]')->text());
     }
 
+    public function testPayButtonIsDisabledWhileTheRequestRuns(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+
+        $page = $this->readyToPay($client, $this->carrier('Colissimo'), $this->cartWith($this->apiHasProduct($slug), $slug))->render()->crawler();
+
+        // Une action data-loading inconnue (« attr ») lève une erreur JavaScript qui bloque toutes les
+        // actions du composant : ni « Payer » ni le choix de PayPal n'atteignaient le serveur
+        self::assertSame('addAttribute(disabled)', $page->filter('button[data-live-action-param="processPayment"]')->attr('data-loading'));
+    }
+
     public function testUnknownPaymentMethodIsIgnored(): void
     {
         $client = static::createClient();
