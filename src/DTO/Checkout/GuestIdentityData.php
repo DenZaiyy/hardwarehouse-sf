@@ -2,6 +2,8 @@
 
 namespace App\DTO\Checkout;
 
+use App\Validator\AvailableAccountEmail;
+use App\Validator\PasswordRequirements;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -23,7 +25,15 @@ final class GuestIdentityData
     #[Assert\NotBlank]
     #[Assert\Email]
     #[Assert\Length(max: 180)]
+    #[Assert\When(expression: 'this.wantsAnAccount()', constraints: [new AvailableAccountEmail()])]
     public ?string $email = null;
 
+    /** Facultatif : saisi, il crée un compte, avec la même politique que l'inscription. */
+    #[Assert\When(expression: 'this.wantsAnAccount()', constraints: [new PasswordRequirements()])]
     public ?string $password = null;
+
+    public function wantsAnAccount(): bool
+    {
+        return null !== $this->password && '' !== $this->password;
+    }
 }

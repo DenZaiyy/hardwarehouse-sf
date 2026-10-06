@@ -7,6 +7,7 @@ namespace App\Tests\Components\Checkout;
 use App\DTO\Checkout\CheckoutState;
 use App\Entity\Carrier;
 use App\Entity\Order;
+use App\Entity\User;
 use App\Enum\OrderStatus;
 use App\Enum\PaymentMethod;
 use App\Tests\Support\CreatesShopEntities;
@@ -53,6 +54,39 @@ final class CheckoutComponentTest extends WebTestCase
         $checkout->submitForm(['checkout' => self::IDENTITY], 'saveGuest');
 
         self::assertTrue($checkout->response()->isSuccessful());
+    }
+
+    public function testGuestWithAPasswordGetsAnAccountAndIsLoggedIn(): void
+    {
+        $checkout = $this->guestCheckout();
+        $email = 'nouveau-client-'.bin2hex(random_bytes(4)).'@example.com';
+
+        $checkout->submitForm(['checkout' => ['email' => $email, 'password' => 'MotDePasse-2026!'] + self::IDENTITY], 'saveGuest');
+
+        $user = $this->entityManager()->getRepository(User::class)->findOneBy(['email' => $email]);
+        self::assertInstanceOf(User::class, $user);
+        self::assertSame('Jean Dupont', $user->getUsername());
+        self::assertFalse($user->isVerified());
+        // Connecté dans la foulée, comme après l'inscription : la commande rejoindra son compte
+        self::assertStringContainsString('Connecté', $checkout->render()->crawler()->text());
+        self::assertEmailCount(1);
+    }
+
+    public function testGuestAccountFollowsThePasswordPolicy(): void
+    {
+        $checkout = $this->guestCheckout();
+
+        $this->expectException(UnprocessableEntityHttpException::class);
+        $checkout->submitForm(['checkout' => ['password' => 'faible'] + self::IDENTITY], 'saveGuest');
+    }
+
+    public function testGuestCannotCreateASecondAccountForTheSameEmail(): void
+    {
+        $checkout = $this->guestCheckout();
+        $existing = $this->createUser();
+
+        $this->expectException(UnprocessableEntityHttpException::class);
+        $checkout->submitForm(['checkout' => ['email' => $existing->getEmail(), 'password' => 'MotDePasse-2026!'] + self::IDENTITY], 'saveGuest');
     }
 
     public function testMalformedGuestEmailIsRejected(): void

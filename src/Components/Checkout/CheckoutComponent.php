@@ -19,6 +19,7 @@ use App\Service\Checkout\CheckoutAddressManager;
 use App\Service\Checkout\CheckoutDeliveryManager;
 use App\Service\Checkout\CheckoutIdentityManager;
 use App\Service\Checkout\CheckoutStateManager;
+use App\Service\Checkout\GuestAccountCreator;
 use App\Service\OrderService;
 use App\Service\StripeService;
 use Psr\Log\LoggerInterface;
@@ -69,6 +70,7 @@ final class CheckoutComponent
         private readonly AuthenticationUtils $authenticationUtils,
         private readonly Security $security,
         private readonly LoggerInterface $logger,
+        private readonly GuestAccountCreator $guestAccountCreator,
     ) {
     }
 
@@ -357,7 +359,14 @@ final class CheckoutComponent
 
         /** @var GuestIdentityData $data */
         $data = $this->getForm()->getData();
-        $state = $this->identityManager->saveGuestIdentity($this->getState(), $data);
+
+        if ($data->wantsAnAccount()) {
+            // Connecté dans la foulée, comme après l'inscription : le panier et la commande rejoignent le compte
+            $this->security->login($this->guestAccountCreator->create($data), 'form_login', 'main');
+            $state = $this->identityManager->saveNewAccountIdentity($this->getState(), $data);
+        } else {
+            $state = $this->identityManager->saveGuestIdentity($this->getState(), $data);
+        }
 
         $this->stateManager->saveState($state);
         $this->resetForm();
