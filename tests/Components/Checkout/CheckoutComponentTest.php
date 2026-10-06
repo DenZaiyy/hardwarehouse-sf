@@ -6,6 +6,8 @@ namespace App\Tests\Components\Checkout;
 
 use App\DTO\Checkout\CheckoutState;
 use App\Entity\Carrier;
+use App\Entity\Order;
+use App\Enum\OrderStatus;
 use App\Tests\Support\CreatesShopEntities;
 use App\Tests\Support\FakesCatalogApi;
 use Doctrine\ORM\EntityManagerInterface;
@@ -198,6 +200,22 @@ final class CheckoutComponentTest extends WebTestCase
 
         self::assertTrue($checkout->response()->isRedirect());
         self::assertStringEndsWith('/cart', (string) $checkout->response()->headers->get('Location'));
+    }
+
+    public function testRefusedStripeSessionCancelsTheOrder(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $checkout = $this->readyToPay($client, $this->carrier('Colissimo'), $this->cartWith($this->apiHasProduct($slug), $slug));
+
+        // Sans clé (phpunit.dist.xml), Stripe refuse la session, comme pour un moyen de paiement non activé
+        $checkout->call('processPayment');
+
+        self::assertTrue($checkout->response()->isSuccessful());
+        self::assertStringContainsString("Le paiement n'a pas pu démarrer", $checkout->render()->crawler()->text());
+        // La commande ne sera jamais payée : elle ne reste pas en attente
+        $orders = $this->entityManager()->getRepository(Order::class)->findBy(['userFullNameSnapshot' => 'Jean Dupont'], ['id' => 'DESC'], 1);
+        self::assertSame(OrderStatus::CANCELLED, $orders[0]->getStatus());
     }
 
     /** Tunnel rempli jusqu'au paiement par un visiteur, dont le panier est rangé sous ce jeton. */

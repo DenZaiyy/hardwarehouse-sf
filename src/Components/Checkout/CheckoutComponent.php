@@ -9,6 +9,7 @@ use App\DTO\Checkout\GuestIdentityData;
 use App\Entity\Address;
 use App\Entity\User;
 use App\Enum\AddressType;
+use App\Enum\OrderStatus;
 use App\Form\Checkout\CheckoutAddressType;
 use App\Form\Checkout\DeliveryChoiceType;
 use App\Form\Checkout\GuestIdentityType;
@@ -19,6 +20,8 @@ use App\Service\Checkout\CheckoutIdentityManager;
 use App\Service\Checkout\CheckoutStateManager;
 use App\Service\OrderService;
 use App\Service\StripeService;
+use Psr\Log\LoggerInterface;
+use Stripe\Exception\ExceptionInterface as StripeException;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
@@ -64,6 +67,7 @@ final class CheckoutComponent
         private readonly FormFactoryInterface $formFactory,
         private readonly AuthenticationUtils $authenticationUtils,
         private readonly Security $security,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -725,7 +729,21 @@ final class CheckoutComponent
         $successUrl = $this->urlGenerator->generate('payment.success', ['reference' => $order->getReference()], UrlGeneratorInterface::ABSOLUTE_URL);
         $cancelUrl = $this->urlGenerator->generate('checkout.index', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $session = $this->stripeService->createCheckoutSession($order, $this->getSelectedCarrierLabel(), $this->getSelectedPaymentMethod(), $successUrl, $cancelUrl);
+        try {
+            $session = $this->stripeService->createCheckoutSession($order, $this->getSelectedCarrierLabel(), $this->getSelectedPaymentMethod(), $successUrl, $cancelUrl);
+        } catch (StripeException $e) {
+            // Moyen de paiement non activé dans le Dashboard, Stripe injoignable, clé invalide : la commande
+            // ne sera jamais payée, elle est annulée plutôt que de rester en attente
+            $this->orderService->updateOrderStatus($order, OrderStatus::CANCELLED);
+            $this->logger->error('Stripe refused the checkout session', [
+                'reference' => $order->getReference(),
+                'payment_method' => $this->getSelectedPaymentMethod(),
+                'exception' => $e,
+            ]);
+            $this->paymentNotices = ["Le paiement n'a pas pu démarrer. Merci de réessayer dans quelques instants."];
+
+            return null;
+        }
 
         $sessionUrl = $session->url;
         if (null === $sessionUrl) {

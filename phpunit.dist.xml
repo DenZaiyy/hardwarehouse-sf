@@ -17,6 +17,8 @@
         <server name="SHELL_VERBOSITY" value="-1" />
         <!-- Secret de signature factice, utilisé par StripeWebhookControllerTest -->
         <env name="STRIPE_WEBHOOK_SECRET" value="whsec_test_hardwarehouse" force="true" />
+        <!-- Clé vide : les tests n'appellent jamais Stripe, qui refuse de créer une session sans clé -->
+        <env name="STRIPE_SECRET_KEY" value="" force="true" />
     </php>
 
     <testsuites>
