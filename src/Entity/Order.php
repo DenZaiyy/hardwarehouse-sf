@@ -178,6 +178,12 @@ class Order
         return $this;
     }
 
+    /** Nombre d'articles : la somme des quantités des lignes. */
+    public function getItemCount(): int
+    {
+        return array_sum($this->orderLines->map(static fn (OrderLine $line): int => $line->getQuantity() ?? 0)->toArray());
+    }
+
     public function getPaymentMethod(): PaymentMethod
     {
         return $this->paymentMethod;

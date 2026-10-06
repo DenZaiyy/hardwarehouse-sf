@@ -1,0 +1,10 @@
+{# Couleurs des maquettes pour Confirmé, Expédié et Livré ; texte et fond au moins AA pour chaque statut #}
+{% set colors = {
+    PENDING: 'bg-slate-100 text-muted',
+    CONFIRMED: 'bg-[#dbeafe] text-[#1e40af]',
+    PROCESSING: 'bg-[#dbeafe] text-[#1e40af]',
+    SHIPPED: 'bg-[#fef3c7] text-warning',
+    DELIVERED: 'bg-[#dcfce7] text-success',
+    CANCELLED: 'bg-[#fee2e2] text-danger',
+} %}
+<span class="inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold {{ colors[status.value] }}">{{ status|trans }}</span>

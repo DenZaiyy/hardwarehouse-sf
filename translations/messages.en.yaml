@@ -1,4 +1,40 @@
 user:
+    account:
+        menu:
+            label: 'Customer area'
+            profile: 'My profile'
+            orders: 'My orders'
+            addresses: 'My addresses'
+            password: Password
+            logout: 'Log out'
+    orders:
+        title: 'My orders'
+        empty: 'You have not placed any order yet.'
+        guest_notice: 'Orders placed without an account are not listed here.'
+        show: 'View details'
+        columns:
+            reference: Reference
+            date: Date
+            status: Status
+            items: Items
+            total: Total
+            action: Action
+        detail:
+            title: 'Order %reference%'
+            back: 'Back to my orders'
+            date: Date
+            payment_method: 'Payment method'
+            items: Items
+            product: Product
+            quantity: Quantity
+            line_total: 'Total incl. VAT'
+            subtotal: 'Subtotal excl. VAT'
+            vat: VAT
+            shipping: Shipping
+            total: 'Total incl. VAT'
+            addresses:
+                delivery: 'Delivery address'
+                billing: 'Billing address'
     registration:
         title: 'Create your account'
         agree_terms: { label: 'I accept the terms of use', is_true: 'You must accept the terms of use.' }
@@ -58,6 +94,7 @@ header:
         empty: { label: 'Empty cart' }
         show: 'View my cart'
     nav:
+        orders: { label: 'My orders' }
         profile: { label: Profile }
         logout: { label: Logout }
         login: { label: Login }

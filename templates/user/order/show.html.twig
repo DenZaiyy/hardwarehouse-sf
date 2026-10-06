@@ -1,0 +1,86 @@
+{% extends 'user/_account_layout.html.twig' %}
+
+{% set accountMenuActive = 'orders' %}
+
+{% block title %}{{ 'user.orders.detail.title'|trans({'%reference%': order.reference}, 'title') }} - HardWareHouse{% endblock %}
+
+{% block account_content %}
+    <a href="{{ path('order.index') }}" class="inline-flex items-center gap-2 self-start text-sm font-semibold">
+        {{ ux_icon('lucide:arrow-left', {class: 'size-4', 'aria-hidden': 'true'}) }}
+        {{ 'user.orders.detail.back'|trans }}
+    </a>
+
+    <div class="flex flex-wrap items-center gap-3">
+        <h1 class="mb-0">{{ 'user.orders.detail.title'|trans({'%reference%': order.reference}) }}</h1>
+        {% include 'user/order/_status_badge.html.twig' with {status: order.status} only %}
+    </div>
+
+    <dl class="flex flex-wrap gap-x-8 gap-y-2 text-sm">
+        <div>
+            <dt class="text-muted">{{ 'user.orders.detail.date'|trans }}</dt>
+            <dd class="font-semibold text-ink">{{ order.createdAt|date('d/m/Y') }}</dd>
+        </div>
+        <div>
+            <dt class="text-muted">{{ 'user.orders.detail.payment_method'|trans }}</dt>
+            <dd class="font-semibold text-ink">{{ order.paymentMethod|trans }}</dd>
+        </div>
+    </dl>
+
+    <section class="overflow-x-auto rounded-xl border border-secondary bg-white">
+        <h2 class="sr-only">{{ 'user.orders.detail.items'|trans }}</h2>
+        <table class="w-full">
+            <thead class="border-b-0 bg-paragraph">
+                <tr>
+                    <th scope="col" class="px-5 py-3 text-left text-xs text-primary">{{ 'user.orders.detail.product'|trans }}</th>
+                    <th scope="col" class="px-5 py-3 text-left text-xs text-primary">{{ 'user.orders.detail.quantity'|trans }}</th>
+                    <th scope="col" class="px-5 py-3 text-right text-xs text-primary">{{ 'user.orders.detail.line_total'|trans }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in order.orderLines %}
+                    <tr class="border-secondary/20 hover:bg-transparent">
+                        <td class="px-5 py-4 text-sm">
+                            <a href="{{ path('product.show', {slug: line.productSlug}) }}" class="font-semibold">{{ line.productName }}</a>
+                        </td>
+                        <td class="px-5 py-4 text-sm text-ink">{{ line.quantity }}</td>
+                        <td class="px-5 py-4 text-right text-sm font-semibold text-ink">{{ line.lineTotal|format_currency('EUR') }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <dl class="flex flex-col gap-2 border-t border-secondary/20 px-5 py-4 text-sm">
+            <div class="flex justify-between">
+                <dt class="text-muted">{{ 'user.orders.detail.subtotal'|trans }}</dt>
+                <dd class="text-ink">{{ order.subtotal|format_currency('EUR') }}</dd>
+            </div>
+            <div class="flex justify-between">
+                <dt class="text-muted">{{ 'user.orders.detail.vat'|trans }}</dt>
+                <dd class="text-ink">{{ order.taxAmount|format_currency('EUR') }}</dd>
+            </div>
+            <div class="flex justify-between">
+                <dt class="text-muted">{{ 'user.orders.detail.shipping'|trans }}</dt>
+                <dd class="text-ink">{{ order.shippingAmount|format_currency('EUR') }}</dd>
+            </div>
+            <div class="flex justify-between border-t border-secondary/20 pt-2 text-base">
+                <dt class="font-semibold text-primary">{{ 'user.orders.detail.total'|trans }}</dt>
+                <dd class="font-bold text-primary">{{ order.totalAmount|format_currency('EUR') }}</dd>
+            </div>
+        </dl>
+    </section>
+
+    <div class="grid gap-6 md:grid-cols-2">
+        {% for type in ['DELIVERY', 'BILLING'] %}
+            {% set address = order.orderAddresses|filter(address => address.type and address.type.value == type)|first %}
+            {% if address %}
+                <section class="rounded-xl border border-secondary bg-white p-5 text-sm text-ink">
+                    <h2 class="mb-2 text-base">{{ ('user.orders.detail.addresses.' ~ type|lower)|trans }}</h2>
+                    <p>{{ address.firstName }} {{ address.lastName }}</p>
+                    <p>{{ address.address }}</p>
+                    <p>{{ address.postalCode }} {{ address.city }}</p>
+                    <p>{{ address.country|country }}</p>
+                </section>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endblock %}

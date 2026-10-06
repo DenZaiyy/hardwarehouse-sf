@@ -1,4 +1,40 @@
 user:
+    account:
+        menu:
+            label: 'Espace client'
+            profile: 'Mon profil'
+            orders: 'Mes commandes'
+            addresses: 'Mes adresses'
+            password: 'Mot de passe'
+            logout: 'Se déconnecter'
+    orders:
+        title: 'Mes commandes'
+        empty: "Vous n'avez pas encore passé de commande."
+        guest_notice: "Les commandes passées sans compte n'apparaissent pas ici."
+        show: 'Voir le détail'
+        columns:
+            reference: Référence
+            date: Date
+            status: Statut
+            items: Articles
+            total: Total
+            action: Action
+        detail:
+            title: 'Commande %reference%'
+            back: 'Retour à mes commandes'
+            date: Date
+            payment_method: 'Moyen de paiement'
+            items: Articles
+            product: Produit
+            quantity: Quantité
+            line_total: 'Total TTC'
+            subtotal: 'Sous-total HT'
+            vat: TVA
+            shipping: Livraison
+            total: 'Total TTC'
+            addresses:
+                delivery: 'Adresse de livraison'
+                billing: 'Adresse de facturation'
     registration:
         title: 'Créez votre compte'
         agree_terms: { label: "J'accepte les conditions générales d'utilisation", is_true: "Vous devez accepter les conditions générales d'utilisation." }
@@ -60,6 +96,7 @@ header:
         empty: { label: 'Panier vide' }
         show: 'Voir le panier'
     nav:
+        orders: { label: 'Mes commandes' }
         profile: { label: Profil }
         logout: { label: Déconnexion }
         register: { label: "S'inscrire" }
