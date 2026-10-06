@@ -32,6 +32,9 @@ user:
             vat: VAT
             shipping: Shipping
             total: 'Total incl. VAT'
+            invoice:
+                label: Invoice
+                download: 'Download the invoice (PDF)'
             addresses:
                 delivery: 'Delivery address'
                 billing: 'Billing address'

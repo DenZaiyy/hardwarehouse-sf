@@ -3,9 +3,9 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Invoice;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 
 /**
  * @extends AbstractSecuredCrudController<Invoice>
@@ -17,14 +17,11 @@ class InvoiceCrudController extends AbstractSecuredCrudController
         return Invoice::class;
     }
 
-    /*
-    public function configureFields(string $pageName): iterable
+    /** Pièces comptables émises automatiquement au paiement : consultables, jamais créées ni modifiées ici. */
+    public function configureActions(Actions $actions): Actions
     {
-        return [
-            IdField::new('id')->hideOnForm(),
-            TextField::new('title'),
-            TextEditorField::new('description'),
-        ];
+        return $actions
+            ->add(Crud::PAGE_INDEX, Action::DETAIL)
+            ->disable(Action::NEW, Action::EDIT, Action::DELETE);
     }
-    */
 }

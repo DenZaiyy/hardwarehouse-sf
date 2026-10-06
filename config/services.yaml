@@ -9,6 +9,20 @@
 parameters:
     app.supported_locales: 'en|fr'
 
+    # Identité du vendeur portée sur les factures. Valeurs fictives (projet d'examen), remplaçables par
+    # les variables d'environnement du même nom ; vider INVOICE_NOTICE avec de vraies valeurs.
+    app.invoice_seller:
+        name: '%env(INVOICE_SELLER_NAME)%'
+        address: '%env(INVOICE_SELLER_ADDRESS)%'
+        siret: '%env(INVOICE_SELLER_SIRET)%'
+        vat_number: '%env(INVOICE_SELLER_VAT_NUMBER)%'
+        notice: '%env(INVOICE_NOTICE)%'
+    env(INVOICE_SELLER_NAME): 'HardWareHouse SAS (société fictive)'
+    env(INVOICE_SELLER_ADDRESS): '10 avenue de Bruxelles, 68350 Brunstatt-Didenheim, France'
+    env(INVOICE_SELLER_SIRET): '000 000 000 00000 (fictif)'
+    env(INVOICE_SELLER_VAT_NUMBER): 'FR00 000000000 (fictif)'
+    env(INVOICE_NOTICE): "Document établi dans le cadre d'un projet d'examen : la société et ses identifiants sont fictifs."
+
 services:
     # default configuration for services in *this* file
     _defaults:

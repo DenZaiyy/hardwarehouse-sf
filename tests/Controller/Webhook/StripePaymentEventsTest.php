@@ -66,6 +66,22 @@ final class StripePaymentEventsTest extends WebTestCase
         self::assertEmailCount(0);
     }
 
+    public function testConfirmedOrderGetsItsInvoiceAttachedToTheEmail(): void
+    {
+        $order = $this->createOrder($this->createUser())->setCustomerEmail('jean.dupont@example.com');
+        $this->entityManager()->flush();
+
+        $this->send('payment_intent.succeeded', ['id' => 'pi_invoice', 'object' => 'payment_intent', 'metadata' => ['order_reference' => $order->getReference()]]);
+
+        $invoice = $this->reload($order)->getInvoice();
+        self::assertNotNull($invoice);
+        $email = self::getMailerMessage();
+        self::assertInstanceOf(\Symfony\Component\Mime\Email::class, $email);
+        $attachments = $email->getAttachments();
+        self::assertCount(1, $attachments);
+        self::assertSame('facture-'.$invoice->getReference().'.pdf', $attachments[0]->getFilename());
+    }
+
     public function testSucceededPaymentConfirmsTheOrderEvenBeforeTheSessionEvent(): void
     {
         $order = $this->createOrder(null);

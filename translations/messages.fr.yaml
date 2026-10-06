@@ -32,6 +32,9 @@ user:
             vat: TVA
             shipping: Livraison
             total: 'Total TTC'
+            invoice:
+                label: Facture
+                download: 'Télécharger la facture (PDF)'
             addresses:
                 delivery: 'Adresse de livraison'
                 billing: 'Adresse de facturation'

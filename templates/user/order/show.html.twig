@@ -24,6 +24,12 @@
             <dt class="text-muted">{{ 'user.orders.detail.payment_method'|trans }}</dt>
             <dd class="font-semibold text-ink">{{ order.paymentMethod|trans }}</dd>
         </div>
+        {% if order.invoice or order.status.paid %}
+            <div>
+                <dt class="text-muted">{{ 'user.orders.detail.invoice.label'|trans }}</dt>
+                <dd><a href="{{ path('order.invoice', {reference: order.reference}) }}" class="font-semibold underline">{{ 'user.orders.detail.invoice.download'|trans }}</a></dd>
+            </div>
+        {% endif %}
     </dl>
 
     <section class="overflow-x-auto rounded-xl border border-secondary bg-white">

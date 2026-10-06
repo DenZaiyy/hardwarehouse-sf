@@ -8,8 +8,10 @@ use App\Entity\Order;
 use App\Entity\User;
 use App\Repository\OrderRepository;
 use App\Security\Voter\OrderVoter;
+use App\Service\Invoice\InvoiceGenerator;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -37,5 +39,19 @@ final class OrderController extends AbstractController
         return $this->render('user/order/show.html.twig', [
             'order' => $order,
         ]);
+    }
+
+    /** Une commande non payée n'a pas de facture, sauf si elle en a reçu une avant d'être remboursée. */
+    #[Route('/{reference}/invoice', name: 'invoice', methods: ['GET'])]
+    #[IsGranted(OrderVoter::VIEW, subject: 'order', statusCode: Response::HTTP_NOT_FOUND)]
+    public function invoice(#[MapEntity(mapping: ['reference' => 'reference'])] Order $order, InvoiceGenerator $invoiceGenerator): BinaryFileResponse
+    {
+        if (null === $order->getInvoice() && !$order->getStatus()->isPaid()) {
+            throw $this->createNotFoundException();
+        }
+
+        $invoice = $invoiceGenerator->forOrder($order);
+
+        return $this->file($invoiceGenerator->absolutePath($invoice), 'facture-'.$invoice->getReference().'.pdf');
     }
 }

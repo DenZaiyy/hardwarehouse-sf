@@ -67,6 +67,31 @@ final class OrderControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(404);
     }
 
+    public function testCustomerDownloadsTheInvoiceOfAPaidOrder(): void
+    {
+        $customer = $this->createUser();
+        $order = $this->orderWithLine($customer, quantity: 1);
+
+        $this->client->loginUser($customer);
+        $this->client->request('GET', '/fr/profile/orders/'.$order->getReference().'/invoice');
+
+        self::assertResponseIsSuccessful();
+        self::assertResponseHeaderSame('Content-Type', 'application/pdf');
+        self::assertStringContainsString('filename=facture-FAC-', (string) $this->client->getResponse()->headers->get('Content-Disposition'));
+    }
+
+    public function testUnpaidOrderHasNoInvoice(): void
+    {
+        $customer = $this->createUser();
+        $order = $this->orderWithLine($customer, quantity: 1)->setStatus(OrderStatus::PENDING);
+        $this->entityManager()->flush();
+
+        $this->client->loginUser($customer);
+        $this->client->request('GET', '/fr/profile/orders/'.$order->getReference().'/invoice');
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
     public function testVisitorIsAskedToLogIn(): void
     {
         $this->client->request('GET', '/fr/profile/orders');
