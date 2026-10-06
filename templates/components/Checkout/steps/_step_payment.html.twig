@@ -13,70 +13,43 @@
         <div class="text-sm text-muted">
             Complète d'abord la livraison.
         </div>
-    {% elseif state.paymentCompleted %}
-        <div class="text-sm font-medium text-success">
-            Commande finalisée.
-        </div>
     {% elseif state.currentStep == 4 %}
-        {% if not state.paymentMethod %}
-            <div class="space-y-3">
-                <div class="font-medium">Choisissez votre moyen de paiement :</div>
+        <fieldset class="space-y-3">
+            <legend class="font-medium">Choisissez votre moyen de paiement :</legend>
 
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {% for method, label in availablePaymentMethods %}
-                    <button
-                        type="button"
-                        class="w-full flex items-center gap-3 rounded border p-3 text-left hover:border-black"
-                        data-action="live#action"
-                        data-live-action-param="selectPaymentMethod"
-                        data-live-method-param="{{ method }}"
-                    >
-                        {% if method == 'stripe' %}
-                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/>
-                            </svg>
-                        {% endif %}
+                    {# Vrais boutons radio, stylés en boutons : le choix reste un groupe au clavier et au lecteur d'écran #}
+                    <label class="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-primary bg-white px-4 py-3 font-title font-semibold text-primary transition-colors has-[:checked]:bg-primary has-[:checked]:text-paragraph has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary has-[:focus-visible]:ring-offset-2">
+                        <input
+                            type="radio"
+                            name="payment_method"
+                            value="{{ method }}"
+                            class="sr-only"
+                            {% if method == selectedPaymentMethod %}checked{% endif %}
+                            data-action="change->live#action"
+                            data-live-action-param="selectPaymentMethod"
+                            data-live-method-param="{{ method }}"
+                        >
+                        {{ ux_icon(method == 'paypal' ? 'simple-icons:paypal' : 'lucide:credit-card', {height: '20px', width: '20px'}) }}
                         <span>{{ label }}</span>
-                    </button>
+                    </label>
                 {% endfor %}
             </div>
-        {% else %}
-            <div class="rounded border p-3 text-sm space-y-2">
-                <div class="font-medium">Récapitulatif de votre commande :</div>
-                <div>Transporteur : {{ selectedCarrierLabel ?? 'Non défini' }}</div>
-                <div>Moyen de paiement : {{ this.availablePaymentMethods[state.paymentMethod] ?? state.paymentMethod }}</div>
-            </div>
+        </fieldset>
 
-            <div class="flex gap-2">
-                <button
-                    type="button"
-                    data-action="live#action"
-                    data-live-action-param="selectPaymentMethod"
-                    data-live-method-param=""
-                    class="rounded border px-4 py-2 text-sm"
-                >
-                    Modifier
-                </button>
+        <p class="text-xs text-muted">
+            Paiement sécurisé par Stripe : vos données bancaires ne transitent pas par HardWareHouse.
+        </p>
 
-                {% if state.paymentMethod == 'stripe' %}
-                    <button
-                        type="button"
-                        data-action="live#action"
-                        data-live-action-param="processPayment"
-                        class="rounded bg-black text-white px-6 py-2 font-medium"
-                    >
-                        Payer maintenant
-                    </button>
-                {% else %}
-                    <button
-                        type="button"
-                        data-action="live#action"
-                        data-live-action-param="finalizePayment"
-                        class="rounded bg-black text-white px-6 py-2 font-medium"
-                    >
-                        Finaliser la commande
-                    </button>
-                {% endif %}
-            </div>
-        {% endif %}
+        {# Désactivé pendant la requête : un double clic créait deux commandes et deux sessions Stripe #}
+        <button
+            type="button"
+            data-action="live#action"
+            data-live-action-param="processPayment"
+            data-loading="attr(disabled)"
+        >
+            Payer {{ orderTotal|format_currency('EUR') }}
+        </button>
     {% endif %}
 </section>

@@ -1,5 +1,6 @@
 <div {{ attributes }} class="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
     {% set state = this.state %}
+    {% set totals = this.orderTotals %}
 
     <div class="space-y-4">
         {% include 'components/Checkout/steps/_step_identity.html.twig' with {
@@ -29,9 +30,10 @@
 
         {% include 'components/Checkout/steps/_step_payment.html.twig' with {
             state: state,
-            selectedCarrierLabel: this.selectedCarrierLabel,
             availablePaymentMethods: this.availablePaymentMethods,
-            paymentNotices: this.paymentNotices
+            selectedPaymentMethod: this.selectedPaymentMethod,
+            paymentNotices: this.paymentNotices,
+            orderTotal: totals.total
         } only %}
     </div>
 
@@ -40,7 +42,7 @@
             state: state,
             cartItems: this.cartItems,
             cartCount: this.cartCount,
-            totals: this.orderTotals
+            totals: totals
         } only %}
     </div>
 </div>

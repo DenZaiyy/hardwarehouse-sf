@@ -553,21 +553,13 @@ final class CheckoutComponent
     {
         $state = $this->getState();
 
-        if ($state->identityCompleted && $state->addressCompleted && $state->deliveryCompleted) {
-            $state->paymentMethod = empty($method) ? null : $method;
-            $state->currentStep = 4;
-
-            $this->stateManager->saveState($state);
+        // La valeur vient du navigateur : seuls les moyens proposés sont retenus
+        if (!isset($this->getAvailablePaymentMethods()[$method])) {
+            return;
         }
-    }
-
-    #[LiveAction]
-    public function finalizePayment(): void
-    {
-        $state = $this->getState();
 
         if ($state->identityCompleted && $state->addressCompleted && $state->deliveryCompleted) {
-            $state->paymentCompleted = true;
+            $state->paymentMethod = $method;
             $state->currentStep = 4;
 
             $this->stateManager->saveState($state);
@@ -575,15 +567,25 @@ final class CheckoutComponent
     }
 
     /**
+     * Moyens de paiement proposés, tous encaissés par Stripe : les clés sont les types de moyens de
+     * paiement Stripe (payment_method_types).
+     *
      * @return array<string, string>
      */
     public function getAvailablePaymentMethods(): array
     {
         return [
-            'stripe' => 'Carte bancaire (Stripe)',
-            // 'paypal' => 'PayPal',
-            // 'bank_transfer' => 'Virement bancaire',
+            'card' => 'Carte bancaire',
+            'paypal' => 'PayPal',
         ];
+    }
+
+    /** Moyen choisi par le client ; la carte bancaire est présélectionnée, comme sur la maquette. */
+    public function getSelectedPaymentMethod(): string
+    {
+        $method = $this->getState()->paymentMethod;
+
+        return null !== $method && isset($this->getAvailablePaymentMethods()[$method]) ? $method : 'card';
     }
 
     public function getSelectedCarrierLabel(): ?string
@@ -723,7 +725,7 @@ final class CheckoutComponent
         $successUrl = $this->urlGenerator->generate('payment.success', ['reference' => $order->getReference()], UrlGeneratorInterface::ABSOLUTE_URL);
         $cancelUrl = $this->urlGenerator->generate('checkout.index', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $session = $this->stripeService->createCheckoutSession($order, $this->getSelectedCarrierLabel(), $successUrl, $cancelUrl);
+        $session = $this->stripeService->createCheckoutSession($order, $this->getSelectedCarrierLabel(), $this->getSelectedPaymentMethod(), $successUrl, $cancelUrl);
 
         $sessionUrl = $session->url;
         if (null === $sessionUrl) {

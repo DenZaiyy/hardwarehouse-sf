@@ -124,6 +124,34 @@ final class CheckoutComponentTest extends WebTestCase
         self::assertNotNull($radio->attr('checked'));
     }
 
+    public function testPaymentStepOffersCardAndPaypal(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+
+        $page = $this->readyToPay($client, $this->carrier('Colissimo'), $this->cartWith($this->apiHasProduct($slug), $slug))->render()->crawler();
+
+        $methods = $page->filter('input[name="payment_method"]');
+        self::assertSame(['card', 'paypal'], $methods->each(static fn (Crawler $radio): string => (string) $radio->attr('value')));
+        // Carte bancaire présélectionnée, comme sur la maquette
+        self::assertNotNull($methods->first()->attr('checked'));
+        // 449,90 € HT, soit 539,88 € TTC, et 4,90 € de port
+        self::assertStringContainsString('544,78', $page->filter('button[data-live-action-param="processPayment"]')->text());
+    }
+
+    public function testUnknownPaymentMethodIsIgnored(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $checkout = $this->readyToPay($client, $this->carrier('Colissimo'), $this->cartWith($this->apiHasProduct($slug), $slug));
+
+        $checkout->call('selectPaymentMethod', ['method' => 'paypal']);
+        // Valeur envoyée par le navigateur, hors de la liste proposée
+        $checkout->call('selectPaymentMethod', ['method' => 'virement']);
+
+        self::assertNotNull($checkout->render()->crawler()->filter('input[name="payment_method"][value="paypal"]')->attr('checked'));
+    }
+
     public function testPaymentIsNotStartedWhenTheCartChangedSinceItWasFilled(): void
     {
         $client = static::createClient();
@@ -181,7 +209,6 @@ final class CheckoutComponentTest extends WebTestCase
             identity: self::IDENTITY,
             deliveryAddress: self::ADDRESS,
             carrierId: $carrier instanceof Carrier ? $carrier->getId() : $carrier,
-            paymentMethod: 'stripe',
             identityCompleted: true,
             addressCompleted: true,
             deliveryCompleted: true,
