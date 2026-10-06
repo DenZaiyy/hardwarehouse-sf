@@ -520,16 +520,26 @@ Quand une commande est payée, le webhook Stripe met en file un message `RecordO
 commande à `POST /api/v1/stock-exits`. **Sans worker, les messages restent dans `messenger_messages` et
 le stock ne baisse jamais.**
 
-Service systemd `/etc/systemd/system/hardwarehouse-messenger.service` :
+Créer le service avec l'éditeur de systemd, qui évite les pièges du copier-coller dans le shell (lignes
+repliées, espaces ajoutés) :
+```bash
+sudo systemctl edit --force --full hardwarehouse-messenger.service
+```
+Contenu, en remplaçant `/chemin/du/projet` par le chemin **absolu** du projet sur le serveur (systemd ne
+comprend pas `~`) ; un `\` doit être le dernier caractère de sa ligne :
 ```ini
 [Unit]
-Description=HardWareHouse - worker Messenger (sorties de stock)
+Description=HardWareHouse worker Messenger
 After=network.target postgresql.service
 
 [Service]
 User=www-data
-WorkingDirectory=/var/www/hardwarehouse
-ExecStart=/usr/bin/php bin/console messenger:consume async --time-limit=3600 --memory-limit=128M --env=prod
+WorkingDirectory=/chemin/du/projet
+ExecStart=/usr/bin/php8.4 \
+  /chemin/du/projet/bin/console \
+  messenger:consume async \
+  --time-limit=3600 \
+  --memory-limit=128M --env=prod
 Restart=always
 RestartSec=5
 
@@ -537,10 +547,15 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 ```bash
-sudo systemctl daemon-reload
+sudo systemd-analyze verify /etc/systemd/system/hardwarehouse-messenger.service   # rien = valide
+systemctl show hardwarehouse-messenger -p ExecStart --no-pager                    # commande lancée
 sudo systemctl enable --now hardwarehouse-messenger
-journalctl -u hardwarehouse-messenger -f        # suivre le worker
+systemctl status hardwarehouse-messenger --no-pager                              # active (running)
+sudo journalctl -u hardwarehouse-messenger -n 50 --no-pager                      # sudo : groupe adm requis sinon
+php bin/console messenger:stats --env=prod                                       # messages en attente
 ```
+`www-data` (l'utilisateur de PHP-FPM) doit pouvoir lire le projet et écrire dans `var/`. En production,
+le worker ne journalise que les erreurs ; `messenger:stats` montre la file.
 
 `make prod` termine par `messenger:stop-workers` : le worker s'arrête proprement après son message en
 cours et systemd le relance avec le nouveau code.
