@@ -88,22 +88,29 @@ jobs:
             && (needs.deploy-test.result == 'success' || needs.deploy-test.result == 'skipped')
         runs-on: ubuntu-latest
         steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-              with:
-                  token: ${{ secrets.PAT_TOKEN }}
-                  fetch-depth: 0
+            # Une PR suit sa branche : GitHub y ajoute de lui-même les commits arrivés sur test. Il ne reste qu'à
+            # la créer si aucune n'est ouverte, sinon à refaire son corps, qui décrit l'état de la préproduction.
+            # PAT_TOKEN plutôt que GITHUB_TOKEN : une PR créée avec ce dernier ne déclenche pas les workflows.
+            # API REST plutôt que gh pr edit / create : ces commandes lisent en GraphQL des données de
+            # l'organisation et exigent la portée read:org, que le jeton n'a pas (seulement repo).
+            - name: Create or update the pull request from test to main
+              env:
+                  GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+                  GH_REPO: ${{ github.repository }}
+                  PREPROD: ${{ needs.deploy-test.result == 'success' && '✅ **Préproduction :** à jour sur [test.hardwarehouse.fr](https://test.hardwarehouse.fr)' || '⏭️ **Préproduction :** sautée, non configurée (variable `PREPROD_ENABLED`)' }}
+              run: |
+                  if [ "$(gh api "repos/$GH_REPO/compare/main...test" --jq '.ahead_by')" = "0" ]; then
+                      echo "test n'a aucun commit absent de main : pas de PR"
+                      exit 0
+                  fi
 
-            - name: Create Pull Request from test to main
-              uses: repo-sync/pull-request@v2
-              with:
-                  source_branch: test          # branche source
-                  destination_branch: main     # branche destination
-                  github_token: ${{ secrets.PAT_TOKEN }}
-                  pr_title: "🚀 Deploy to Production - Auto PR from test"
-                  pr_body: |
-                      ## 🚀 Déploiement en Production
+                  BODY=$(printf '## 🚀 Déploiement en Production\n\n✅ **Tests passés sur :** dev → test\n%s\n' "$PREPROD")
+                  PR=$(gh api "repos/$GH_REPO/pulls?state=open&base=main&head=$GITHUB_REPOSITORY_OWNER:test" --jq '.[].number')
 
-                      ✅ **Tests passés sur :** dev → test
-                      ${{ needs.deploy-test.result == 'success' && '✅ **Préproduction :** à jour sur [test.hardwarehouse.fr](https://test.hardwarehouse.fr)' || '⏭️ **Préproduction :** sautée, non configurée (variable `PREPROD_ENABLED`)' }}
-                  pr_draft: false
+                  if [ -n "$PR" ]; then
+                      gh api -X PATCH "repos/$GH_REPO/pulls/$PR" -f body="$BODY" --silent
+                      echo "PR #$PR mise à jour"
+                  else
+                      gh api -X POST "repos/$GH_REPO/pulls" -f base=main -f head=test \
+                          -f title="🚀 Deploy to Production - Auto PR from test" -f body="$BODY" --jq '.html_url'
+                  fi

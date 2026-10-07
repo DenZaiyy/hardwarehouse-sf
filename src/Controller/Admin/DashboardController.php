@@ -54,7 +54,6 @@ class DashboardController extends AbstractDashboardController
 
             MenuItem::subMenu('Users', 'fa-solid fa-users')->setSubItems([
                 MenuItem::linkTo(UserCrudController::class, 'Users', 'fa-solid fa-users'),
-                MenuItem::linkTo(UserCrudController::class, 'Add user', 'fa-solid fa-users')->setAction(Action::NEW),
                 MenuItem::linkTo(AddressCrudController::class, 'Address', 'fa-solid fa-address-book'),
             ]),
 

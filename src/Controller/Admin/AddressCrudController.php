@@ -44,8 +44,10 @@ class AddressCrudController extends AbstractSecuredCrudController
     {
         return [
             IdField::new('id', 'ID')->hideOnForm(),
+            // User n'a pas de __toString() : le formulaire affiche l'e-mail, comme la liste
             AssociationField::new('user')
                 ->formatValue(static fn (User $user) => $user->getEmail())
+                ->setFormTypeOption('choice_label', 'email')
                 ->setSortProperty('email'),
             ChoiceField::new('type', 'Type')
                 ->setChoices(AddressType::cases())
