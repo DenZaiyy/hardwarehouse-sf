@@ -81,9 +81,8 @@
     {% endblock %}
 </head>
 <body class="flex flex-col min-h-screen relative">
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TVB43RJ9" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
+    {# Pas d'iframe <noscript> de Google Tag Manager : sans JavaScript, le bandeau ne peut recueillir aucun
+       consentement, et Turbo la chargeait à chaque navigation (son contenu devient de vrais éléments) #}
     {% include '_partials/_header.html.twig' %}
     <div id="flash-messages" class="relative">
         {% include '_partials/_flash_messages.html.twig' %}
