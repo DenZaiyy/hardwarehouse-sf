@@ -41,13 +41,13 @@ final class AdminPagesTest extends WebTestCase
     }
 
     /**
-     * Les factures et les commandes ne se créent pas depuis le back-office (actions désactivées).
+     * Les factures, les commandes et les comptes ne se créent pas depuis le back-office (actions désactivées).
      *
      * @return iterable<string, array{string}>
      */
     public static function creationForms(): iterable
     {
-        foreach (['/address', '/carrier', '/cart', '/cart-line', '/order-line', '/shipment', '/user'] as $path) {
+        foreach (['/address', '/carrier', '/cart', '/cart-line', '/order-line', '/shipment'] as $path) {
             yield '/fr/admin'.$path.'/new' => ['/fr/admin'.$path.'/new'];
         }
     }
@@ -62,6 +62,23 @@ final class AdminPagesTest extends WebTestCase
         $client->request('GET', $url);
 
         self::assertResponseIsSuccessful();
+    }
+
+    /**
+     * Un compte se crée par l'inscription ou le tunnel de commande, avec la vérification de l'e-mail et la
+     * politique de mot de passe : le back-office n'en gère que les rôles et le bannissement.
+     */
+    public function testUserAccountsAreNotCreatedFromTheBackOffice(): void
+    {
+        $client = static::createClient();
+        $client->loginUser($this->createUser('admin')->setRoles(['ROLE_SUPER_ADMIN']));
+        $this->entityManager()->flush();
+
+        $client->request('GET', '/fr/admin/user');
+        self::assertSelectorNotExists('a[href$="/admin/user/new"]');
+
+        $client->request('GET', '/fr/admin/user/new');
+        self::assertResponseStatusCodeSame(403);
     }
 
     /** Les rôles se modifient ici : roles stocke des chaînes, que le champ doit cocher. */

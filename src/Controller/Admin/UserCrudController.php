@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\User;
 use App\Enum\UserRoleType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AvatarField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
@@ -32,6 +33,15 @@ class UserCrudController extends AbstractSecuredCrudController
     public static function getEntityFqcn(): string
     {
         return User::class;
+    }
+
+    /**
+     * Un compte se crée par l'inscription ou le tunnel de commande, avec la vérification de l'e-mail et la
+     * politique de mot de passe : le back-office n'en gère que les rôles et le bannissement.
+     */
+    public function configureActions(Actions $actions): Actions
+    {
+        return $actions->disable(Action::NEW);
     }
 
     #[\Override]
