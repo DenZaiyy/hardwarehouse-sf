@@ -232,23 +232,30 @@ aucun e-mail réel).
    SYMFONY_TRUSTED_PROXIES=<identique à la production>
    ```
 5. **Nginx** : dupliquer le bloc serveur de production en remplaçant `server_name` par
-   `test.hardwarehouse.fr`, `root` par `/var/www/hardwarehouse-test/public` et le chemin du
-   `maintenance.flag`, avec un certificat valide pour ce domaine et la même configuration Cloudflare
-   (`real_ip`, Authenticated Origin Pulls, voir [INFRASTRUCTURE.md](INFRASTRUCTURE.md)). Ajouter :
+   `test.hardwarehouse.fr` (sans `www.` : le certificat universel de Cloudflare ne couvre qu'un niveau de
+   sous-domaine), `root` par `/var/www/hardwarehouse-test/public` et le chemin du `maintenance.flag`, avec
+   un certificat valide pour ce domaine et la même configuration Cloudflare (`real_ip`, Authenticated
+   Origin Pulls, voir [INFRASTRUCTURE.md](INFRASTRUCTURE.md)). En tête du fichier, hors du bloc `server` :
+   ```nginx
+   # Stripe doit pouvoir notifier les paiements sans authentification. La décision se prend sur l'URI
+   # d'origine : un `auth_basic off` dans `location = /webhook/stripe` ne suffit pas, car `try_files`
+   # renvoie la requête en interne vers /index.php, dont le bloc hérite de l'authentification (401).
+   map $request_uri $hwh_preprod_auth {
+       /webhook/stripe  off;
+       default          "Préproduction HardWareHouse";
+   }
+   ```
+   Puis, dans le bloc `server` :
    ```nginx
    # La préproduction ne doit pas être référencée
    add_header X-Robots-Tag "noindex, nofollow" always;
 
-   # Accès réservé (fichier créé avec htpasswd)
-   auth_basic "Préproduction HardWareHouse";
+   # Accès réservé (fichier créé avec htpasswd), sauf pour le webhook Stripe
+   auth_basic $hwh_preprod_auth;
    auth_basic_user_file /etc/nginx/.htpasswd-hardwarehouse-test;
-
-   # Stripe doit pouvoir notifier les paiements sans authentification
-   location = /webhook/stripe {
-       auth_basic off;
-       try_files $uri /index.php$is_args$args;
-   }
    ```
+   Contrôle : sans identifiants, `https://test.hardwarehouse.fr/` répond 401, et un `POST` sur
+   `/webhook/stripe` répond 400 (signature absente), jamais 401.
 6. **Stripe (environnement de test)** : dans Workbench, onglet **Webhooks**, ajouter une destination
    « endpoint de webhook » vers `https://test.hardwarehouse.fr/webhook/stripe`, avec les événements
    traités par `StripeWebhookController` (les mêmes qu'en production) : `checkout.session.completed`,
