@@ -223,7 +223,10 @@ aucun e-mail réel).
    DEFAULT_URI=https://test.hardwarehouse.fr
    DATABASE_URL="postgresql://hardwarehouse_test:<mot-de-passe>@127.0.0.1:5432/hardwarehouse_test?serverVersion=16&charset=utf8"
    API_BASE_URL=https://api.hardwarehouse.fr   # API de production, lue seulement
+   SHOP_API_TOKEN=                             # vide : aucune sortie de stock sur l'API de production
    MAILER_DSN=null://null                      # aucun e-mail réel depuis la préproduction
+   FROM_EMAIL=<identique à la production>
+   ADMIN_EMAIL=<identique à la production>
    MESSENGER_TRANSPORT_DSN=<identique à la production>
    STRIPE_SECRET_KEY=sk_test_...               # clés de test uniquement
    STRIPE_WEBHOOK_SECRET=whsec_...             # secret du point de terminaison de test (étape 6)
@@ -281,7 +284,11 @@ aucun e-mail réel).
    tant qu'elle n'existe pas, le job de préproduction est sauté et la PR vers `main` est créée dès que les
    tests passent.
 9. **Premier déploiement** : lancer `make prod` à la main dans le dossier (création de la base et
-   migrations), puis vérifier le site avant de pousser sur `test`.
+   migrations), puis vérifier le site avant de pousser sur `test`. Le job de la CI ne fait que mettre à
+   jour un dépôt existant (`git fetch`, `git reset --hard origin/test`, `make prod`) : le clone, la base,
+   le `.env.local` et les ACL de `var/` (voir [Worker Messenger](#worker-messenger-sorties-de-stock)) se font à la main,
+   une fois. Écrire le `.env.local` à partir du modèle ci-dessus plutôt que copier celui de la production :
+   une variable oubliée donne une erreur explicite, au lieu de pointer en silence vers la production.
 
 ### Limite connue
 
