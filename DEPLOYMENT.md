@@ -563,6 +563,19 @@ le worker ne journalise que les erreurs ; `messenger:stats` montre la file.
 `make prod` termine par `messenger:stop-workers` : le worker s'arrête proprement après son message en
 cours et systemd le relance avec le nouveau code.
 
+Ce signal passe par le cache de l'application (`var/share/prod/pools/app/`), qu'écrivent à la fois `www-data`
+(PHP-FPM, worker) et l'utilisateur du déploiement. Avec les seuls propriétaires et droits Unix, un dossier
+créé par `www-data` reste fermé à l'utilisateur du déploiement : la commande affiche alors
+`Failed to save key "workers.restart_requested_timestamp" … Permission denied`, puis `[OK]` à tort, et le
+worker garde l'ancien code jusqu'à sa relance horaire (`--time-limit=3600`). Donner les droits aux deux
+utilisateurs par ACL, comme le recommande la documentation de Symfony, une fois, depuis le dossier du
+projet et en tant qu'utilisateur du déploiement (paquet `acl` requis) :
+```bash
+sudo setfacl -dR -m u:www-data:rwX -m u:$(whoami):rwX var   # fichiers à venir
+sudo setfacl -R -m u:www-data:rwX -m u:$(whoami):rwX var    # fichiers existants
+php bin/console messenger:stop-workers --env=prod             # plus d'erreur : le worker redémarre
+```
+
 **Reprises et échecs.** Une API injoignable ou en erreur fait réessayer le message 3 fois, avec un délai
 croissant ; il passe ensuite dans la file `failed`. Un refus n'est pas réessayé : un stock insuffisant
 (409) envoie aussi une alerte à `ADMIN_EMAIL`, pour décider entre réassort et remboursement ; un jeton
