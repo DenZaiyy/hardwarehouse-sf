@@ -47,8 +47,14 @@ class UserCrudController extends AbstractSecuredCrudController
     #[\Override]
     public function configureFields(string $pageName): iterable
     {
+        // roles stocke des chaînes : des cas d'enum feraient basculer EasyAdmin sur EnumType, sans classe d'enum
+        $roleChoices = [];
+        foreach (UserRoleType::cases() as $role) {
+            $roleChoices[$role->trans($this->translator)] = $role->value;
+        }
+
         $rolesField = ChoiceField::new('roles', 'Rôles')
-            ->setChoices(UserRoleType::cases())
+            ->setChoices($roleChoices)
             ->formatValue(fn (array $values): string => implode(', ', array_map(
                 function (mixed $role): string {
                     assert(is_string($role));

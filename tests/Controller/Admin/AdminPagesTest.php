@@ -40,6 +40,45 @@ final class AdminPagesTest extends WebTestCase
         self::assertResponseIsSuccessful();
     }
 
+    /**
+     * Les factures et les commandes ne se créent pas depuis le back-office (actions désactivées).
+     *
+     * @return iterable<string, array{string}>
+     */
+    public static function creationForms(): iterable
+    {
+        foreach (['/address', '/carrier', '/cart', '/cart-line', '/order-line', '/shipment', '/user'] as $path) {
+            yield '/fr/admin'.$path.'/new' => ['/fr/admin'.$path.'/new'];
+        }
+    }
+
+    #[DataProvider('creationForms')]
+    public function testCreationFormOpensForAnAdministrator(string $url): void
+    {
+        $client = static::createClient();
+        $client->loginUser($this->createUser('admin')->setRoles(['ROLE_SUPER_ADMIN']));
+        $this->entityManager()->flush();
+
+        $client->request('GET', $url);
+
+        self::assertResponseIsSuccessful();
+    }
+
+    /** Les rôles se modifient ici : roles stocke des chaînes, que le champ doit cocher. */
+    public function testUserEditionFormChecksTheRolesOfTheUser(): void
+    {
+        $client = static::createClient();
+        $client->loginUser($this->createUser('admin')->setRoles(['ROLE_SUPER_ADMIN']));
+        $customer = $this->createUser()->setRoles(['ROLE_ADMIN']);
+        $this->entityManager()->flush();
+
+        $client->request('GET', '/fr/admin/user/'.$customer->getId().'/edit');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('input[name="User[roles][]"][value="ROLE_ADMIN"]:checked');
+        self::assertSelectorNotExists('input[name="User[roles][]"][value="ROLE_SUPER_ADMIN"]:checked');
+    }
+
     /** Un enum ne fait échouer une liste qu'à l'affichage d'une ligne : chaque écran en reçoit une. */
     private function createRowsWithEnums(): void
     {
