@@ -19,10 +19,12 @@ jobs:
     tests:
         uses: ./.github/workflows/test.yml
 
-    # Déploie la branche test sur la préproduction (test.hardwarehouse.fr)
+    # Déploie la branche test sur la préproduction (test.hardwarehouse.fr).
+    # Sauté tant que la variable de dépôt PREPROD_ENABLED ne vaut pas 'true' : le serveur n'est pas installé.
     deploy-test:
         name: Deploy to preprod
         needs: [audit, quality, tests]
+        if: vars.PREPROD_ENABLED == 'true'
         runs-on: ubuntu-latest
         environment: preprod
         timeout-minutes: 15
@@ -73,10 +75,17 @@ jobs:
 
                       echo "🎉 Preprod deployment completed successfully!"
 
-    # Crée PR vers master, seulement si la préproduction est à jour
+    # Crée la PR vers main quand les tests passent et que la préproduction est à jour, ou sautée.
+    # Un job sauté fait sauter ceux qui en dépendent : d'où la condition explicite.
     create-pr-to-master:
         name: Create PR to Master
-        needs: [deploy-test]
+        needs: [audit, quality, tests, deploy-test]
+        if: >-
+            !cancelled()
+            && needs.audit.result == 'success'
+            && needs.quality.result == 'success'
+            && needs.tests.result == 'success'
+            && (needs.deploy-test.result == 'success' || needs.deploy-test.result == 'skipped')
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
@@ -96,7 +105,5 @@ jobs:
                       ## 🚀 Déploiement en Production
 
                       ✅ **Tests passés sur :** dev → test
-                      ✅ **Déploiement test :** Réussi
-
-                      **Environnement de test :** [test.hardwarehouse.fr](https://test.hardwarehouse.fr)
+                      ${{ needs.deploy-test.result == 'success' && '✅ **Préproduction :** à jour sur [test.hardwarehouse.fr](https://test.hardwarehouse.fr)' || '⏭️ **Préproduction :** sautée, non configurée (variable `PREPROD_ENABLED`)' }}
                   pr_draft: false
