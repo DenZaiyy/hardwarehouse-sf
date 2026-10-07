@@ -17,7 +17,7 @@ graph LR
 
 ### Workflow Automatisé :
 1. **`dev`** → Push → Quality + Audit + Tests → Auto-merge vers `test`
-2. **`test`** → Re-tests → Déploiement en préproduction (`test.hardwarehouse.fr`) → Création PR automatique vers `main`
+2. **`test`** → Re-tests → Déploiement en préproduction (`test.hardwarehouse.fr`, sauté tant que la variable `PREPROD_ENABLED` ne vaut pas `true`) → Création PR automatique vers `main`
 3. **`main`** → Merge manuel → Triple validation → Déploiement production
 
 ## Prérequis
@@ -182,8 +182,8 @@ Jobs:
 ├── quality      # Re-validation qualité
 ├── audit        # Re-audit sécurité
 ├── tests        # Re-tests complets
-├── deploy-test  # Déploiement en préproduction (voir section dédiée)
-└── create-pr    # PR automatique vers main, seulement si la préproduction est à jour
+├── deploy-test  # Déploiement en préproduction (voir section dédiée), sauté sans PREPROD_ENABLED=true
+└── create-pr    # PR automatique vers main si les tests passent et que la préproduction est à jour ou sautée
 ```
 
 ### **ci-main.yml** - Branche `main`
@@ -269,7 +269,10 @@ aucun e-mail réel).
 7. **reCAPTCHA** : ajouter `test.hardwarehouse.fr` aux domaines autorisés de la clé, ou créer une clé dédiée.
 8. **GitHub** : créer l'environnement `preprod` (Settings > Environments) et ses secrets (voir
    [Secrets GitHub Requis](#secrets-github-requis)). Le job refuse de s'exécuter si
-   `PREPROD_PROJECT_PATH` est vide ou identique à `PROJECT_PATH`.
+   `PREPROD_PROJECT_PATH` est vide ou identique à `PROJECT_PATH`. Créer enfin la variable de dépôt
+   `PREPROD_ENABLED` avec la valeur `true` (Settings > Secrets and variables > Actions, onglet Variables) :
+   tant qu'elle n'existe pas, le job de préproduction est sauté et la PR vers `main` est créée dès que les
+   tests passent.
 9. **Premier déploiement** : lancer `make prod` à la main dans le dossier (création de la base et
    migrations), puis vérifier le site avant de pousser sur `test`.
 
@@ -559,6 +562,19 @@ le worker ne journalise que les erreurs ; `messenger:stats` montre la file.
 
 `make prod` termine par `messenger:stop-workers` : le worker s'arrête proprement après son message en
 cours et systemd le relance avec le nouveau code.
+
+Ce signal passe par le cache de l'application (`var/share/prod/pools/app/`), qu'écrivent à la fois `www-data`
+(PHP-FPM, worker) et l'utilisateur du déploiement. Avec les seuls propriétaires et droits Unix, un dossier
+créé par `www-data` reste fermé à l'utilisateur du déploiement : la commande affiche alors
+`Failed to save key "workers.restart_requested_timestamp" … Permission denied`, puis `[OK]` à tort, et le
+worker garde l'ancien code jusqu'à sa relance horaire (`--time-limit=3600`). Donner les droits aux deux
+utilisateurs par ACL, comme le recommande la documentation de Symfony, une fois, depuis le dossier du
+projet et en tant qu'utilisateur du déploiement (paquet `acl` requis) :
+```bash
+sudo setfacl -dR -m u:www-data:rwX -m u:$(whoami):rwX var   # fichiers à venir
+sudo setfacl -R -m u:www-data:rwX -m u:$(whoami):rwX var    # fichiers existants
+php bin/console messenger:stop-workers --env=prod             # plus d'erreur : le worker redémarre
+```
 
 **Reprises et échecs.** Une API injoignable ou en erreur fait réessayer le message 3 fois, avec un délai
 croissant ; il passe ensuite dans la file `failed`. Un refus n'est pas réessayé : un stock insuffisant
