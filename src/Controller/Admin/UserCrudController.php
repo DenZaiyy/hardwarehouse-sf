@@ -5,6 +5,7 @@ namespace App\Controller\Admin;
 use App\Entity\User;
 use App\Enum\UserRoleType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AvatarField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
@@ -34,6 +35,15 @@ class UserCrudController extends AbstractSecuredCrudController
         return User::class;
     }
 
+    /**
+     * Un compte se crée par l'inscription ou le tunnel de commande, avec la vérification de l'e-mail et la
+     * politique de mot de passe : le back-office n'en gère que les rôles et le bannissement.
+     */
+    public function configureActions(Actions $actions): Actions
+    {
+        return $actions->disable(Action::NEW);
+    }
+
     #[\Override]
     public function configureFilters(Filters $filters): Filters
     {
@@ -47,8 +57,14 @@ class UserCrudController extends AbstractSecuredCrudController
     #[\Override]
     public function configureFields(string $pageName): iterable
     {
+        // roles stocke des chaînes : des cas d'enum feraient basculer EasyAdmin sur EnumType, sans classe d'enum
+        $roleChoices = [];
+        foreach (UserRoleType::cases() as $role) {
+            $roleChoices[$role->trans($this->translator)] = $role->value;
+        }
+
         $rolesField = ChoiceField::new('roles', 'Rôles')
-            ->setChoices(UserRoleType::cases())
+            ->setChoices($roleChoices)
             ->formatValue(fn (array $values): string => implode(', ', array_map(
                 function (mixed $role): string {
                     assert(is_string($role));

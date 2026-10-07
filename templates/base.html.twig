@@ -10,6 +10,8 @@
     <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {# Turbo signe avec ce nonce les scripts qu'insèrent ses flux : c'est ce qu'il prévoit pour une CSP à nonce #}
+    <meta name="csp-nonce" content="{{ csp_nonce() }}">
 
     {% set default_title = "HardWareHouse" %}
     {% set default_description = "seo.description.default"|trans %}
