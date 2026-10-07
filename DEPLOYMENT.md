@@ -237,8 +237,13 @@ aucun e-mail réel).
 5. **Nginx** : dupliquer le bloc serveur de production en remplaçant `server_name` par
    `test.hardwarehouse.fr` (sans `www.` : le certificat universel de Cloudflare ne couvre qu'un niveau de
    sous-domaine), `root` par `/var/www/hardwarehouse-test/public` et le chemin du `maintenance.flag`, avec
-   un certificat valide pour ce domaine et la même configuration Cloudflare (`real_ip`, Authenticated
-   Origin Pulls, voir [INFRASTRUCTURE.md](INFRASTRUCTURE.md)). En tête du fichier, hors du bloc `server` :
+   la même configuration Cloudflare (`real_ip`, Authenticated Origin Pulls, voir
+   [INFRASTRUCTURE.md](INFRASTRUCTURE.md)). Le certificat Let's Encrypt de production ne couvre pas
+   `test.hardwarehouse.fr`, et le mode Full (strict) de Cloudflare le refuserait (erreur 526) : utiliser un
+   certificat d'origine Cloudflare (SSL/TLS > Origin Server, nom `test.hardwarehouse.fr`, valable 15 ans).
+   Seul Cloudflare le reconnaît, ce qui suffit puisque l'origine n'accepte que Cloudflare ; il évite aussi
+   la validation Let's Encrypt, que l'authentification et la redirection HTTPS gêneraient. En tête du
+   fichier, hors du bloc `server` :
    ```nginx
    # Stripe doit pouvoir notifier les paiements sans authentification. La décision se prend sur l'URI
    # d'origine : un `auth_basic off` dans `location = /webhook/stripe` ne suffit pas, car `try_files`
