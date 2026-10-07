@@ -222,7 +222,7 @@ aucun e-mail réel).
    APP_SECRET=<nouvelle valeur, différente de la production>
    DEFAULT_URI=https://test.hardwarehouse.fr
    DATABASE_URL="postgresql://hardwarehouse_test:<mot-de-passe>@127.0.0.1:5432/hardwarehouse_test?serverVersion=16&charset=utf8"
-   API_BASE_URL=https://api.hardwarehouse.fr   # API de production, lue seulement
+   API_BASE_URL=https://api.hardwarehouse.fr/api/v1/   # API de production ; barre finale requise
    SHOP_API_TOKEN=                             # vide : aucune sortie de stock sur l'API de production
    MAILER_DSN=null://null                      # aucun e-mail réel depuis la préproduction
    FROM_EMAIL=<identique à la production>
