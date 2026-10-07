@@ -291,8 +291,16 @@ aucun e-mail réel).
 9. **Premier déploiement** : lancer `make prod` à la main dans le dossier (création de la base et
    migrations), puis vérifier le site avant de pousser sur `test`. Le job de la CI ne fait que mettre à
    jour un dépôt existant (`git fetch`, `git reset --hard origin/test`, `make prod`) : le clone, la base,
-   le `.env.local` et les ACL de `var/` (voir [Worker Messenger](#worker-messenger-sorties-de-stock)) se font à la main,
-   une fois. Écrire le `.env.local` à partir du modèle ci-dessus plutôt que copier celui de la production :
+   le `.env.local` et les ACL de `var/` (voir [Worker Messenger](#worker-messenger-sorties-de-stock)) et de
+   `public/uploads/` se font à la main, une fois. `public/uploads/images/` est ignoré par Git : sans lui,
+   EasyAdmin et l'envoi d'avatar tentent de le créer sous `www-data`, qui n'a pas le droit d'écrire dans
+   `public/` (erreur 500 sur le formulaire des transporteurs) :
+   ```bash
+   mkdir -p public/uploads/images/carriers
+   sudo setfacl -dR -m u:www-data:rwX -m u:$(whoami):rwX public/uploads
+   sudo setfacl -R -m u:www-data:rwX -m u:$(whoami):rwX public/uploads
+   ```
+   Écrire le `.env.local` à partir du modèle ci-dessus plutôt que copier celui de la production :
    une variable oubliée donne une erreur explicite, au lieu de pointer en silence vers la production.
 
 ### Limite connue
