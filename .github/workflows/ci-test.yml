@@ -91,6 +91,8 @@ jobs:
             # Une PR suit sa branche : GitHub y ajoute de lui-même les commits arrivés sur test. Il ne reste qu'à
             # la créer si aucune n'est ouverte, sinon à refaire son corps, qui décrit l'état de la préproduction.
             # PAT_TOKEN plutôt que GITHUB_TOKEN : une PR créée avec ce dernier ne déclenche pas les workflows.
+            # API REST plutôt que gh pr edit / create : ces commandes lisent en GraphQL des données de
+            # l'organisation et exigent la portée read:org, que le jeton n'a pas (seulement repo).
             - name: Create or update the pull request from test to main
               env:
                   GH_TOKEN: ${{ secrets.PAT_TOKEN }}
@@ -103,11 +105,12 @@ jobs:
                   fi
 
                   BODY=$(printf '## 🚀 Déploiement en Production\n\n✅ **Tests passés sur :** dev → test\n%s\n' "$PREPROD")
-                  PR=$(gh pr list --base main --head test --state open --json number --jq '.[].number')
+                  PR=$(gh api "repos/$GH_REPO/pulls?state=open&base=main&head=$GITHUB_REPOSITORY_OWNER:test" --jq '.[].number')
 
                   if [ -n "$PR" ]; then
-                      gh pr edit "$PR" --body "$BODY"
+                      gh api -X PATCH "repos/$GH_REPO/pulls/$PR" -f body="$BODY" --silent
                       echo "PR #$PR mise à jour"
                   else
-                      gh pr create --base main --head test --title "🚀 Deploy to Production - Auto PR from test" --body "$BODY"
+                      gh api -X POST "repos/$GH_REPO/pulls" -f base=main -f head=test \
+                          -f title="🚀 Deploy to Production - Auto PR from test" -f body="$BODY" --jq '.html_url'
                   fi
