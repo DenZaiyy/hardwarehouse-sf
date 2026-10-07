@@ -183,7 +183,7 @@ Jobs:
 ├── audit        # Re-audit sécurité
 ├── tests        # Re-tests complets
 ├── deploy-test  # Déploiement en préproduction (voir section dédiée), sauté sans PREPROD_ENABLED=true
-└── create-pr    # PR automatique vers main si les tests passent et que la préproduction est à jour ou sautée
+└── create-pr    # PR vers main si les tests passent et que la préproduction est à jour ou sautée (créée, ou mise à jour si déjà ouverte)
 ```
 
 ### **ci-main.yml** - Branche `main`
