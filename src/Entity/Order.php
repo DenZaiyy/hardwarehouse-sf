@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Enum\OrderStatus;
+use App\Enum\PaymentMethod;
 use App\Repository\OrderRepository;
 use App\Trait\TimestampTrait;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -40,6 +41,17 @@ class Order
 
     #[ORM\Column(length: 50, enumType: OrderStatus::class)]
     private OrderStatus $status = OrderStatus::PENDING;
+
+    /**
+     * Adresse de confirmation : celle du compte, ou celle saisie dans le tunnel pour un achat sans
+     * compte. Vide pour les commandes sans compte passées avant son ajout.
+     */
+    #[ORM\Column(length: 180, nullable: true)]
+    private ?string $customerEmail = null;
+
+    /** Choisi dans la boutique ; la session Stripe ne propose que ce moyen. */
+    #[ORM\Column(length: 20, enumType: PaymentMethod::class)]
+    private PaymentMethod $paymentMethod = PaymentMethod::CARD;
 
     #[ORM\OneToOne(mappedBy: 'order', cascade: ['persist', 'remove'])]
     private ?Invoice $invoice = null;
@@ -169,6 +181,36 @@ class Order
     public function setStatus(OrderStatus $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getCustomerEmail(): ?string
+    {
+        return $this->customerEmail;
+    }
+
+    public function setCustomerEmail(?string $customerEmail): static
+    {
+        $this->customerEmail = $customerEmail;
+
+        return $this;
+    }
+
+    /** Nombre d'articles : la somme des quantités des lignes. */
+    public function getItemCount(): int
+    {
+        return array_sum($this->orderLines->map(static fn (OrderLine $line): int => $line->getQuantity() ?? 0)->toArray());
+    }
+
+    public function getPaymentMethod(): PaymentMethod
+    {
+        return $this->paymentMethod;
+    }
+
+    public function setPaymentMethod(PaymentMethod $paymentMethod): static
+    {
+        $this->paymentMethod = $paymentMethod;
 
         return $this;
     }

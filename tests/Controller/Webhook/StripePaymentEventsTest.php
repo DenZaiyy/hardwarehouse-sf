@@ -44,6 +44,55 @@ final class StripePaymentEventsTest extends WebTestCase
         self::assertSame('pi_paid_checkout', $order->getStripePaymentIntentId());
     }
 
+    public function testConfirmedOrderSendsTheConfirmationEmailOnce(): void
+    {
+        $order = $this->withAddresses($this->createOrder($this->createUser())->setCustomerEmail('jean.dupont@example.com'));
+        $metadata = ['order_reference' => $order->getReference()];
+
+        $this->send('payment_intent.succeeded', ['id' => 'pi_confirmation_email', 'object' => 'payment_intent', 'metadata' => $metadata]);
+
+        self::assertEmailCount(1);
+        $email = self::getMailerMessage();
+        self::assertNotNull($email);
+        self::assertEmailAddressContains($email, 'to', 'jean.dupont@example.com');
+        self::assertEmailSubjectContains($email, (string) $order->getReference());
+        // Commande d'un compte : le lien mène au détail dans l'espace client
+        self::assertEmailHtmlBodyContains($email, '/fr/profile/orders/'.$order->getReference());
+
+        // L'événement de session qui suit ne change plus le statut : pas de second e-mail
+        $this->send('checkout.session.completed', ['object' => 'checkout.session', 'payment_intent' => 'pi_confirmation_email', 'payment_status' => 'paid', 'metadata' => $metadata]);
+
+        self::assertEmailCount(0);
+    }
+
+    public function testConfirmedOrderGetsItsInvoiceAttachedToTheEmail(): void
+    {
+        $order = $this->withAddresses($this->createOrder($this->createUser())->setCustomerEmail('jean.dupont@example.com'));
+
+        $this->send('payment_intent.succeeded', ['id' => 'pi_invoice', 'object' => 'payment_intent', 'metadata' => ['order_reference' => $order->getReference()]]);
+
+        $invoice = $this->reload($order)->getInvoice();
+        self::assertNotNull($invoice);
+        $email = self::getMailerMessage();
+        self::assertInstanceOf(\Symfony\Component\Mime\Email::class, $email);
+        $attachments = $email->getAttachments();
+        self::assertCount(1, $attachments);
+        self::assertSame('facture-'.$invoice->getReference().'.pdf', $attachments[0]->getFilename());
+    }
+
+    public function testConfirmedOrderQueuesItsStockExit(): void
+    {
+        $order = $this->withAddresses($this->createOrder($this->createUser())->setCustomerEmail('jean.dupont@example.com'));
+
+        $this->send('payment_intent.succeeded', ['id' => 'pi_stock_exit', 'object' => 'payment_intent', 'metadata' => ['order_reference' => $order->getReference()]]);
+
+        // Traité par le worker : la réponse au webhook n'attend pas l'API
+        /** @var \Symfony\Component\Messenger\Transport\InMemory\InMemoryTransport $transport */
+        $transport = static::getContainer()->get('messenger.transport.async');
+        $messages = array_map(static fn ($envelope): object => $envelope->getMessage(), $transport->getSent());
+        self::assertEquals([new \App\Message\RecordOrderStockExit((string) $order->getReference())], $messages);
+    }
+
     public function testSucceededPaymentConfirmsTheOrderEvenBeforeTheSessionEvent(): void
     {
         $order = $this->createOrder(null);

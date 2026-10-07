@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\Order;
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -51,6 +52,35 @@ readonly class MailerService
     }
 
     /**
+     * Confirmation envoyée une fois la commande payée ; une commande sans compte passée avant
+     * l'enregistrement de l'e-mail n'en reçoit pas.
+     */
+    /**
+     * @param array<string, string> $attachments chemin du fichier => nom proposé au client
+     */
+    public function sendOrderConfirmation(Order $order, array $attachments = []): bool
+    {
+        $email = $order->getCustomerEmail();
+        if (null === $email || !$this->validateEmail($email)) {
+            $this->logger->warning('Order confirmation not sent: no valid customer email', [
+                'reference' => $order->getReference(),
+            ]);
+
+            return false;
+        }
+
+        $this->sendTemplatedEmail(
+            $email,
+            sprintf('Confirmation de votre commande %s', $order->getReference()),
+            'emails/order/confirmation.html.twig',
+            ['order' => $order],
+            attachments: $attachments,
+        );
+
+        return true;
+    }
+
+    /**
      * @param array<string, mixed> $context
      */
     public function sendAdminNotification(string $subject, string $message, array $context = [], ?string $adminMail = null): bool
@@ -84,9 +114,10 @@ readonly class MailerService
     }
 
     /**
-     * @param array<string, mixed> $context
+     * @param array<string, mixed>  $context
+     * @param array<string, string> $attachments chemin du fichier => nom proposé au destinataire
      */
-    public function sendTemplatedEmail(string $to, string $subject, string $template, array $context = [], ?string $from = null): void
+    public function sendTemplatedEmail(string $to, string $subject, string $template, array $context = [], ?string $from = null, array $attachments = []): void
     {
         try {
             $email = new TemplatedEmail()
@@ -95,6 +126,9 @@ readonly class MailerService
                 ->subject($subject)
                 ->htmlTemplate($template)
                 ->context($context);
+            foreach ($attachments as $path => $name) {
+                $email->attachFromPath($path, $name);
+            }
             $this->mailer->send($email);
         } catch (TransportExceptionInterface $e) {
             $this->logger->error('Erreur lors de l\'envoi de l\'email template', [

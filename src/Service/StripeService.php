@@ -20,13 +20,10 @@ class StripeService
         Stripe::setApiVersion('');
     }
 
-    /**
-     * @param string $paymentMethodType Stripe payment method type chosen in the shop: card or paypal
-     */
-    public function createCheckoutSession(Order $order, ?string $carrierLabel, string $paymentMethodType, string $successUrl, string $cancelUrl): Session
+    public function createCheckoutSession(Order $order, ?string $carrierLabel, string $successUrl, string $cancelUrl): Session
     {
         return (new StripeClient($this->stripeSecretKey))->checkout->sessions->create(
-            $this->checkoutSessionParameters($order, $carrierLabel, $paymentMethodType, $successUrl, $cancelUrl),
+            $this->checkoutSessionParameters($order, $carrierLabel, $successUrl, $cancelUrl),
         );
     }
 
@@ -34,10 +31,8 @@ class StripeService
      * Built from the order, not from the cart: Stripe bills the discounted unit prices recorded on the
      * order lines, rounded like the order totals, so the amount charged is the order total to the cent.
      *
-     * The customer picks card or PayPal in the shop, so the Stripe page only offers that method. A
-     * method must be enabled in the Stripe Dashboard (Settings > Payment methods) to be accepted.
-     *
-     * @param string $paymentMethodType Stripe payment method type chosen in the shop: card or paypal
+     * The customer picks card or PayPal in the shop and the order records it, so the Stripe page only
+     * offers that method. A method must be enabled in the Stripe Dashboard (Settings > Payment methods).
      *
      * @return array{
      *     payment_method_types: list<string>,
@@ -49,7 +44,7 @@ class StripeService
      *     payment_intent_data: array{metadata: array<string, string>}
      * }
      */
-    public function checkoutSessionParameters(Order $order, ?string $carrierLabel, string $paymentMethodType, string $successUrl, string $cancelUrl): array
+    public function checkoutSessionParameters(Order $order, ?string $carrierLabel, string $successUrl, string $cancelUrl): array
     {
         $lineItems = [];
 
@@ -85,7 +80,7 @@ class StripeService
         ];
 
         return [
-            'payment_method_types' => [$paymentMethodType],
+            'payment_method_types' => [$order->getPaymentMethod()->value],
             'line_items' => $lineItems,
             'mode' => 'payment',
             'success_url' => $successUrl,

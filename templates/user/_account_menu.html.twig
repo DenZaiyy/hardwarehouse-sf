@@ -1,0 +1,40 @@
+{% set user = app.user %}
+{% set name = user.username ?: user.email %}
+{% set words = name|split(' ')|filter(word => word is not empty) %}
+{% set initials = words|length > 1 ? words|first|first ~ words|last|first : name|slice(0, 2) %}
+
+<nav class="w-full shrink-0 rounded-xl border border-secondary bg-white p-4 lg:w-70" aria-label="{{ 'user.account.menu.label'|trans }}">
+    <div class="flex items-center gap-3 pb-3">
+        <span class="flex size-13 shrink-0 items-center justify-center rounded-full bg-primary font-title text-xl font-bold text-paragraph" aria-hidden="true">{{ initials|upper }}</span>
+        <div class="min-w-0">
+            <p class="truncate font-semibold text-primary">{{ user.username }}</p>
+            <p class="truncate text-xs text-muted">{{ user.email }}</p>
+        </div>
+    </div>
+
+    <div class="mb-2 h-px bg-secondary/30"></div>
+
+    <ul class="flex flex-col gap-1">
+        {% for entry in [
+            {key: 'profile', route: 'profile.index', icon: 'lucide:user'},
+            {key: 'orders', route: 'order.index', icon: 'lucide:package'},
+            {key: 'addresses', route: 'address.index', icon: 'lucide:map-pin'},
+            {key: 'password', route: 'profile.password', icon: 'lucide:lock'},
+        ] %}
+            <li>
+                <a href="{{ path(entry.route) }}"
+                   class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold hover:no-underline {{ entry.key == active ? 'bg-primary text-paragraph' : 'text-primary hover:bg-paragraph' }}"
+                   {% if entry.key == active %}aria-current="page"{% endif %}>
+                    {{ ux_icon(entry.icon, {class: 'size-5', 'aria-hidden': 'true'}) }}
+                    {{ ('user.account.menu.' ~ entry.key)|trans }}
+                </a>
+            </li>
+        {% endfor %}
+        <li>
+            <a href="{{ logout_path() }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-danger hover:bg-paragraph hover:no-underline">
+                {{ ux_icon('lucide:log-out', {class: 'size-5', 'aria-hidden': 'true'}) }}
+                {{ 'user.account.menu.logout'|trans }}
+            </a>
+        </li>
+    </ul>
+</nav>

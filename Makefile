@@ -107,7 +107,7 @@ tests: ## Running tests using PHPUnit
 ## —— Production ————————————————————————————————————————————————————————————————
 prod: APP_ENV=prod
 prod: APP_DEBUG=0
-prod: vendor-prod assets cache-prod migrate-prod sitemap ## Execute all commands needed to prod env
+prod: vendor-prod assets cache-prod migrate-prod sitemap workers ## Execute all commands needed to prod env
 
 cache-prod: APP_ENV=prod
 cache-prod: APP_DEBUG=0
@@ -141,6 +141,12 @@ migrate-prod: ## Create DB (if needed) and run migrations
 	$(CONSOLE) doctrine:database:create --if-not-exists --no-debug
 	$(call banner,$(INFO),Launch migration without interaction...)
 	$(CONSOLE) doctrine:migrations:migrate --no-interaction --allow-no-migration --no-debug
+
+workers: APP_ENV=prod
+workers: APP_DEBUG=0
+workers: ## Stop the Messenger workers after their current message: systemd restarts them with the new code
+	$(call banner,$(INFO),Restarting Messenger workers...)
+	$(CONSOLE) messenger:stop-workers --no-debug
 
 vendor-prod: ## Install composer dependencies for production
 	composer install --no-dev --optimize-autoloader --classmap-authoritative --no-interaction --prefer-dist

@@ -236,3 +236,4 @@ user:
 'There is already an address of this type for this order': 'There is already an address of this type for this order.'
 'There is already an order with this reference': 'There is already an order with this reference.'
 'There is already a carrier with this name': 'There is already a carrier with this name.'
+'There is already an account with this email: log in to use it.': "There is already an account with this email: log in to use it."

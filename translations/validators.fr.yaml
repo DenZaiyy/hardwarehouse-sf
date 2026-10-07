@@ -236,3 +236,4 @@ user:
 'There is already an address of this type for this order': 'Cette commande a déjà une adresse de ce type.'
 'There is already an order with this reference': 'Une commande porte déjà cette référence.'
 'There is already a carrier with this name': 'Un transporteur porte déjà ce nom.'
+'There is already an account with this email: log in to use it.': "Un compte existe déjà avec cette adresse : connectez-vous pour l'utiliser."

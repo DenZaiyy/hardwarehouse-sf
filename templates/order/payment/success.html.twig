@@ -28,7 +28,7 @@
                     Retour à l'accueil
                 </a>
                 {% if is_granted('ROLE_USER') %}
-                    <a href="#"
+                    <a href="{{ path('order.index') }}"
                        class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-lg font-medium">
                         Mes commandes
                     </a>
