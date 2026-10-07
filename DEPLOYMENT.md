@@ -222,8 +222,11 @@ aucun e-mail réel).
    APP_SECRET=<nouvelle valeur, différente de la production>
    DEFAULT_URI=https://test.hardwarehouse.fr
    DATABASE_URL="postgresql://hardwarehouse_test:<mot-de-passe>@127.0.0.1:5432/hardwarehouse_test?serverVersion=16&charset=utf8"
-   API_BASE_URL=https://api.hardwarehouse.fr   # API de production, lue seulement
+   API_BASE_URL=https://api.hardwarehouse.fr/api/v1/   # API de production ; barre finale requise
+   SHOP_API_TOKEN=                             # vide : aucune sortie de stock sur l'API de production
    MAILER_DSN=null://null                      # aucun e-mail réel depuis la préproduction
+   FROM_EMAIL=<identique à la production>
+   ADMIN_EMAIL=<identique à la production>
    MESSENGER_TRANSPORT_DSN=<identique à la production>
    STRIPE_SECRET_KEY=sk_test_...               # clés de test uniquement
    STRIPE_WEBHOOK_SECRET=whsec_...             # secret du point de terminaison de test (étape 6)
@@ -232,23 +235,35 @@ aucun e-mail réel).
    SYMFONY_TRUSTED_PROXIES=<identique à la production>
    ```
 5. **Nginx** : dupliquer le bloc serveur de production en remplaçant `server_name` par
-   `test.hardwarehouse.fr`, `root` par `/var/www/hardwarehouse-test/public` et le chemin du
-   `maintenance.flag`, avec un certificat valide pour ce domaine et la même configuration Cloudflare
-   (`real_ip`, Authenticated Origin Pulls, voir [INFRASTRUCTURE.md](INFRASTRUCTURE.md)). Ajouter :
+   `test.hardwarehouse.fr` (sans `www.` : le certificat universel de Cloudflare ne couvre qu'un niveau de
+   sous-domaine), `root` par `/var/www/hardwarehouse-test/public` et le chemin du `maintenance.flag`, avec
+   la même configuration Cloudflare (`real_ip`, Authenticated Origin Pulls, voir
+   [INFRASTRUCTURE.md](INFRASTRUCTURE.md)). Le certificat Let's Encrypt de production ne couvre pas
+   `test.hardwarehouse.fr`, et le mode Full (strict) de Cloudflare le refuserait (erreur 526) : utiliser un
+   certificat d'origine Cloudflare (SSL/TLS > Origin Server, nom `test.hardwarehouse.fr`, valable 15 ans).
+   Seul Cloudflare le reconnaît, ce qui suffit puisque l'origine n'accepte que Cloudflare ; il évite aussi
+   la validation Let's Encrypt, que l'authentification et la redirection HTTPS gêneraient. En tête du
+   fichier, hors du bloc `server` :
+   ```nginx
+   # Stripe doit pouvoir notifier les paiements sans authentification. La décision se prend sur l'URI
+   # d'origine : un `auth_basic off` dans `location = /webhook/stripe` ne suffit pas, car `try_files`
+   # renvoie la requête en interne vers /index.php, dont le bloc hérite de l'authentification (401).
+   map $request_uri $hwh_preprod_auth {
+       /webhook/stripe  off;
+       default          "Préproduction HardWareHouse";
+   }
+   ```
+   Puis, dans le bloc `server` :
    ```nginx
    # La préproduction ne doit pas être référencée
    add_header X-Robots-Tag "noindex, nofollow" always;
 
-   # Accès réservé (fichier créé avec htpasswd)
-   auth_basic "Préproduction HardWareHouse";
+   # Accès réservé (fichier créé avec htpasswd), sauf pour le webhook Stripe
+   auth_basic $hwh_preprod_auth;
    auth_basic_user_file /etc/nginx/.htpasswd-hardwarehouse-test;
-
-   # Stripe doit pouvoir notifier les paiements sans authentification
-   location = /webhook/stripe {
-       auth_basic off;
-       try_files $uri /index.php$is_args$args;
-   }
    ```
+   Contrôle : sans identifiants, `https://test.hardwarehouse.fr/` répond 401, et un `POST` sur
+   `/webhook/stripe` répond 400 (signature absente), jamais 401.
 6. **Stripe (environnement de test)** : dans Workbench, onglet **Webhooks**, ajouter une destination
    « endpoint de webhook » vers `https://test.hardwarehouse.fr/webhook/stripe`, avec les événements
    traités par `StripeWebhookController` (les mêmes qu'en production) : `checkout.session.completed`,
@@ -274,7 +289,11 @@ aucun e-mail réel).
    tant qu'elle n'existe pas, le job de préproduction est sauté et la PR vers `main` est créée dès que les
    tests passent.
 9. **Premier déploiement** : lancer `make prod` à la main dans le dossier (création de la base et
-   migrations), puis vérifier le site avant de pousser sur `test`.
+   migrations), puis vérifier le site avant de pousser sur `test`. Le job de la CI ne fait que mettre à
+   jour un dépôt existant (`git fetch`, `git reset --hard origin/test`, `make prod`) : le clone, la base,
+   le `.env.local` et les ACL de `var/` (voir [Worker Messenger](#worker-messenger-sorties-de-stock)) se font à la main,
+   une fois. Écrire le `.env.local` à partir du modèle ci-dessus plutôt que copier celui de la production :
+   une variable oubliée donne une erreur explicite, au lieu de pointer en silence vers la production.
 
 ### Limite connue
 
