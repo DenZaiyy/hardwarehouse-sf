@@ -68,7 +68,7 @@ dev → test (auto) → main (PR manuelle) → production (auto)
 2. ✅ **Re-analyse qualité**
 3. 🧪 **Re-tests complets**
 4. 🚀 **Déploiement en préproduction** (`test.hardwarehouse.fr`), sauté tant que la variable de dépôt `PREPROD_ENABLED` ne vaut pas `true`
-5. 📝 **Création PR automatique vers `main`**, si les tests passent et que la préproduction est à jour ou sautée ; si elle est déjà ouverte, son corps est mis à jour (CLI GitHub `gh`)
+5. 📝 **Création PR automatique vers `main`**, si les tests passent et que la préproduction est à jour ou sautée ; si elle est déjà ouverte, son corps est mis à jour (`gh api`, l'API REST ne demandant au jeton que la portée `repo`)
 
 **Permissions :** `contents: write`, `pull-requests: write`  
 **Variable :** `PREPROD_ENABLED` (absente tant que la préproduction n'est pas installée)  
