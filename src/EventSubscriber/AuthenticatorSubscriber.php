@@ -4,6 +4,7 @@ namespace App\EventSubscriber;
 
 use App\Entity\User;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -17,6 +18,7 @@ use Symfony\Component\Security\Http\Event\LogoutEvent;
 readonly class AuthenticatorSubscriber implements EventSubscriberInterface
 {
     public function __construct(
+        #[Target]
         private LoggerInterface $securityLogger,
         private RequestStack $requestStack,
     ) {
