@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 
@@ -11,8 +12,11 @@ class RateLimiterService
 
     public function __construct(
         private readonly RequestStack $requestStack,
+        #[Target]
         private readonly RateLimiterFactoryInterface $registerFormLimiter,
+        #[Target]
         private readonly RateLimiterFactoryInterface $contactFormLimiter,
+        #[Target]
         private readonly RateLimiterFactoryInterface $newsletterFormLimiter,
     ) {
     }
