@@ -612,9 +612,10 @@ php bin/console messenger:failed:show --env=prod
 php bin/console messenger:failed:retry --env=prod
 ```
 
-**Côté API**, une seule fois : définir `SHOP_API_TOKEN` (même valeur que la boutique) dans les variables
-d'environnement Vercel, puis créer l'index unique qui rend la sortie idempotente avec
-`npm run db:push` sur la base de production.
+**Côté API**, une seule fois : définir `SHOP_API_TOKEN` (même valeur que la boutique) dans
+`~/hardwarehouse-api/shared/.env.local` sur le VPS, puis recharger l'API (`pm2 reload next-api`). L'index unique
+qui rend la sortie idempotente est créé par `prisma db push`, que le déploiement de l'API lance à chaque mise en
+production (`hardwarehouse-api/deploy/README.md`).
 
 **Factures.** Les PDF sont rangés dans `var/invoices/prod/AAAA/`, hors de `public/` : ils sont servis
 uniquement à leur titulaire par `/profile/orders/{référence}/invoice`. Le dossier `var/` fait partie de
