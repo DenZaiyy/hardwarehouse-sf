@@ -8,7 +8,9 @@ use App\Exception\Api\ApiNotFoundException;
 use App\Exception\Api\ApiServerException;
 use App\Exception\Api\ApiUnavailableException;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
@@ -22,7 +24,15 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 
 readonly class ApiService
 {
+    /**
+     * The API writes its dates with JavaScript's toISOString() (milliseconds and "Z"), which the
+     * default RFC 3339 format does not match: parse them with the DateTimeImmutable constructor,
+     * explicitly, instead of the implicit fallback deprecated since Symfony 8.1.
+     */
+    private const array DESERIALIZATION_CONTEXT = [DateTimeNormalizer::FORMAT_KEY => null];
+
     public function __construct(
+        #[Autowire(service: 'api.client')]
         private HttpClientInterface $apiClient,
         private SerializerInterface $serializer,
         private LoggerInterface $logger,
@@ -48,7 +58,7 @@ readonly class ApiService
         $response = $this->request('GET', $endpoint.'?active=true');
 
         /* @var T */
-        return $this->serializer->deserialize($response->getContent(), $dtoClass, 'json');
+        return $this->serializer->deserialize($response->getContent(), $dtoClass, 'json', self::DESERIALIZATION_CONTEXT);
     }
 
     /**
@@ -77,7 +87,8 @@ readonly class ApiService
         return $this->serializer->deserialize(
             json_encode($payload, JSON_THROW_ON_ERROR),
             $dtoClass.'[]',
-            'json'
+            'json',
+            self::DESERIALIZATION_CONTEXT
         );
     }
 
@@ -142,7 +153,8 @@ readonly class ApiService
         $result = $this->serializer->deserialize(
             json_encode($response['data'], JSON_THROW_ON_ERROR),
             $dtoClass.'[]',
-            'json'
+            'json',
+            self::DESERIALIZATION_CONTEXT
         );
 
         /** @var array<T> $data */
