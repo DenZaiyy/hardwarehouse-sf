@@ -56,13 +56,10 @@
         </table>
 
         <dl class="flex flex-col gap-2 border-t border-secondary/20 px-5 py-4 text-sm">
+            {# Montants TTC, comme au panier : le détail hors taxe figure sur la facture #}
             <div class="flex justify-between">
                 <dt class="text-muted">{{ 'user.orders.detail.subtotal'|trans }}</dt>
-                <dd class="text-ink">{{ order.subtotal|format_currency('EUR') }}</dd>
-            </div>
-            <div class="flex justify-between">
-                <dt class="text-muted">{{ 'user.orders.detail.vat'|trans }}</dt>
-                <dd class="text-ink">{{ order.taxAmount|format_currency('EUR') }}</dd>
+                <dd class="text-ink">{{ (order.totalAmount - order.shippingAmount)|format_currency('EUR') }}</dd>
             </div>
             <div class="flex justify-between">
                 <dt class="text-muted">{{ 'user.orders.detail.shipping'|trans }}</dt>
@@ -71,6 +68,10 @@
             <div class="flex justify-between border-t border-secondary/20 pt-2 text-base">
                 <dt class="font-semibold text-primary">{{ 'user.orders.detail.total'|trans }}</dt>
                 <dd class="font-bold text-primary">{{ order.totalAmount|format_currency('EUR') }}</dd>
+            </div>
+            <div class="flex justify-between">
+                <dt class="text-muted">{{ 'user.orders.detail.vat'|trans }}</dt>
+                <dd class="text-muted">{{ order.taxAmount|format_currency('EUR') }}</dd>
             </div>
         </dl>
     </section>

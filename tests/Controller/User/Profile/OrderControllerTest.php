@@ -59,6 +59,22 @@ final class OrderControllerTest extends WebTestCase
         self::assertStringContainsString('France', $page->filter('main')->text());
     }
 
+    public function testOrderDetailShowsItsTotalsIncludingTax(): void
+    {
+        $customer = $this->createUser();
+        $order = $this->orderWithLine($customer, quantity: 2);
+
+        $this->client->loginUser($customer);
+        $page = $this->client->request('GET', '/fr/profile/orders/'.$order->getReference())->filter('main')->text();
+
+        // 124,90 € TTC dont 4,90 € de port : 120,00 € de produits TTC, dont 20,00 € de TVA
+        self::assertStringContainsString('Sous-total TTC', $page);
+        self::assertStringContainsString('120,00', $page);
+        self::assertStringContainsString('Dont TVA', $page);
+        self::assertStringContainsString('20,00', $page);
+        self::assertDoesNotMatchRegularExpression('/\bHT\b/', $page);
+    }
+
     public function testOrderOfAnotherCustomerIsNotFound(): void
     {
         $other = $this->orderWithLine($this->createUser('autre'), quantity: 1);

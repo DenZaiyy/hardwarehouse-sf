@@ -3,6 +3,7 @@
 namespace App\SEO\Schema;
 
 use App\DTO\Api\Products\ProductDto;
+use App\Service\Pricing\PriceCalculator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final readonly class ProductSchemaBuilder
@@ -12,6 +13,7 @@ final readonly class ProductSchemaBuilder
 
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,
+        private PriceCalculator $priceCalculator,
     ) {
     }
 
@@ -26,7 +28,10 @@ final readonly class ProductSchemaBuilder
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
-        $price = $product->discountPrice ?? $product->price;
+        // Le prix que paie le client, celui de la fiche : TTC, remise comprise
+        $price = $this->priceCalculator->unitPriceIncludingTax(
+            $product->promote && null !== $product->discountPrice ? $product->discountPrice : $product->price,
+        ) / 100;
 
         $schema = [
             '@context' => 'https://schema.org',

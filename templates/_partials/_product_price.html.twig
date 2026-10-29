@@ -1,0 +1,20 @@
+{#
+    Prix d'un produit tel que le client le paiera : TTC (filtre ttc, même calcul que le panier), remise comprise.
+    Paramètres : product (prix HT de l'API), class (conteneur), price_class (prix payé).
+#}
+{% set discounted = product.promote and product.discountPrice is not null and product.discountPrice < product.price %}
+<div class="{{ class|default('flex flex-col items-center gap-1') }}">
+    {% if discounted %}
+        <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-danger">
+            -{{ discount_rate(product.price, product.discountPrice) }}%
+        </span>
+    {% endif %}
+    <div class="flex items-center justify-center gap-2">
+        {% if discounted %}
+            <del class="text-sm text-muted line-through">{{ product.price|ttc|format_currency('EUR') }}</del>
+        {% endif %}
+        <span class="{{ price_class|default('text-lg font-bold text-black lg:text-xl') }}">
+            {{ (discounted ? product.discountPrice : product.price)|ttc|format_currency('EUR') }}
+        </span>
+    </div>
+</div>

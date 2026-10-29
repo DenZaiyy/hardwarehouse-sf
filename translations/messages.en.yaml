@@ -28,8 +28,8 @@ user:
             product: Product
             quantity: Quantity
             line_total: 'Total incl. VAT'
-            subtotal: 'Subtotal excl. VAT'
-            vat: VAT
+            subtotal: 'Subtotal incl. VAT'
+            vat: 'Including VAT'
             shipping: Shipping
             total: 'Total incl. VAT'
             invoice:
@@ -90,8 +90,7 @@ header:
     cart:
         label: Cart
         item: { delete: { label: Remove } }
-        subtotal: { label: 'Subtotal excluding tax' }
-        vat: { label: VAT }
+        vat: { label: 'Including VAT' }
         totalttc: { label: 'Total including tax' }
         checkout: { label: 'Proceed to checkout' }
         empty: { label: 'Empty cart' }
