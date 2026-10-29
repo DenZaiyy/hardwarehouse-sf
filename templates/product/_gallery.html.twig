@@ -1,15 +1,20 @@
-{% set productImages = product.images|default([]) %}
-{# Uniformiser la taille de la thumbnail pour qu'elle corresponde aux autres images #}
-{% set normalizedThumbnail = product.thumbnail|replace({'400': '800'}) %}
-{% set allImages = [normalizedThumbnail] %}
-{% if productImages|length > 0 %}
-    {# Uniformiser toutes les images à la même taille #}
-    {% set normalizedProductImages = [] %}
-    {% for image in productImages %}
-        {% set normalizedProductImages = normalizedProductImages|merge([image|replace({'400': '800'})]) %}
-    {% endfor %}
-    {% set allImages = allImages|merge(normalizedProductImages) %}
+{# Tailles générées par l'API (ImageUploadService) : miniature carrée en 400 et 800 px, galerie en 600 et 1200 px.
+   full est l'image affichée en grand et dans la visionneuse, preview la vignette de la liste. #}
+{% set allImages = [] %}
+{% if product.thumbnail %}
+    {% set allImages = [{
+        full: product.thumbnail|catalog_image('@2x'),
+        preview: product.thumbnail|catalog_image,
+        srcset: (product.thumbnail|catalog_image) ~ ' 400w, ' ~ (product.thumbnail|catalog_image('@2x')) ~ ' 800w',
+    }] %}
 {% endif %}
+{% for image in product.images|default([]) %}
+    {% set allImages = allImages|merge([{
+        full: image|catalog_image,
+        preview: image|catalog_image('-sm'),
+        srcset: (image|catalog_image('-sm')) ~ ' 600w, ' ~ (image|catalog_image) ~ ' 1200w',
+    }]) %}
+{% endfor %}
 
 {% if allImages|length > 0 %}
     <div
@@ -28,10 +33,10 @@
                 >
                     <img
                         data-product-gallery-target="mainImage"
-                        src="{{ allImages[0] }}"
-                        srcset="{{ allImages[0] }} 800w, {{ allImages[0]|replace({'800': '1200'}) }} 1200w"
-                        sizes="(min-width: 1024px) 600px, 100vw"
-                        alt="{{ allImages[0].alt|default(product.name) }}"
+                        src="{{ allImages[0].full }}"
+                        srcset="{{ allImages[0].srcset }}"
+                        sizes="(min-width: 1024px) 500px, 100vw"
+                        alt="{{ product.name }}"
                         class="w-full h-full object-contain transition-all duration-200 ease-out"
                     >
 
@@ -104,8 +109,8 @@
                                 data-product-gallery-target="images"
                                 data-action="click->product-gallery#select"
                                 data-index="{{ loop.index0 }}"
-                                data-full-src="{{ image }}"
-                                data-srcset="{{ image }} 800w, {{ image|replace({'800': '1200'}) }} 1200w"
+                                data-full-src="{{ image.full }}"
+                                data-srcset="{{ image.srcset }}"
                                 class="relative shrink-0 w-20 h-20 lg:w-[245px] lg:h-[245px] rounded-lg overflow-hidden snap-start border-2
                                {{ loop.first ? 'border-primary opacity-100' : 'border-transparent hover:border-secondary opacity-60' }}
                                focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2
@@ -114,8 +119,8 @@
                                 aria-current="{{ loop.first ? 'true' : 'false' }}"
                             >
                                 <img
-                                    src="{{ image }}"
-                                    alt="{{ image.alt|default(product.name ~ ' - Image ' ~ loop.index) }}"
+                                    src="{{ image.preview }}"
+                                    alt="{{ product.name ~ ' - Image ' ~ loop.index }}"
                                     class="absolute inset-0 w-full h-full object-cover"
                                     loading="{{ loop.index <= 4 ? 'eager' : 'lazy' }}"
                                 >
@@ -165,8 +170,8 @@
             <div class="relative max-w-[90vw] max-h-[90vh]">
                 <img
                     data-product-gallery-target="lightboxImage"
-                    src="{{ allImages[0] }}"
-                    alt="{{ allImages[0].alt|default(product.name) }}"
+                    src="{{ allImages[0].full }}"
+                    alt="{{ product.name }}"
                     class="max-w-full max-h-[90vh] object-contain"
                 >
             </div>

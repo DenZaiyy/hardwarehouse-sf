@@ -3,17 +3,18 @@
 namespace App\SEO\Schema;
 
 use App\DTO\Api\Products\ProductDto;
+use App\Service\Catalog\CatalogImageUrl;
 use App\Service\Pricing\PriceCalculator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final readonly class ProductSchemaBuilder
 {
     private const string CURRENCY = 'EUR';
-    private const string BASE_URL = 'https://hardwarehouse.fr';
 
     public function __construct(
         private UrlGeneratorInterface $urlGenerator,
         private PriceCalculator $priceCalculator,
+        private CatalogImageUrl $catalogImageUrl,
     ) {
     }
 
@@ -88,13 +89,14 @@ final readonly class ProductSchemaBuilder
     {
         $images = [];
 
-        $thumbnail = $this->absoluteUrl($product->thumbnail);
+        // La miniature dans sa taille de 800 px : celle de 400 px est trop petite pour les résultats enrichis
+        $thumbnail = $this->catalogImageUrl->resolve($product->thumbnail, '@2x');
         if (null !== $thumbnail) {
             $images[] = $thumbnail;
         }
 
         foreach ($product->images as $image) {
-            $absoluteImage = $this->absoluteUrl($image);
+            $absoluteImage = $this->catalogImageUrl->resolve($image);
 
             if (null !== $absoluteImage && !in_array($absoluteImage, $images, true)) {
                 $images[] = $absoluteImage;
@@ -102,19 +104,6 @@ final readonly class ProductSchemaBuilder
         }
 
         return $images;
-    }
-
-    private function absoluteUrl(?string $path): ?string
-    {
-        if (null === $path || '' === $path) {
-            return null;
-        }
-
-        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-            return $path;
-        }
-
-        return rtrim(self::BASE_URL, '/').'/'.ltrim($path, '/');
     }
 
     private function resolveAvailability(ProductDto $product): string

@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Tests\Controller\Api;
 
+use App\Service\Catalog\CatalogImageUrl;
+use App\Tests\Http\ApiMockResponseFactory;
 use App\Tests\Support\FakesCatalogApi;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DomCrawler\Crawler;
 
 final class ProductControllerTest extends WebTestCase
 {
@@ -128,5 +131,76 @@ final class ProductControllerTest extends WebTestCase
         self::assertStringContainsString('539,88', $card->filter('del')->text());
         self::assertStringContainsString('485,89', $card->text());
         self::assertStringContainsString('-10%', $card->text());
+    }
+
+    public function testListedProductImageIsServedByTheApi(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->apiListsProducts([self::productPayload($slug)]);
+
+        $image = $client->request('GET', '/fr/produits')->filter('a[href$="/produits/'.$slug.'"] img');
+
+        self::assertSame($this->apiImages($slug).'/thumbnail.webp', $image->attr('src'));
+        self::assertSame($this->apiImages($slug).'/thumbnail.webp 400w, '.$this->apiImages($slug).'/thumbnail@2x.webp 800w', $image->attr('srcset'));
+        self::assertSame('400', $image->attr('width'));
+        self::assertSame('400', $image->attr('height'));
+    }
+
+    /**
+     * La galerie commence par la miniature en 800 px, puis les images de galerie (600 et 1200 px). Le slug
+     * contient 800, comme celui du Ryzen 7 5800X3D : l'ancien gabarit remplaçait 800 par 1200 dans toute l'adresse.
+     */
+    public function testGalleryShowsTheSizesGeneratedByTheApi(): void
+    {
+        $client = static::createClient();
+        $slug = 'amd-ryzen-7-5800x3d-'.bin2hex(random_bytes(4));
+        $product = self::productPayload($slug);
+        $product['images'] = ['/images/products/'.$slug.'/image-1.webp'];
+        ApiMockResponseFactory::respondWith('products/'.$slug, $product);
+
+        $gallery = $client->request('GET', '/fr/produits/'.$slug)->filter('[data-controller="product-gallery"]');
+
+        $images = $this->apiImages($slug);
+        self::assertSame($images.'/thumbnail@2x.webp', $gallery->filter('[data-product-gallery-target="mainImage"]')->attr('src'));
+        self::assertSame(
+            [
+                [$images.'/thumbnail@2x.webp', $images.'/thumbnail.webp 400w, '.$images.'/thumbnail@2x.webp 800w'],
+                [$images.'/image-1.webp', $images.'/image-1-sm.webp 600w, '.$images.'/image-1.webp 1200w'],
+            ],
+            $gallery->filter('[data-product-gallery-target="images"]')->each(
+                static fn (Crawler $button): array => [$button->attr('data-full-src'), $button->attr('data-srcset')],
+            ),
+        );
+    }
+
+    public function testSharedProductPageShowsItsImage(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug);
+
+        $client->request('GET', '/fr/produits/'.$slug);
+
+        self::assertSelectorExists('meta[property="og:image"][content="'.$this->apiImages($slug).'/thumbnail@2x.webp"]');
+    }
+
+    public function testProductWithoutImageShowsThePlaceholder(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $product = self::productPayload($slug);
+        $product['thumbnail'] = null;
+        ApiMockResponseFactory::respondWith('products/'.$slug, $product);
+
+        $client->request('GET', '/fr/produits/'.$slug);
+
+        self::assertSelectorNotExists('[data-controller="product-gallery"]');
+        self::assertSelectorTextContains('main', 'Aucune image disponible');
+    }
+
+    private function apiImages(string $slug): string
+    {
+        return static::getContainer()->get(CatalogImageUrl::class)->origin().'/images/products/'.$slug;
     }
 }

@@ -2,7 +2,7 @@
     {% for item in cart %}
         <div class="group relative flex items-center gap-4 {% if not loop.last %}border-b{% endif%} {% if loop.index is even %}bg-secondary/10{% endif%} p-4">
             {% if item.imageUrl %}
-                <img src="{{ item.imageUrl }}" alt="{{ item.name }}" loading="lazy" class="w-16 h-16 object-cover rounded">
+                <img src="{{ item.imageUrl|catalog_image }}" alt="{{ item.name }}" loading="lazy" class="w-16 h-16 object-cover rounded">
             {% else %}
                 <div class="w-16 h-16 bg-gray-100 rounded flex items-center justify-center text-muted text-xs">
                     No image
