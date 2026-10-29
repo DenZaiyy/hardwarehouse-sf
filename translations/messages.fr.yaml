@@ -28,8 +28,8 @@ user:
             product: Produit
             quantity: Quantité
             line_total: 'Total TTC'
-            subtotal: 'Sous-total HT'
-            vat: TVA
+            subtotal: 'Sous-total TTC'
+            vat: 'Dont TVA'
             shipping: Livraison
             total: 'Total TTC'
             invoice:
@@ -92,8 +92,7 @@ header:
     cart:
         label: Panier
         item: { delete: { label: Retirer } }
-        subtotal: { label: Sous-total }
-        vat: { label: TVA }
+        vat: { label: 'Dont TVA' }
         totalttc: { label: 'Total TTC' }
         checkout: { label: 'Passer au paiement' }
         empty: { label: 'Panier vide' }

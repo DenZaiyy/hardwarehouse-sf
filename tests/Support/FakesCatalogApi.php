@@ -21,18 +21,51 @@ trait FakesCatalogApi
     /**
      * L'API renvoie cette fiche pour le slug donné. L'identifiant, dérivé du slug, est celui
      * que reprend la ligne de panier : une fiche enregistrée deux fois garde le même produit.
+     * Les prix sont hors taxe, comme dans l'API ; une remise passe par $discountPrice.
      *
      * @param list<array{name: string, type: string, value: string}> $attributes caractéristiques techniques
      */
-    private function apiHasProduct(string $slug, bool $active = true, int $stock = 3, array $attributes = [], float $price = 449.9): string
+    private function apiHasProduct(string $slug, bool $active = true, int $stock = 3, array $attributes = [], float $price = 449.9, ?float $discountPrice = null, ?float $discountAmount = null): string
     {
-        $id = substr(hash('sha256', $slug), 0, 24);
+        ApiMockResponseFactory::respondWith('products/'.$slug, self::productPayload($slug, $active, $stock, $attributes, $price, $discountPrice, $discountAmount));
 
-        ApiMockResponseFactory::respondWith('products/'.$slug, [
-            'id' => $id,
+        return self::productId($slug);
+    }
+
+    private static function productId(string $slug): string
+    {
+        return substr(hash('sha256', $slug), 0, 24);
+    }
+
+    /**
+     * La liste des produits ne contient que ces fiches (voir productPayload()).
+     *
+     * @param list<array<string, mixed>> $products
+     */
+    private function apiListsProducts(array $products): void
+    {
+        ApiMockResponseFactory::respondWith('products', [
+            'data' => $products,
+            'total' => \count($products),
+            'meta' => ['page' => 1, 'limit' => 20, 'totalPages' => 1, 'hasNext' => false, 'hasPrev' => false],
+        ]);
+    }
+
+    /**
+     * @param list<array{name: string, type: string, value: string}> $attributes
+     *
+     * @return array<string, mixed> fiche produit telle que l'API la renvoie
+     */
+    private static function productPayload(string $slug, bool $active = true, int $stock = 3, array $attributes = [], float $price = 449.9, ?float $discountPrice = null, ?float $discountAmount = null): array
+    {
+        return [
+            'id' => self::productId($slug),
             'name' => 'AMD Ryzen 7 7800X3D',
             'slug' => $slug,
             'price' => $price,
+            'discountPrice' => $discountPrice,
+            'discountAmount' => $discountAmount,
+            'promote' => null !== $discountPrice,
             'active' => $active,
             'thumbnail' => 'https://example.com/ryzen-7-7800x3d.webp',
             'images' => [],
@@ -50,9 +83,7 @@ trait FakesCatalogApi
                     'attribute' => ['id' => 'attribut-'.$index, 'name' => $attribute['name'], 'type' => $attribute['type']],
                 ],
             ], array_keys($attributes), $attributes),
-        ]);
-
-        return $id;
+        ];
     }
 
     private function apiFailsOn(string $path, int $status = 503): void
