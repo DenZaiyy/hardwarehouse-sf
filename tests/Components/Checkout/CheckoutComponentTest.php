@@ -177,6 +177,22 @@ final class CheckoutComponentTest extends WebTestCase
         self::assertStringContainsString('544,78', $page->filter('button[data-live-action-param="processPayment"]')->text());
     }
 
+    public function testSummaryShowsAmountsIncludingTax(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+
+        $summary = $this->readyToPay($client, $this->carrier('Colissimo'), $this->cartWith($this->apiHasProduct($slug), $slug))->render()->crawler()->text();
+
+        // 449,90 € HT : 539,88 € de produits TTC, 4,90 € de port, 544,78 € au total, dont 89,98 € de TVA
+        self::assertStringContainsString('Sous-total TTC', $summary);
+        self::assertStringContainsString('539,88', $summary);
+        self::assertStringContainsString('544,78', $summary);
+        self::assertStringContainsString('Dont TVA', $summary);
+        self::assertStringContainsString('89,98', $summary);
+        self::assertDoesNotMatchRegularExpression('/\bHT\b/', $summary);
+    }
+
     public function testPayButtonIsDisabledWhileTheRequestRuns(): void
     {
         $client = static::createClient();

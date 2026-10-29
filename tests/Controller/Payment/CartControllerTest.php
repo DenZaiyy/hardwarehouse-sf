@@ -144,6 +144,21 @@ final class CartControllerTest extends WebTestCase
         self::assertSame(2, $this->quantityInCarts($productId));
     }
 
+    public function testCartTotalIsShownIncludingTaxWithItsVat(): void
+    {
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug, price: 449.9);
+        $this->client->submit($this->addToCartForm($slug));
+
+        $cart = $this->client->request('GET', '/fr/cart')->filter('main')->text();
+
+        // 449,90 € HT : 539,88 € TTC, dont 89,98 € de TVA, sans montant hors taxe à l'écran
+        self::assertStringContainsString('539,88', $cart);
+        self::assertStringContainsString('Dont TVA', $cart);
+        self::assertStringContainsString('89,98', $cart);
+        self::assertDoesNotMatchRegularExpression('/\bHT\b/', $cart);
+    }
+
     public function testCartPageStaysAvailableWhenTheCatalogApiFails(): void
     {
         $this->apiFailsOn('categories');

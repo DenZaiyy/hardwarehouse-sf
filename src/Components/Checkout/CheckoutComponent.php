@@ -628,9 +628,10 @@ final class CheckoutComponent
     }
 
     /**
-     * Get cart totals including carrier costs.
+     * Get cart totals including carrier costs. products_total est le total TTC des articles, celui qu'affiche
+     * le résumé ; subtotal reste le hors taxe enregistré sur la commande.
      *
-     * @return array{subtotal: float, vat_rate: float, vat_amount: float, carrier_cost: float, total: float}
+     * @return array{subtotal: float, products_total: float, vat_rate: float, vat_amount: float, carrier_cost: float, total: float}
      */
     public function getOrderTotals(): array
     {
@@ -641,6 +642,7 @@ final class CheckoutComponent
 
         return [
             'subtotal' => $cartTotals['subtotal'],
+            'products_total' => $cartTotals['total'],
             'vat_rate' => $cartTotals['vat_rate'],
             'vat_amount' => $cartTotals['vat_amount'],
             'carrier_cost' => $carrierCost,
