@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Tests\Controller;
 
+use App\Tests\Support\FakesCatalogApi;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 final class ContentSecurityPolicyTest extends WebTestCase
 {
+    use FakesCatalogApi;
+
     /**
      * Les flux Turbo ajoutent des scripts, comme celui qui referme la fenêtre modale après l'ajout d'une
      * adresse. Leur réponse n'a pas le nonce de la page : Turbo les signe avec celui de la balise
@@ -48,6 +51,31 @@ final class ContentSecurityPolicyTest extends WebTestCase
             static fn (string $src): bool => [] === array_filter($sources, static fn (string $source): bool => str_starts_with($src, $source)),
         );
 
+        self::assertSame([], array_values($blocked));
+    }
+
+    /**
+     * Les images du catalogue viennent de l'origine de l'API (CatalogImageUrl), celle de production comme celle
+     * d'un poste de développement (http://localhost:3000) : img-src doit l'autoriser, sinon le navigateur les bloque.
+     */
+    public function testCatalogueImagesAreAllowedByThePolicy(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug);
+
+        $client->request('GET', '/fr/produits/'.$slug);
+
+        preg_match('/img-src ([^;]*)/', (string) $client->getResponse()->headers->get('Content-Security-Policy'), $directive);
+        $sources = preg_split('/\s+/', trim($directive[1] ?? ''), -1, \PREG_SPLIT_NO_EMPTY) ?: [];
+        preg_match_all('/<img\b[^>]*\bsrc="(https?:[^"]+)"/', (string) $client->getResponse()->getContent(), $images);
+
+        $blocked = array_filter(
+            $images[1],
+            static fn (string $src): bool => [] === array_filter($sources, static fn (string $source): bool => str_starts_with($src, $source.'/')),
+        );
+
+        self::assertNotSame([], $images[1]);
         self::assertSame([], array_values($blocked));
     }
 }

@@ -67,7 +67,8 @@ trait FakesCatalogApi
             'discountAmount' => $discountAmount,
             'promote' => null !== $discountPrice,
             'active' => $active,
-            'thumbnail' => 'https://example.com/ryzen-7-7800x3d.webp',
+            // Chemin relatif, comme l'API l'enregistre après un envoi depuis le back-office (ImageUploadService)
+            'thumbnail' => '/images/products/'.$slug.'/thumbnail.webp',
             'images' => [],
             'shortDescription' => 'Processeur 8 cœurs pour le jeu',
             'description' => 'Fiche produit de test',

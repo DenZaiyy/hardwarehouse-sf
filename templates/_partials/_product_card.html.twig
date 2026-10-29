@@ -8,7 +8,11 @@
     <a href="{{ path('product.show', {slug: product.slug}) }}" class="flex flex-1 flex-col no-underline">
         <div class="aspect-square overflow-hidden rounded-md">
             <img
-                src="{% if product.thumbnail starts with 'https://' %}{{ product.thumbnail }}{% else %}{{ 'http://localhost:3000/' ~ product.thumbnail }}{% endif %}"
+                src="{{ product.thumbnail|catalog_image }}"
+                srcset="{{ product.thumbnail|catalog_image }} 400w, {{ product.thumbnail|catalog_image('@2x') }} 800w"
+                sizes="(min-width: 640px) 280px, 50vw"
+                width="400"
+                height="400"
                 alt="{{ product.name }} preview"
                 loading="lazy"
                 class="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-[1.03]"

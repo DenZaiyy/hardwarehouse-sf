@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Controller\Payment;
 
 use App\Entity\CartLine;
+use App\Service\Catalog\CatalogImageUrl;
 use App\Tests\Support\CreatesShopEntities;
 use App\Tests\Support\FakesCatalogApi;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -157,6 +158,20 @@ final class CartControllerTest extends WebTestCase
         self::assertStringContainsString('Dont TVA', $cart);
         self::assertStringContainsString('89,98', $cart);
         self::assertDoesNotMatchRegularExpression('/\bHT\b/', $cart);
+    }
+
+    public function testCartLineImageIsServedByTheApi(): void
+    {
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug);
+        $this->client->submit($this->addToCartForm($slug));
+
+        $image = $this->client->request('GET', '/fr/cart')->filter('main img[alt="AMD Ryzen 7 7800X3D"]');
+
+        self::assertSame(
+            static::getContainer()->get(CatalogImageUrl::class)->origin().'/images/products/'.$slug.'/thumbnail.webp',
+            $image->attr('src'),
+        );
     }
 
     public function testCartPageStaysAvailableWhenTheCatalogApiFails(): void

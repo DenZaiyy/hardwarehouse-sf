@@ -20,7 +20,7 @@
                     <td><a href="{{ path('brand.show', {slug: brand.slug}) }}">{{ brand.id }}</a></td>
                     <td>{{ brand.name }}</td>
                     <td>{{ brand.slug }}</td>
-                    <td><img src="{{ brand.logo }}" alt="{{ brand.name }} logo" class="size-16"/></td>
+                    <td><img src="{{ brand.logo|catalog_image }}" alt="{{ brand.name }} logo" class="size-16"/></td>
                 </tr>
             {% endfor %}
         {% else %}

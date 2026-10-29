@@ -2,6 +2,7 @@
 
 namespace App\EventListener;
 
+use App\Service\Catalog\CatalogImageUrl;
 use App\Service\CspNonceService;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -11,8 +12,10 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 #[AsEventListener(event: 'kernel.response')]
 class CspNonceListener
 {
-    public function __construct(private readonly CspNonceService $nonceService)
-    {
+    public function __construct(
+        private readonly CspNonceService $nonceService,
+        private readonly CatalogImageUrl $catalogImageUrl,
+    ) {
     }
 
     public function onKernelRequest(RequestEvent $event): void
@@ -34,6 +37,9 @@ class CspNonceListener
             return;
         }
 
+        // Origine des images du catalogue : https://api.hardwarehouse.fr en production, l'API locale en développement
+        $catalogImages = $this->catalogImageUrl->origin();
+
         $response = $event->getResponse();
         $response->headers->set(
             'Content-Security-Policy',
@@ -42,7 +48,7 @@ class CspNonceListener
             "script-src 'self' 'nonce-$nonce' 'strict-dynamic'; ".
             "style-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://fonts.axept.io https://fonts.googleapis.com; ".
             "font-src 'self' https://fonts.gstatic.com https://fonts.axept.io data:; ".
-            "img-src 'self' data: https://api.hardwarehouse.fr https://axeptio.imgix.net https://www.googletagmanager.com https://fonts.gstatic.com https://picsum.photos https://fastly.picsum.photos; ".
+            "img-src 'self' data: $catalogImages https://axeptio.imgix.net https://www.googletagmanager.com https://fonts.gstatic.com https://picsum.photos https://fastly.picsum.photos; ".
             "connect-src 'self' https://www.googletagmanager.com https://api.axept.io https://region1.analytics.google.com/g/collect https://region1.google-analytics.com/g/collect https://static.axept.io/ https://client.axept.io/ https://api.hardwarehouse.fr https://www.google.com/recaptcha/; ".
             'frame-src https://www.google.com/recaptcha/ https://recaptcha.google.com/recaptcha/; '.
             "form-action 'self'; ".

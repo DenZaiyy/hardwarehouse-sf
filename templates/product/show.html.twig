@@ -4,7 +4,7 @@
 
 {% block og_type %}product{% endblock %}
 
-{% block img %}{{ product.thumbnail }}{% endblock %}
+{% block img %}{{ product.thumbnail|catalog_image('@2x') }}{% endblock %}
 {% block og_description %}{{ product.shortDescription }}{% endblock %}
 {% block meta_description %}{{ product.shortDescription }}{% endblock %}
 

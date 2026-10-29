@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Service\ApiService;
+use App\Service\Catalog\CatalogImageUrl;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,6 +22,7 @@ class SearchController extends AbstractController
 {
     public function __construct(
         private readonly ApiService $apiService,
+        private readonly CatalogImageUrl $catalogImageUrl,
         private readonly LoggerInterface $logger,
     ) {
     }
@@ -55,7 +57,7 @@ class SearchController extends AbstractController
                 'id' => $product['id'] ?? null,
                 'name' => $product['name'] ?? 'Produit sans nom',
                 'price' => $product['price'] ?? null,
-                'thumbnail' => $product['thumbnail'] ?? null,
+                'thumbnail' => $this->catalogImageUrl->resolve(is_string($product['thumbnail'] ?? null) ? $product['thumbnail'] : null),
                 'url' => $this->generateUrl('product.show', ['slug' => $product['slug'] ?? '']),
             ], $items);
 
