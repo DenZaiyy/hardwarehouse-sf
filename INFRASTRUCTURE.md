@@ -22,6 +22,8 @@ flowchart LR
 
 Point notable : le storefront Symfony consomme l'API via son nom de domaine public (`API_BASE_URL`), pas en local. Ces appels **ressortent donc réellement vers Cloudflare** avant de revenir sur le VPS (routage en épingle à cheveux / *hairpin*) — ce détail a des implications directes sur la configuration WAF (voir ##7).
 
+Le navigateur charge lui aussi les images du catalogue sur `api.hardwarehouse.fr` : l'API les enregistre sous un chemin relatif (`/images/products/{slug}/thumbnail.webp`) et Nginx les sert depuis `shared/images` (voir `deploy/README.md` du dépôt de l'API). La boutique en déduit l'adresse complète, ainsi que la source autorisée par la directive `img-src` de la CSP, à partir de l'origine de `API_BASE_URL` (`CatalogImageUrl`, filtre Twig `catalog_image`). `API_BASE_URL` doit donc rester une adresse publique : une adresse interne (`http://127.0.0.1:3000`) casserait toutes les images.
+
 ## 2. Pourquoi Cloudflare ?
 
 - **Protection DDoS** en périphérie, avant que le trafic n'atteigne le VPS
