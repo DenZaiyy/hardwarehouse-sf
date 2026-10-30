@@ -139,6 +139,8 @@ Point de vigilance appliqué pendant la mise en place : la règle 5 (DNS) doit r
 
 Méthode de sécurisation suivie pour éviter un verrouillage accidentel de l'accès SSH : configuration de toutes les règles pendant que le pare-feu restait désactivé, activation seulement après relecture complète du jeu de règles, test de reconnexion SSH dans un terminal séparé **avant** de fermer la session existante.
 
+Le port 22 reste ouvert à tout Internet, car les déploiements partent de GitHub Actions et de CircleCI, dont les adresses changent. L'accès SSH est donc protégé sur le serveur lui-même. fail2ban surveille sshd (prison `sshd` du paquet Ubuntu : 5 échecs en 10 minutes bannissent l'adresse 10 minutes). Chaque CI a sa propre clé : celle de l'API ne peut lancer que `deploy/receive-release.sh` (`command=` dans `authorized_keys`), celle de la boutique est autorisée avec `restrict` (ni terminal ni redirection). Aucune n'utilise le mot de passe du compte, qui ouvre aussi `sudo` (voir `DEPLOYMENT.md`). Le compte d'administration se connecte encore par mot de passe, sous la protection de fail2ban.
+
 ## 8. Règle Cloudflare : autoriser le trafic de l'origine elle-même
 
 Conséquence directe du schéma en §1 : les appels serveur-à-serveur de Symfony vers `api.hardwarehouse.fr` traversent Cloudflare comme n'importe quelle requête publique. Sans exception, les protections anti-bot de Cloudflare (Bot Fight Mode, Browser Integrity Check — qui inspecte des en-têtes typiques d'un navigateur, absents d'un client HTTP serveur-à-serveur) pourraient bloquer ce trafic légitime, cassant le site entier de façon difficile à diagnostiquer.
