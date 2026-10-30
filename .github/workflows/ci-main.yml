@@ -64,8 +64,8 @@ jobs:
                   host: ${{ secrets.HOST }}
                   username: ${{ secrets.USERNAME }}
                   port: ${{ secrets.PORT }}
+                  # Clé dédiée à GitHub Actions (DEPLOYMENT.md), jamais le mot de passe du compte, qui ouvre aussi sudo
                   key: ${{ secrets.SSH_PRIVATE_KEY }}
-                  password: ${{ secrets.SSH_PASSWORD }}
                   timeout: 300s
                   script_stop: true
                   script: |

@@ -140,11 +140,16 @@ Dans `Settings > Secrets and variables > Actions` :
 HOST=123.45.67.89                    # IP de votre VPS
 USERNAME=deploy                      # Utilisateur SSH
 PORT=22                              # Port SSH
-SSH_PRIVATE_KEY=-----BEGIN RSA...    # Clé privée SSH complète
-SSH_PASSPHRASE=ma-passphrase         # Passphrase de la clé (si protégée)
-SSH_PASSWORD=mot-de-passe-user       # Mot de passe utilisateur deploy
+SSH_PRIVATE_KEY=-----BEGIN OPENSSH... # Clé privée dédiée à GitHub Actions (ed25519, sans passphrase)
 PROJECT_PATH=/var/www/hardwarehouse  # Chemin du projet
 ```
+
+> Aucun mot de passe : celui de l'utilisateur SSH ouvre aussi `sudo`, il ne doit pas quitter le serveur. La clé sert
+> aux seuls déploiements. Générée sans passphrase (`ssh-keygen -t ed25519 -N "" -f ~/.ssh/hardwarehouse-sf-deploy`),
+> elle est autorisée pour l'utilisateur SSH avec l'option `restrict` (ni redirection de port, ni terminal, dont le
+> script de déploiement n'a pas besoin), puis copiée dans le secret par
+> `gh secret set SSH_PRIVATE_KEY < ~/.ssh/hardwarehouse-sf-deploy`. Pour la révoquer, il suffit de supprimer sa ligne
+> dans `~/.ssh/authorized_keys` du serveur.
 
 ### **Base de données (Tests)**
 > **Configuration PostgreSQL automatique**
@@ -154,7 +159,7 @@ PROJECT_PATH=/var/www/hardwarehouse  # Chemin du projet
 ```env
 PREPROD_PROJECT_PATH=/var/www/hardwarehouse-test   # Chemin de la préproduction, distinct de PROJECT_PATH
 ```
-> Si `HOST`, `USERNAME`, `PORT`, `SSH_PRIVATE_KEY` et `SSH_PASSWORD` sont rattachés à l'environnement `prod`, les recopier aussi dans `preprod`.
+> Si `HOST`, `USERNAME`, `PORT` et `SSH_PRIVATE_KEY` sont rattachés à l'environnement `prod`, les recopier aussi dans `preprod`.
 
 ### **Auto-merge dev→test**
 ```env
