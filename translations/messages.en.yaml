@@ -262,3 +262,20 @@ cart:
         decrease: 'Remove one'
         increase: 'Add one'
         remove: 'Remove this item from the cart'
+componentSlot:
+    cpu:
+        label: Processor
+    cooler:
+        label: Cooling
+    motherboard:
+        label: Motherboard
+    ram:
+        label: Memory
+    gpu:
+        label: 'Graphics card'
+    storage:
+        label: Storage
+    case:
+        label: Case
+    psu:
+        label: 'Power supply'

@@ -264,3 +264,20 @@ cart:
         decrease: 'Retirer un exemplaire'
         increase: 'Ajouter un exemplaire'
         remove: 'Retirer cet article du panier'
+componentSlot:
+    cpu:
+        label: Processeur
+    cooler:
+        label: Refroidissement
+    motherboard:
+        label: 'Carte mère'
+    ram:
+        label: 'Mémoire vive'
+    gpu:
+        label: 'Carte graphique'
+    storage:
+        label: Stockage
+    case:
+        label: Boîtier
+    psu:
+        label: Alimentation
