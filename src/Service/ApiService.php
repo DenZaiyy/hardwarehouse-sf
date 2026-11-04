@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\DTO\Api\PaginationMeta;
+use App\DTO\Api\Products\ProductSpecDto;
 use App\Exception\Api\ApiException;
 use App\Exception\Api\ApiNotFoundException;
 use App\Exception\Api\ApiServerException;
@@ -214,6 +215,36 @@ readonly class ApiService
         $result = $this->request('GET', $endpoint)->toArray();
 
         return $result;
+    }
+
+    /**
+     * Lecture groupée du configurateur : les produits demandés (20 au plus) avec leurs attributs indexés par code,
+     * actifs ou non. Sans le filtre active=true des autres lectures, pour qu'un composant retiré de la vente depuis son
+     * choix soit signalé au lieu de disparaître.
+     *
+     * @param list<string> $ids
+     *
+     * @return list<ProductSpecDto>
+     *
+     * @throws ApiNotFoundException
+     * @throws ApiUnavailableException
+     * @throws ApiServerException
+     * @throws ApiException
+     * @throws ExceptionInterface
+     * @throws \JsonException
+     */
+    public function fetchProductSpecs(array $ids): array
+    {
+        $query = http_build_query(['ids' => implode(',', $ids), 'include' => 'attributes']);
+        $response = $this->request('GET', 'products?'.$query)->toArray();
+
+        /** @var list<ProductSpecDto> */
+        return $this->serializer->deserialize(
+            json_encode($response['data'] ?? [], JSON_THROW_ON_ERROR),
+            ProductSpecDto::class.'[]',
+            'json',
+            self::DESERIALIZATION_CONTEXT
+        );
     }
 
     /**
