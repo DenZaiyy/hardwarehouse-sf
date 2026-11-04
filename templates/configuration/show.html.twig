@@ -1,8 +1,79 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}{{ configuration.label }} - HardWareHouse{% endblock %}
+{% block title %}{{ configuration.name }} - HardWareHouse{% endblock %}
 
 {% block body %}
+    {# Prix enregistrés à la sauvegarde, hors taxe : affichés TTC comme partout dans la boutique #}
+    {% set total = configuration.items|reduce((sum, item) => sum + (item.unitPriceSnapshot|ttc) * item.quantity, 0) %}
+    <div class="container mx-auto max-w-3xl space-y-4">
+        <a href="{{ path('configuration.index') }}" class="inline-flex items-center gap-1 text-primary hover:underline">
+            {{ ux_icon('lucide:arrow-left', {'aria-hidden': 'true'}) }}
+            {{ 'configurator.my_configurations'|trans }}
+        </a>
 
+        <div>
+            <h1>{{ configuration.name }}</h1>
+            <p class="text-sm text-muted">{{ 'configurator.saved.saved_on'|trans({'%date%': (configuration.updatedAt ?? configuration.createdAt)|date('d/m/Y')}) }}</p>
+        </div>
+
+        {% set missingCount = issues|filter(issue => issue.rule == 'missing')|length %}
+        {% if missingCount > 0 %}
+            <p class="text-sm text-warning">{{ 'configurator.incomplete'|trans({'%count%': missingCount}) }}</p>
+        {% endif %}
+        {{ include('components/Configurator/_problems.html.twig', {problems: issues|filter(issue => issue.rule != 'missing')}, with_context = false) }}
+        {% if error %}
+            {# Clé de traduction, ou message destiné au client levé par CartService, que trans rend tel quel #}
+            <p role="alert" class="text-sm text-danger">{{ error|trans }}</p>
+        {% endif %}
+
+        <ul class="space-y-2">
+            {% for slot in slots %}
+                {% for item in configuration.items|filter(item => item.slot == slot) %}
+                    <li class="flex items-center gap-3 rounded-md bg-paragraph p-3">
+                        {% if item.productImageSnapshot %}
+                            <img src="{{ item.productImageSnapshot|catalog_image }}" alt="" width="56" height="56" loading="lazy" class="size-14 shrink-0 rounded object-cover">
+                        {% else %}
+                            <span class="size-14 shrink-0 rounded bg-white" aria-hidden="true"></span>
+                        {% endif %}
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm text-muted">{{ slot|trans }}</p>
+                            <a href="{{ path('product.show', {slug: item.productSlugSnapshot}) }}" class="font-title text-primary hover:underline">{{ item.productNameSnapshot }}</a>
+                        </div>
+                        <p class="shrink-0 text-right text-primary">
+                            {% if item.quantity > 1 %}
+                                <span class="text-sm text-muted">{{ 'configurator.quantity'|trans({'%quantity%': item.quantity}) }}</span>
+                            {% endif %}
+                            <span class="font-semibold">{{ item.unitPriceSnapshot|ttc|format_currency('EUR') }}</span>
+                        </p>
+                    </li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+
+        <div class="text-right text-primary">
+            <p>{{ 'configurator.total'|trans }} <strong class="font-title text-2xl">{{ total|format_currency('EUR') }}</strong></p>
+            <p class="text-xs text-muted">{{ 'configurator.saved.prices_note'|trans }}</p>
+        </div>
+
+        <div class="flex flex-wrap justify-end gap-2">
+            <form action="{{ path('configuration.edit', {id: configuration.id}) }}" method="post">
+                <input type="hidden" name="_token" value="{{ csrf_token('configuration_edit' ~ configuration.id) }}">
+                <button type="submit" class="rounded-md border-2 border-primary bg-white px-3 py-2 font-title text-primary transition-colors hover:bg-primary hover:text-paragraph">
+                    {{ 'configurator.saved.edit'|trans }}
+                </button>
+            </form>
+            <form action="{{ path('configuration.cart', {id: configuration.id}) }}" method="post">
+                <input type="hidden" name="_token" value="{{ csrf_token('configuration_cart' ~ configuration.id) }}">
+                <button type="submit" class="rounded-md bg-primary px-3 py-2 font-title text-paragraph transition-colors hover:bg-primary-dark">
+                    {{ 'configurator.add_to_cart'|trans }}
+                </button>
+            </form>
+            <form action="{{ path('configuration.delete', {id: configuration.id}) }}" method="post" data-turbo-confirm="{{ 'form.delete.confirm.message'|trans }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('configuration_delete' ~ configuration.id) }}">
+                <button type="submit" class="rounded-md border-2 border-danger bg-white px-3 py-2 font-title text-danger transition-colors hover:bg-red-50">
+                    {{ 'configurator.saved.delete'|trans }}
+                </button>
+            </form>
+        </div>
+    </div>
 {% endblock %}
-

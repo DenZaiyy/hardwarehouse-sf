@@ -105,6 +105,8 @@ header:
         login: { label: 'Se connecter' }
         addresses: { label: 'Mes adresses' }
         admin_dashboard: { label: 'Panel administrateur' }
+        configurator: { label: 'Configurateur PC' }
+        configurations: { label: 'Mes configurations' }
     locale:
         label: Langues
 country:
@@ -148,6 +150,7 @@ category:
     memoire-ram: 'Mémoire RAM'
     cartes-meres: 'Cartes mères'
     processeurs: Processeurs
+    refroidissement: Refroidissement
 footer:
     description: 'Votre spécialiste en composants PC. Livraison rapide, expertise technique, meilleurs prix.'
     contact:
@@ -281,3 +284,57 @@ componentSlot:
         label: Boîtier
     psu:
         label: Alimentation
+configurator:
+    title: 'Construis ton ordinateur'
+    my_configurations: 'Mes configurations'
+    start_new: 'Nouvelle configuration'
+    optional: facultatif
+    add_drive: 'Ajouter un disque'
+    removed_product: "Ce composant n'est plus au catalogue"
+    slot_prefix: '%slot% :'
+    chosen_product: 'Composant choisi'
+    remove: 'Retirer %name%'
+    in_stock: 'En stock'
+    out_of_stock: 'Rupture de stock'
+    quantity: '× %quantity%'
+    total: 'Total :'
+    add_to_cart: 'Ajouter au panier'
+    incomplete: '{1}Configuration incomplète : 1 composant reste à choisir.|]1,Inf[Configuration incomplète : %count% composants restent à choisir.'
+    storage_full: 'Trois disques au plus : retirez-en un pour en choisir un autre.'
+    unavailable: 'Le catalogue ne répond pas pour le moment. Votre sélection est conservée : réessayez dans quelques instants.'
+    save:
+        name: 'Nom de la configuration'
+        submit: Sauvegarder
+        login: 'Se connecter pour sauvegarder'
+        name_required: 'Donnez un nom à la configuration pour la sauvegarder.'
+        done: 'Configuration enregistrée dans Mes configurations.'
+    saved:
+        open_configurator: 'Ouvrir le configurateur'
+        empty: 'Aucune configuration sauvegardée pour le moment : composez votre PC dans le configurateur, puis sauvegardez-le.'
+        summary: '{1}1 composant, enregistrée le %date%|]1,Inf[%count% composants, enregistrée le %date%'
+        saved_on: 'Enregistrée le %date%'
+        prices_note: "Prix lors de la sauvegarde : le panier reprend les prix du jour."
+        edit: Modifier
+        delete: Supprimer
+        deleted: 'Configuration supprimée.'
+    list:
+        count: '{0}%slot% : aucun produit compatible|{1}%slot% : 1 produit compatible|]1,Inf[%slot% : %count% produits compatibles'
+        filtered: 'Seuls les produits compatibles avec les composants déjà choisis sont affichés.'
+        empty: 'Aucun produit compatible avec les composants déjà choisis : modifiez-les pour élargir le choix.'
+        categories: 'Type de stockage'
+        pagination: 'Pages de la liste'
+        previous: 'Page précédente'
+        next: 'Page suivante'
+        page: 'Page %page% sur %pages%'
+    issue:
+        unavailable: '%slots% : composant indisponible, à remplacer.'
+        socket: "Le processeur et la carte mère n'ont pas le même socket."
+        memory_type: "La mémoire et la carte mère n'utilisent pas le même type de DDR."
+        memory_support: 'Le processeur ne prend pas en charge ce type de mémoire.'
+        form_factor: "La carte mère n'entre pas dans le boîtier."
+        cooler_socket: 'Le refroidissement ne se fixe pas sur le socket du processeur.'
+        cooler_capacity: 'Le refroidissement ne dissipe pas assez de chaleur pour ce processeur.'
+        power: "L'alimentation est trop faible pour le processeur et la carte graphique."
+        references: 'Trois disques au plus.'
+        quantity: "Plus de barrettes que la carte mère n'a d'emplacements."
+        stock: '%slots% : stock insuffisant pour cette quantité.'

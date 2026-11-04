@@ -49,10 +49,17 @@ final class ApiMockResponseFactory
         $path = trim((string) parse_url($url, PHP_URL_PATH), '/');
         self::$requests[] = ['method' => $method, 'path' => $path, 'query' => (string) parse_url($url, PHP_URL_QUERY), 'options' => $options];
 
-        foreach (self::$responses as $registered => [$status, $body]) {
-            if ($path === $registered || str_ends_with($path, '/'.$registered)) {
-                return $this->json($body, $status);
-            }
+        // La ressource enregistrée la plus précise l'emporte : categories/ssd/products plutôt que products
+        $matches = array_filter(
+            self::$responses,
+            static fn (string $registered): bool => $path === $registered || str_ends_with($path, '/'.$registered),
+            \ARRAY_FILTER_USE_KEY,
+        );
+        if ([] !== $matches) {
+            uksort($matches, static fn (string $a, string $b): int => \strlen($b) <=> \strlen($a));
+            [$status, $body] = reset($matches);
+
+            return $this->json($body, $status);
         }
 
         if (1 === preg_match('#(^|/)(categories|brands)$#', $path)) {

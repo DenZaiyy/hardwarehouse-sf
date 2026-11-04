@@ -9,16 +9,11 @@ use App\DTO\Configurator\ConfiguratorState;
 use App\Entity\Configuration;
 use App\Entity\ConfigurationItem;
 use App\Enum\ComponentSlot;
-use App\Service\ApiService;
 use App\Service\CartService;
 use App\Service\ConfigurationService;
-use App\Service\Configurator\ConfiguratorCatalogManager;
-use App\Service\Configurator\ConfiguratorCompatibilityManager;
-use App\Service\Configurator\ConfiguratorCompletenessManager;
 use App\Tests\Http\ApiMockResponseFactory;
 use App\Tests\Support\CreatesShopEntities;
 use App\Tests\Support\FakesCatalogApi;
-use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -331,21 +326,12 @@ final class ConfigurationServiceTest extends KernelTestCase
         return array_column($cartService->getCart(), 'quantity', 'productId');
     }
 
-    /** Construit ici : tant qu'aucun contrôleur ne l'utilise, le conteneur de test ne garde pas le service. */
     private function service(): ConfigurationService
     {
-        $apiService = static::getContainer()->get(ApiService::class);
-        $cartService = static::getContainer()->get(CartService::class);
-        self::assertInstanceOf(ApiService::class, $apiService);
-        self::assertInstanceOf(CartService::class, $cartService);
+        $service = static::getContainer()->get(ConfigurationService::class);
+        self::assertInstanceOf(ConfigurationService::class, $service);
 
-        return new ConfigurationService(
-            new ConfiguratorCatalogManager($apiService, new NullLogger()),
-            new ConfiguratorCompatibilityManager(),
-            new ConfiguratorCompletenessManager(),
-            $cartService,
-            $this->entityManager(),
-        );
+        return $service;
     }
 
     /**

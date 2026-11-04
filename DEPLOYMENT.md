@@ -315,6 +315,11 @@ des commandes payées (`POST /api/v1/stock-exits`), une commande de test en pré
 le stock réel : **laisser `SHOP_API_TOKEN` vide en préproduction**. Les sorties de stock y partent alors
 dans la file des échecs avec un message explicite, jusqu'à ce qu'une API de préproduction existe.
 
+Le configurateur (`/configurations/new`) interroge l'API avec ses filtres d'attributs (`attr`, `attrHas`, `attrMin`,
+`attrMax`) et sa lecture groupée (`GET /products?ids=…&include=attributes`). Tant que l'API de production ne les a
+pas reçus (runbook de l'API, `deploy/README.md`, section Schéma et attributs du configurateur), la préproduction
+affiche à la place des listes le message d'indisponibilité du catalogue. L'API se déploie donc avant la boutique.
+
 ## Processus de Déploiement Production
 
 ### **Phase 1 : Validation Locale**

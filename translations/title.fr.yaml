@@ -5,6 +5,8 @@ register:
 login:
     title: Connexion
 user:
+    configurations:
+        title: 'Mes configurations'
     orders:
         title: 'Mes commandes'
         detail: { title: 'Commande %reference%' }
@@ -17,3 +19,5 @@ contact:
     title: 'Nous contacter'
 checkout:
     title: Commande
+configurator:
+    title: 'Configurateur PC'
