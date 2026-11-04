@@ -116,6 +116,53 @@ final class ConfigurationServiceTest extends KernelTestCase
         self::assertNotNull($configuration->getUpdatedAt());
     }
 
+    public function testDiscountedComponentIsSavedAtTheCartPrice(): void
+    {
+        $state = new ConfiguratorState();
+        $cpu = $this->choose($state, ComponentSlot::CPU, 'processeurs', self::AM5_CPU, discountPrice: 329.92);
+        $configuration = $this->newConfiguration();
+
+        self::assertSame([], $this->service()->save($configuration, $state));
+
+        self::assertSame('329.92', $this->savedItems($configuration)[$cpu]->getUnitPriceSnapshot());
+    }
+
+    public function testSavedSelectionGoesOnEditingItsConfiguration(): void
+    {
+        $state = new ConfiguratorState();
+        $this->choose($state, ComponentSlot::CPU, 'processeurs', self::AM5_CPU);
+        $configuration = $this->newConfiguration();
+
+        $this->service()->save($configuration, $state);
+
+        self::assertNotNull($configuration->getId());
+        self::assertSame($configuration->getId(), $state->configurationId());
+    }
+
+    public function testOpenedConfigurationIsTheOneTheSelectionEdits(): void
+    {
+        $configuration = $this->newConfiguration();
+        $state = new ConfiguratorState();
+        $this->choose($state, ComponentSlot::CPU, 'processeurs', self::AM5_CPU);
+        $this->service()->save($configuration, $state);
+
+        self::assertSame($configuration->getId(), $this->service()->load($configuration)->configurationId());
+    }
+
+    public function testReviewReadsTheComponentsAndListsWhatKeepsThemOutOfTheCart(): void
+    {
+        $state = new ConfiguratorState();
+        $cpu = $this->choose($state, ComponentSlot::CPU, 'processeurs', self::AM5_CPU);
+        $motherboard = $this->choose($state, ComponentSlot::MOTHERBOARD, 'cartes-meres', ['socket' => ['value' => 'LGA1700'], 'ddr_type' => ['value' => 'DDR5']]);
+        $screen = $this->choose($state, ComponentSlot::STORAGE, 'ecrans');
+
+        $review = $this->service()->review($state);
+
+        self::assertEqualsCanonicalizing([$cpu, $motherboard, $screen], array_keys($review['products']));
+        // Écran à la place d'un disque, sockets différents, puis mémoire, carte graphique, boîtier et alimentation
+        self::assertSame(['unavailable', 'socket', 'missing', 'missing', 'missing', 'missing'], self::rules($review['issues']));
+    }
+
     public function testOpeningASavedConfigurationRestoresTheSelection(): void
     {
         $state = new ConfiguratorState();
@@ -229,17 +276,19 @@ final class ConfigurationServiceTest extends KernelTestCase
      *
      * @param array<string, array{value: string, values?: list<string>, numericValue?: float|int}> $attributes
      */
-    private function choose(ConfiguratorState $state, ComponentSlot $slot, string $category, array $attributes = [], bool $active = true, int $stock = 5): string
+    private function choose(ConfiguratorState $state, ComponentSlot $slot, string $category, array $attributes = [], bool $active = true, int $stock = 5, ?float $discountPrice = null): string
     {
         $slug = $slot->value.'-'.bin2hex(random_bytes(4));
-        $id = $this->apiHasProduct($slug, active: $active, stock: $stock, price: 374.92);
+        $discountAmount = null === $discountPrice ? null : round(374.92 - $discountPrice, 2);
+        $id = $this->apiHasProduct($slug, active: $active, stock: $stock, price: 374.92, discountPrice: $discountPrice, discountAmount: $discountAmount);
         $this->specs[] = [
             'id' => $id,
             'name' => 'Produit '.$slug,
             'slug' => $slug,
             'price' => 374.92,
-            'discountPrice' => null,
-            'discountAmount' => null,
+            'discountPrice' => $discountPrice,
+            'discountAmount' => $discountAmount,
+            'promote' => null !== $discountPrice,
             'active' => $active,
             'thumbnail' => '/images/products/'.$slug.'/thumbnail.webp',
             'category' => ['slug' => $category],

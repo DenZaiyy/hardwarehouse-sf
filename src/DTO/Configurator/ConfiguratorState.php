@@ -9,7 +9,7 @@ use App\Enum\ComponentSlot;
 
 /**
  * Sélection en cours du configurateur, gardée en session : pour chaque emplacement, les produits choisis et leur
- * quantité. Les règles qui dépendent des caractéristiques des produits (compatibilité, nombre de barrettes admis par
+ * quantité, et la configuration sauvegardée qu'elle modifie, s'il y en a une. Les règles qui dépendent des caractéristiques des produits (compatibilité, nombre de barrettes admis par
  * la carte mère) sont vérifiées par ConfiguratorCompatibilityManager et ConfiguratorCompletenessManager, sur les
  * produits relus dans l'API.
  *
@@ -19,6 +19,19 @@ final class ConfiguratorState
 {
     /** @var array<string, list<ConfiguratorLine>> lignes choisies, indexées par emplacement (ComponentSlot::value) */
     private array $lines = [];
+
+    /** Configuration sauvegardée que la sélection modifie : la sauvegarde suivante la met à jour au lieu d'en créer une. */
+    private ?int $configurationId = null;
+
+    public function configurationId(): ?int
+    {
+        return $this->configurationId;
+    }
+
+    public function setConfigurationId(int $configurationId): void
+    {
+        $this->configurationId = $configurationId;
+    }
 
     /** Choisit un produit. Il remplace le précédent, sauf pour les disques, qui s'ajoutent jusqu'à maxReferences(). */
     public function choose(ComponentSlot $slot, string $productId): bool
@@ -142,11 +155,11 @@ final class ConfiguratorState
     }
 
     /**
-     * @return array<string, list<ConfiguratorLine>>
+     * @return array{configurationId: int|null, lines: array<string, list<ConfiguratorLine>>}
      */
     public function toArray(): array
     {
-        return $this->lines;
+        return ['configurationId' => $this->configurationId, 'lines' => $this->lines];
     }
 
     /**
@@ -158,7 +171,11 @@ final class ConfiguratorState
     public static function fromArray(array $data): self
     {
         $state = new self();
-        foreach ($data as $slotValue => $lines) {
+        $configurationId = $data['configurationId'] ?? null;
+        $state->configurationId = \is_int($configurationId) ? $configurationId : null;
+
+        $slots = $data['lines'] ?? [];
+        foreach (\is_array($slots) ? $slots : [] as $slotValue => $lines) {
             $slot = \is_string($slotValue) ? ComponentSlot::tryFrom($slotValue) : null;
             if (null === $slot || !\is_array($lines)) {
                 continue;

@@ -20,12 +20,21 @@ readonly class ProductSpecDto
         public string $name = '',
         public string $slug = '',
         public float $price = 0.0,
+        public ?float $discountPrice = null,
+        public ?float $discountAmount = null,
+        public bool $promote = false,
         public bool $active = false,
         public ?string $thumbnail = null,
         public ?ProductStockDto $stock = null,
         public array $attributes = [],
         public array $category = [],
     ) {
+    }
+
+    /** Prix unitaire hors taxe que le panier facturera : la remise, si le produit est mis en avant (CartService). */
+    public function effectivePrice(): float
+    {
+        return $this->promote && null !== $this->discountPrice && null !== $this->discountAmount ? $this->discountPrice : $this->price;
     }
 
     /** Catégorie du produit : elle dit quel emplacement de la configuration il peut occuper. */

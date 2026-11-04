@@ -32,9 +32,27 @@ final readonly class ConfigurationService
     }
 
     /**
-     * Enregistre la sélection dans la configuration, nouvelle ou rouverte, avec les instantanés des produits relus.
-     * Une configuration incomplète peut être sauvegardée, pas une configuration incompatible ni un composant
-     * indisponible.
+     * Composants choisis relus dans l'API, en un seul appel, et tout ce qui les tient hors du panier, sauf le stock
+     * (vérifié à l'ajout, avec le contenu du panier) : composants indisponibles, incompatibilités, emplacements
+     * obligatoires vides et quantités hors limites. Le configurateur s'en sert pour son affichage.
+     *
+     * @return array{products: array<string, ProductSpecDto>, issues: list<ConfiguratorIssue>}
+     */
+    public function review(ConfiguratorState $state): array
+    {
+        $products = $this->catalog->specs($state->productIds());
+
+        return ['products' => $products, 'issues' => [
+            ...$this->unavailable($state, $products),
+            ...$this->compatibility->violations($state->productsBySlot($products)),
+            ...$this->completeness->issues($state->linesWith($products)),
+        ]];
+    }
+
+    /**
+     * Enregistre la sélection dans la configuration, nouvelle ou rouverte, avec les instantanés des produits relus,
+     * puis la sélection continue de modifier cette configuration. Une configuration incomplète peut être sauvegardée,
+     * pas une configuration incompatible ni un composant indisponible.
      *
      * @return list<ConfiguratorIssue> ce qui empêche la sauvegarde, vide si elle est faite
      */
@@ -64,6 +82,7 @@ final readonly class ConfigurationService
 
         $this->entityManager->persist($configuration);
         $this->entityManager->flush();
+        $state->setConfigurationId((int) $configuration->getId());
 
         return [];
     }
@@ -72,6 +91,10 @@ final readonly class ConfigurationService
     public function load(Configuration $configuration): ConfiguratorState
     {
         $state = new ConfiguratorState();
+        $configurationId = $configuration->getId();
+        if (null !== $configurationId) {
+            $state->setConfigurationId($configurationId);
+        }
         foreach ($configuration->getItems() as $item) {
             $slot = $item->getSlot();
             $productId = $item->getProductId();
@@ -98,14 +121,9 @@ final readonly class ConfigurationService
      */
     public function addToCart(ConfiguratorState $state): array
     {
-        $products = $this->catalog->specs($state->productIds());
+        ['products' => $products, 'issues' => $issues] = $this->review($state);
         $lines = $state->linesWith($products);
-        $issues = [
-            ...$this->unavailable($state, $products),
-            ...$this->compatibility->violations($state->productsBySlot($products)),
-            ...$this->completeness->issues($lines),
-            ...$this->shortOfStock($lines),
-        ];
+        $issues = [...$issues, ...$this->shortOfStock($lines)];
         if ([] !== $issues) {
             return $issues;
         }
@@ -175,6 +193,6 @@ final readonly class ConfigurationService
             ->setProductNameSnapshot($product->name)
             ->setProductSlugSnapshot($product->slug)
             ->setProductImageSnapshot($product->thumbnail)
-            ->setUnitPriceSnapshot(number_format($product->price, 2, '.', ''));
+            ->setUnitPriceSnapshot(number_format($product->effectivePrice(), 2, '.', ''));
     }
 }

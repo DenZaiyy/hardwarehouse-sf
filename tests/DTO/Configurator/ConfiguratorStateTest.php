@@ -112,17 +112,30 @@ final class ConfiguratorStateTest extends TestCase
         self::assertSame([['productId' => 'ram-a', 'quantity' => 2]], $restored->lines(ComponentSlot::RAM));
     }
 
+    public function testEditedConfigurationSurvivesTheSessionRoundTrip(): void
+    {
+        $state = new ConfiguratorState();
+        self::assertNull($state->configurationId());
+        $state->setConfigurationId(7);
+
+        self::assertSame(7, ConfiguratorState::fromArray($state->toArray())->configurationId());
+    }
+
     public function testUnknownSlotsAndMalformedLinesFromAnOlderSessionAreIgnored(): void
     {
         $state = ConfiguratorState::fromArray([
-            'cpu' => [['productId' => 'cpu-a', 'quantity' => 1]],
-            'fan' => [['productId' => 'fan-a', 'quantity' => 1]],
-            'ram' => [['productId' => 42, 'quantity' => 'two'], ['productId' => 'ram-a', 'quantity' => 0]],
-            'gpu' => 'gpu-a',
+            'configurationId' => 'seven',
+            'lines' => [
+                'cpu' => [['productId' => 'cpu-a', 'quantity' => 1]],
+                'fan' => [['productId' => 'fan-a', 'quantity' => 1]],
+                'ram' => [['productId' => 42, 'quantity' => 'two'], ['productId' => 'ram-a', 'quantity' => 0]],
+                'gpu' => 'gpu-a',
+            ],
         ]);
 
         self::assertSame(['cpu-a'], $state->productIds());
         self::assertSame([], $state->lines(ComponentSlot::RAM));
+        self::assertNull($state->configurationId());
     }
 
     public function testCompatibilityReceivesTheFirstReadProductOfEachSlot(): void
