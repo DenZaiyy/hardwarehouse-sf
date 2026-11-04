@@ -114,40 +114,37 @@ class ProfileController extends AbstractController
         $form = $this->createForm(ChangePasswordFormType::class, $user);
         $form->handleRequest($request);
 
+        // Le mot de passe actuel est vérifié par le formulaire (contrainte UserPassword)
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var string $currentPassword */
-            $currentPassword = $form->get('password')->getData();
+            /** @var string $newPassword */
+            $newPassword = $form->get('plainPassword')->getData();
+            $user->setPassword($hasher->hashPassword($user, $newPassword));
 
-            if ($hasher->hashPassword($user, $currentPassword)) {
-                /** @var string $newPassword */
-                $newPassword = $form->get('plainPassword')->getData();
-                $user->setPassword($hasher->hashPassword($user, $newPassword));
+            // Cette session garde le nouveau hachage et reste ouverte, les autres se ferment (User::isEqualTo())
+            $entityManager->flush();
 
-                $entityManager->flush();
+            $this->addFlash('success', 'Your password has been changed successfully.');
 
-                $this->addFlash('success', 'Your password has been changed successfully.');
+            // Si requête Turbo, retourne des streams
+            if ($request->headers->has('Turbo-Frame') || 'turbo_stream' === $request->getPreferredFormat()) {
+                $defaultAddress = $this->em->getRepository(Address::class)->findOneBy(['user' => $user, 'is_default' => true]);
 
-                // Si requête Turbo, retourne des streams
-                if ($request->headers->has('Turbo-Frame') || 'turbo_stream' === $request->getPreferredFormat()) {
-                    $defaultAddress = $this->em->getRepository(Address::class)->findOneBy(['user' => $user, 'is_default' => true]);
-
-                    return $this->render('user/profile/_infos_stream.html.twig', [
-                        'user' => $user,
-                        'defaultAddress' => $defaultAddress,
-                    ], new Response('', Response::HTTP_OK, [
-                        'Content-Type' => 'text/vnd.turbo-stream.html',
-                    ]));
-                }
-            } else {
-                $this->addFlash('error', 'Your password is incorrect.');
+                return $this->render('user/profile/_infos_stream.html.twig', [
+                    'user' => $user,
+                    'defaultAddress' => $defaultAddress,
+                ], new Response('', Response::HTTP_OK, [
+                    'Content-Type' => 'text/vnd.turbo-stream.html',
+                ]));
             }
 
             return $this->redirectToRoute('profile.index');
         }
 
+        // Le formulaire lui-même, et non sa vue : render() répond alors 422 s'il est invalide, ce que Turbo exige
+        // pour afficher les erreurs (un mot de passe actuel faux, par exemple)
         return $this->render('user/profile/password.html.twig', [
             'user' => $user,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 

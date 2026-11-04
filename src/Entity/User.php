@@ -334,16 +334,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Equatab
         return $this;
     }
 
+    /**
+     * À chaque requête, Symfony compare l'utilisateur gardé en session ($this) à celui relu en base, et ferme la
+     * session s'ils diffèrent. EquatableInterface remplace ses contrôles par défaut (ContextListener::hasUserChanged()) :
+     * ils sont repris ici, pour qu'un mot de passe ou un rôle changé ferme aussi les autres sessions.
+     */
     public function isEqualTo(UserInterface $user): bool
     {
         if (!$user instanceof self) {
             return false;
         }
 
-        if ($user->isBanned() !== $this->isBanned()) {
+        // La session ne garde que le crc32c du hachage (__serialize()), comparé sous cette forme comme le fait Symfony
+        $password = $this->password;
+        if (null !== $password
+            && $password !== $user->getPassword()
+            && (8 !== \strlen($password) || hash('crc32c', (string) $user->getPassword()) !== $password)
+        ) {
             return false;
         }
 
-        return $user->getUserIdentifier() === $this->getUserIdentifier();
+        $roles = $this->getRoles();
+        $refreshedRoles = $user->getRoles();
+        sort($roles);
+        sort($refreshedRoles);
+
+        return $roles === $refreshedRoles
+            && $user->isBanned() === $this->isBanned()
+            && $user->getUserIdentifier() === $this->getUserIdentifier();
     }
 }

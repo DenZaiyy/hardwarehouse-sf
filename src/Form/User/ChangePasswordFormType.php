@@ -12,7 +12,9 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Security\Core\Validator\Constraints\UserPassword;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Sequentially;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ChangePasswordFormType extends AbstractType
@@ -26,10 +28,17 @@ class ChangePasswordFormType extends AbstractType
     {
         $builder
             ->add('password', PasswordType::class, [
+                // Ni écrit dans User::$password, ni accepté sans vérification : le mot de passe actuel doit être le bon
+                'mapped' => false,
                 'constraints' => [
-                    new NotBlank(
-                        message: $this->translator->trans('user.changePassword.current.constraint.not_blank')
-                    ),
+                    new Sequentially([
+                        new NotBlank(
+                            message: $this->translator->trans('user.changePassword.current.constraint.not_blank')
+                        ),
+                        new UserPassword(
+                            message: $this->translator->trans('user.changePassword.current.constraint.invalid')
+                        ),
+                    ]),
                 ],
                 'attr' => [
                     'autocomplete' => 'current-password',
