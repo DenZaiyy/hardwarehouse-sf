@@ -13,6 +13,7 @@ readonly class ProductSpecDto
 {
     /**
      * @param array<string, array{value?: string|null, values?: list<string>, numericValue?: float|int|null}> $attributes
+     * @param array{slug?: string|null}                                                                       $category
      */
     public function __construct(
         public string $id,
@@ -23,7 +24,14 @@ readonly class ProductSpecDto
         public ?string $thumbnail = null,
         public ?ProductStockDto $stock = null,
         public array $attributes = [],
+        public array $category = [],
     ) {
+    }
+
+    /** Catégorie du produit : elle dit quel emplacement de la configuration il peut occuper. */
+    public function categorySlug(): ?string
+    {
+        return $this->category['slug'] ?? null;
     }
 
     public function value(string $code): ?string

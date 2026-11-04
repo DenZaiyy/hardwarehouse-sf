@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DTO\Configurator;
 
+use App\DTO\Api\Products\ProductSpecDto;
 use App\Enum\ComponentSlot;
 
 /**
@@ -97,6 +98,47 @@ final class ConfiguratorState
     public function isEmpty(): bool
     {
         return [] === $this->lines;
+    }
+
+    /**
+     * Premier produit relu de chaque emplacement, la forme qu'attend ConfiguratorCompatibilityManager (aucune de ses
+     * règles ne porte sur les disques, seul emplacement à plusieurs références).
+     *
+     * @param array<string, ProductSpecDto> $products produits relus dans l'API, indexés par identifiant
+     *
+     * @return array<string, ProductSpecDto>
+     */
+    public function productsBySlot(array $products): array
+    {
+        $bySlot = [];
+        foreach ($this->linesWith($products) as $slot => $lines) {
+            $bySlot[$slot] = $lines[0]['product'];
+        }
+
+        return $bySlot;
+    }
+
+    /**
+     * Lignes dont le produit a été relu, avec leur quantité, la forme qu'attend ConfiguratorCompletenessManager. Un
+     * produit absent de la réponse de l'API (supprimé du catalogue) est laissé de côté.
+     *
+     * @param array<string, ProductSpecDto> $products produits relus dans l'API, indexés par identifiant
+     *
+     * @return array<string, non-empty-list<array{product: ProductSpecDto, quantity: int}>>
+     */
+    public function linesWith(array $products): array
+    {
+        $resolved = [];
+        foreach ($this->lines as $slot => $lines) {
+            foreach ($lines as $line) {
+                $product = $products[$line['productId']] ?? null;
+                if (null !== $product) {
+                    $resolved[$slot][] = ['product' => $product, 'quantity' => $line['quantity']];
+                }
+            }
+        }
+
+        return $resolved;
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\DTO\Configurator;
 
+use App\DTO\Api\Products\ProductSpecDto;
 use App\DTO\Configurator\ConfiguratorState;
 use App\Enum\ComponentSlot;
 use PHPUnit\Framework\TestCase;
@@ -122,5 +123,31 @@ final class ConfiguratorStateTest extends TestCase
 
         self::assertSame(['cpu-a'], $state->productIds());
         self::assertSame([], $state->lines(ComponentSlot::RAM));
+    }
+
+    public function testCompatibilityReceivesTheFirstReadProductOfEachSlot(): void
+    {
+        $state = new ConfiguratorState();
+        $state->choose(ComponentSlot::CPU, 'cpu-a');
+        $state->choose(ComponentSlot::STORAGE, 'ssd-a');
+        $state->choose(ComponentSlot::STORAGE, 'ssd-b');
+        $state->choose(ComponentSlot::RAM, 'ram-deleted');
+        $cpu = new ProductSpecDto(id: 'cpu-a');
+        $firstDrive = new ProductSpecDto(id: 'ssd-a');
+
+        $bySlot = $state->productsBySlot(['cpu-a' => $cpu, 'ssd-a' => $firstDrive, 'ssd-b' => new ProductSpecDto(id: 'ssd-b')]);
+
+        self::assertSame(['cpu' => $cpu, 'storage' => $firstDrive], $bySlot);
+    }
+
+    public function testCompletenessReceivesTheQuantitiesOfReadProducts(): void
+    {
+        $state = new ConfiguratorState();
+        $state->choose(ComponentSlot::CPU, 'cpu-deleted');
+        $state->choose(ComponentSlot::RAM, 'ram-a');
+        $state->setQuantity(ComponentSlot::RAM, 'ram-a', 2);
+        $ram = new ProductSpecDto(id: 'ram-a');
+
+        self::assertSame(['ram' => [['product' => $ram, 'quantity' => 2]]], $state->linesWith(['ram-a' => $ram]));
     }
 }

@@ -43,6 +43,7 @@ final class ConfiguratorCatalogManagerTest extends KernelTestCase
         self::assertSame(['665f1c2a9b1e4a0012345678', '665f1c2a9b1e4a0087654321'], array_keys($specs));
         self::assertSame('AM5', $specs['665f1c2a9b1e4a0012345678']->value('socket'));
         self::assertSame(120.0, $specs['665f1c2a9b1e4a0012345678']->number('tdp'));
+        self::assertSame('processeurs', $specs['665f1c2a9b1e4a0012345678']->categorySlug());
         self::assertFalse($specs['665f1c2a9b1e4a0087654321']->active);
 
         $requests = ApiMockResponseFactory::requests();
