@@ -1,5 +1,7 @@
 live_component:
     resource: '@LiveComponentBundle/config/routes.php'
-    prefix: '/_components'
-    # adjust prefix to add localization to your components
-    #prefix: '/{_locale}/_components'
+    # Préfixes localisés, comme les contrôleurs (config/routes.yaml) : les rendus suivants d'un composant gardent la
+    # langue de la page au lieu de repasser dans la langue par défaut
+    prefix:
+        en: /en/_components
+        fr: /fr/_components

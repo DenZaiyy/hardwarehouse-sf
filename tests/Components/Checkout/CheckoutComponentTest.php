@@ -368,6 +368,9 @@ final class CheckoutComponentTest extends WebTestCase
     private function mountOutsideOfARequest(): void
     {
         $request = new Request();
+        // Page de la boutique en français : le LocaleListener reprend la langue de cette requête pour les adresses
+        // des actions du composant (/fr/_components), Request ayant l'anglais par défaut
+        $request->setLocale('fr');
         $request->setSession(new Session(new MockArraySessionStorage()));
         static::getContainer()->get(RequestStack::class)->push($request);
     }
@@ -379,6 +382,7 @@ final class CheckoutComponentTest extends WebTestCase
         // Le premier montage du composant a lieu hors requête HTTP : mount() lit pourtant l'état du
         // tunnel en session. Les actions suivantes passent par le client et sa propre session.
         $request = new Request();
+        $request->setLocale('fr');
         $request->setSession(new Session(new MockArraySessionStorage()));
         static::getContainer()->get(RequestStack::class)->push($request);
 

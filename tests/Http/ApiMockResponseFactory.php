@@ -19,7 +19,7 @@ final class ApiMockResponseFactory
     /** @var array<string, array{int, mixed}> */
     private static array $responses = [];
 
-    /** @var list<array{method: string, path: string, options: array<string, mixed>}> */
+    /** @var list<array{method: string, path: string, query: string, options: array<string, mixed>}> */
     private static array $requests = [];
 
     public static function respondWith(string $path, mixed $body, int $status = 200): void
@@ -36,7 +36,7 @@ final class ApiMockResponseFactory
     /**
      * Requêtes reçues depuis le dernier reset(), pour vérifier ce que la boutique envoie à l'API.
      *
-     * @return list<array{method: string, path: string, options: array<string, mixed>}>
+     * @return list<array{method: string, path: string, query: string, options: array<string, mixed>}>
      */
     public static function requests(): array
     {
@@ -47,12 +47,19 @@ final class ApiMockResponseFactory
     public function __invoke(string $method, string $url, array $options = []): ResponseInterface
     {
         $path = trim((string) parse_url($url, PHP_URL_PATH), '/');
-        self::$requests[] = ['method' => $method, 'path' => $path, 'options' => $options];
+        self::$requests[] = ['method' => $method, 'path' => $path, 'query' => (string) parse_url($url, PHP_URL_QUERY), 'options' => $options];
 
-        foreach (self::$responses as $registered => [$status, $body]) {
-            if ($path === $registered || str_ends_with($path, '/'.$registered)) {
-                return $this->json($body, $status);
-            }
+        // La ressource enregistrée la plus précise l'emporte : categories/ssd/products plutôt que products
+        $matches = array_filter(
+            self::$responses,
+            static fn (string $registered): bool => $path === $registered || str_ends_with($path, '/'.$registered),
+            \ARRAY_FILTER_USE_KEY,
+        );
+        if ([] !== $matches) {
+            uksort($matches, static fn (string $a, string $b): int => \strlen($b) <=> \strlen($a));
+            [$status, $body] = reset($matches);
+
+            return $this->json($body, $status);
         }
 
         if (1 === preg_match('#(^|/)(categories|brands)$#', $path)) {

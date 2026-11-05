@@ -103,6 +103,8 @@ header:
         register: { label: Register }
         addresses: { label: 'My addresses' }
         admin_dashboard: { label: 'Admin panel' }
+        configurator: { label: 'PC configurator' }
+        configurations: { label: 'My configurations' }
     locale:
         label: Languages
 country:
@@ -146,6 +148,7 @@ category:
     memoire-ram: 'RAM memory'
     cartes-meres: Motherboards
     processeurs: Processors
+    refroidissement: Cooling
 footer:
     description: "Your PC components specialist. Fast delivery, technical expertise, best prices."
     contact:
@@ -262,3 +265,74 @@ cart:
         decrease: 'Remove one'
         increase: 'Add one'
         remove: 'Remove this item from the cart'
+componentSlot:
+    cpu:
+        label: Processor
+    cooler:
+        label: Cooling
+    motherboard:
+        label: Motherboard
+    ram:
+        label: Memory
+    gpu:
+        label: 'Graphics card'
+    storage:
+        label: Storage
+    case:
+        label: Case
+    psu:
+        label: 'Power supply'
+configurator:
+    title: 'Build your computer'
+    my_configurations: 'My configurations'
+    start_new: 'New configuration'
+    optional: optional
+    add_drive: 'Add a drive'
+    removed_product: 'This component is no longer in the catalogue'
+    slot_prefix: '%slot%:'
+    chosen_product: 'Chosen component'
+    remove: 'Remove %name%'
+    in_stock: 'In stock'
+    out_of_stock: 'Out of stock'
+    quantity: '× %quantity%'
+    total: 'Total:'
+    add_to_cart: 'Add to cart'
+    incomplete: '{1}Incomplete configuration: 1 component left to choose.|]1,Inf[Incomplete configuration: %count% components left to choose.'
+    storage_full: 'Three drives at most: remove one to choose another.'
+    unavailable: 'The catalogue is not responding right now. Your selection is kept: please try again in a few moments.'
+    save:
+        name: 'Configuration name'
+        submit: Save
+        login: 'Sign in to save'
+        name_required: 'Name the configuration to save it.'
+        done: 'Configuration saved in My configurations.'
+    saved:
+        open_configurator: 'Open the configurator'
+        empty: 'No saved configuration yet: build your PC in the configurator, then save it.'
+        summary: '{1}1 component, saved on %date%|]1,Inf[%count% components, saved on %date%'
+        saved_on: 'Saved on %date%'
+        prices_note: "Prices when saved: the cart uses today's prices."
+        edit: Edit
+        delete: Delete
+        deleted: 'Configuration deleted.'
+    list:
+        count: '{0}%slot%: no compatible product|{1}%slot%: 1 compatible product|]1,Inf[%slot%: %count% compatible products'
+        filtered: 'Only the products compatible with the components already chosen are shown.'
+        empty: 'No product is compatible with the components already chosen: change them to widen the choice.'
+        categories: 'Storage type'
+        pagination: 'List pages'
+        previous: 'Previous page'
+        next: 'Next page'
+        page: 'Page %page% of %pages%'
+    issue:
+        unavailable: '%slots%: component unavailable, to be replaced.'
+        socket: 'The processor and the motherboard do not share the same socket.'
+        memory_type: 'The memory and the motherboard do not use the same DDR type.'
+        memory_support: 'The processor does not support this type of memory.'
+        form_factor: 'The motherboard does not fit in the case.'
+        cooler_socket: 'The cooler does not mount on the processor socket.'
+        cooler_capacity: 'The cooler cannot dissipate enough heat for this processor.'
+        power: 'The power supply is too weak for the processor and the graphics card.'
+        references: 'Three drives at most.'
+        quantity: 'More memory modules than the motherboard has slots.'
+        stock: '%slots%: not enough stock for this quantity.'

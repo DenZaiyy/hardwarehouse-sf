@@ -1,0 +1,11 @@
+{#
+    Ce qui tient une configuration hors du panier, hors emplacements vides (comptés à part par configurator.incomplete).
+    Paramètre : problems (liste de ConfiguratorIssue).
+#}
+{% if problems is not empty %}
+    <ul role="alert" class="space-y-1 rounded-md bg-red-50 p-3 text-sm text-danger">
+        {% for issue in problems %}
+            <li>{{ ('configurator.issue.' ~ issue.rule)|trans({'%slots%': issue.slots|map(issueSlot => issueSlot|trans)|join(', ')}) }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}

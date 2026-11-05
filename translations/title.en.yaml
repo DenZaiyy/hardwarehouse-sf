@@ -5,6 +5,8 @@ register:
 login:
     title: Login
 user:
+    configurations:
+        title: 'My configurations'
     orders:
         title: 'My orders'
         detail: { title: 'Order %reference%' }
@@ -16,3 +18,5 @@ contact:
     title: 'Contact us'
 checkout:
     title: Checkout
+configurator:
+    title: 'PC configurator'
