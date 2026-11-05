@@ -320,6 +320,11 @@ Le configurateur (`/configurations/new`) interroge l'API avec ses filtres d'attr
 pas reçus (runbook de l'API, `deploy/README.md`, section Schéma et attributs du configurateur), la préproduction
 affiche à la place des listes le message d'indisponibilité du catalogue. L'API se déploie donc avant la boutique.
 
+Les attributs à valeurs multiples (`MULTI_SELECT`, étapes 5 et 6 du même runbook) ne s'écrivent en base qu'après la
+mise en production de cette boutique. Une version antérieure ne connaît pas ce type dans `App\Enum\AttributeType` :
+la désérialisation de `GET /products/{slug}` échoue alors pour chaque produit qui en porte un (processeurs, boîtiers,
+refroidissements). Entre les deux, le configurateur affiche des listes incomplètes, sans erreur.
+
 ## Processus de Déploiement Production
 
 ### **Phase 1 : Validation Locale**
