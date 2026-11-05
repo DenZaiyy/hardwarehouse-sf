@@ -6,6 +6,7 @@ use App\Entity\Order;
 use App\Enum\OrderStatus;
 use App\Event\OrderConfirmedEvent;
 use App\Repository\OrderRepository;
+use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
@@ -19,6 +20,11 @@ use Psr\Log\LoggerInterface;
  *
  * Statuses only move forward: a late failure or cancellation never undoes a paid order, and a failed
  * attempt leaves the order pending, since the customer can try again until the session expires.
+ *
+ * Stripe often sends payment_intent.succeeded and checkout.session.completed within the same second.
+ * Each event is therefore applied in a transaction, on the order row locked and read again: the second
+ * event waits for the first one and decides on what it wrote. The follow-ups of a confirmation (email,
+ * invoice, stock exit) only start once that transaction is committed.
  */
 final readonly class StripePaymentEventHandler
 {
@@ -32,26 +38,34 @@ final readonly class StripePaymentEventHandler
 
     public function confirmPayment(string $eventId, ?string $orderReference, ?string $paymentIntentId): void
     {
-        $order = $this->resolveOrder($eventId, $orderReference, $paymentIntentId);
-        if (null === $order) {
+        $confirmed = $this->entityManager->wrapInTransaction(function () use ($eventId, $orderReference, $paymentIntentId): ?Order {
+            $order = $this->resolveOrder($eventId, $orderReference, $paymentIntentId);
+            if (null === $order) {
+                return null;
+            }
+
+            if (OrderStatus::PENDING !== $order->getStatus()) {
+                $this->skip($order, $eventId, 'payment confirmed for an order that is no longer pending');
+
+                return null;
+            }
+
+            $this->apply($order, $eventId, OrderStatus::CONFIRMED, 'payment succeeded');
+
+            return $order;
+        });
+
+        if (!$confirmed instanceof Order) {
             return;
         }
 
-        if (OrderStatus::PENDING !== $order->getStatus()) {
-            $this->skip($order, $eventId, 'payment confirmed for an order that is no longer pending');
-
-            return;
-        }
-
-        $this->apply($order, $eventId, OrderStatus::CONFIRMED, 'payment succeeded');
-
-        // La commande est confirmée et l'événement Stripe enregistré : une suite du paiement en échec
-        // (e-mail, facture, stock) ne doit pas faire répondre une erreur, Stripe ignorerait sa reprise
+        // La confirmation est validée et le verrou rendu : une suite du paiement en échec (e-mail,
+        // facture, stock) ne doit pas faire répondre une erreur, Stripe ignorerait sa reprise
         try {
-            $this->eventDispatcher->dispatch(new OrderConfirmedEvent($order));
+            $this->eventDispatcher->dispatch(new OrderConfirmedEvent($confirmed));
         } catch (\Throwable $e) {
             $this->logger->critical('A follow-up of a confirmed order failed', [
-                'reference' => $order->getReference(),
+                'reference' => $confirmed->getReference(),
                 'exception' => $e,
             ]);
         }
@@ -62,61 +76,69 @@ final readonly class StripePaymentEventHandler
      */
     public function cancelPendingOrder(string $eventId, ?string $orderReference, ?string $paymentIntentId, string $reason): void
     {
-        $order = $this->resolveOrder($eventId, $orderReference, $paymentIntentId);
-        if (null === $order) {
-            return;
-        }
+        $this->entityManager->wrapInTransaction(function () use ($eventId, $orderReference, $paymentIntentId, $reason): void {
+            $order = $this->resolveOrder($eventId, $orderReference, $paymentIntentId);
+            if (null === $order) {
+                return;
+            }
 
-        if (OrderStatus::PENDING !== $order->getStatus()) {
-            $this->skip($order, $eventId, $reason.' after the order left the pending status');
+            if (OrderStatus::PENDING !== $order->getStatus()) {
+                $this->skip($order, $eventId, $reason.' after the order left the pending status');
 
-            return;
-        }
+                return;
+            }
 
-        $this->apply($order, $eventId, OrderStatus::CANCELLED, $reason);
+            $this->apply($order, $eventId, OrderStatus::CANCELLED, $reason);
+        });
     }
 
     public function recordFailedAttempt(string $eventId, ?string $orderReference, ?string $paymentIntentId): void
     {
-        $order = $this->resolveOrder($eventId, $orderReference, $paymentIntentId);
-        if (null === $order) {
-            return;
-        }
+        $this->entityManager->wrapInTransaction(function () use ($eventId, $orderReference, $paymentIntentId): void {
+            $order = $this->resolveOrder($eventId, $orderReference, $paymentIntentId);
+            if (null === $order) {
+                return;
+            }
 
-        $this->skip($order, $eventId, 'payment attempt failed, the customer can try again');
+            $this->skip($order, $eventId, 'payment attempt failed, the customer can try again');
+        });
     }
 
     public function recordRefund(string $paymentIntentId, string $eventId, bool $isFullRefund): void
     {
-        $order = $this->resolveOrder($eventId, null, $paymentIntentId);
-        if (null === $order) {
-            return;
-        }
+        $this->entityManager->wrapInTransaction(function () use ($paymentIntentId, $eventId, $isFullRefund): void {
+            $order = $this->resolveOrder($eventId, null, $paymentIntentId);
+            if (null === $order) {
+                return;
+            }
 
-        if (!$isFullRefund || OrderStatus::CANCELLED === $order->getStatus()) {
-            $this->skip($order, $eventId, $isFullRefund ? 'full refund of a cancelled order' : 'partial refund, status unchanged');
+            if (!$isFullRefund || OrderStatus::CANCELLED === $order->getStatus()) {
+                $this->skip($order, $eventId, $isFullRefund ? 'full refund of a cancelled order' : 'partial refund, status unchanged');
 
-            return;
-        }
+                return;
+            }
 
-        $this->apply($order, $eventId, OrderStatus::CANCELLED, 'full refund');
+            $this->apply($order, $eventId, OrderStatus::CANCELLED, 'full refund');
+        });
     }
 
     public function recordDispute(string $paymentIntentId, string $eventId): void
     {
-        $order = $this->resolveOrder($eventId, null, $paymentIntentId);
-        if (null === $order) {
-            return;
-        }
+        $this->entityManager->wrapInTransaction(function () use ($paymentIntentId, $eventId): void {
+            $order = $this->resolveOrder($eventId, null, $paymentIntentId);
+            if (null === $order) {
+                return;
+            }
 
-        $this->logger->critical('Stripe dispute opened on order', [
-            'order_id' => $order->getId(),
-            'reference' => $order->getReference(),
-            'stripe_event_id' => $eventId,
-        ]);
+            $this->logger->critical('Stripe dispute opened on order', [
+                'order_id' => $order->getId(),
+                'reference' => $order->getReference(),
+                'stripe_event_id' => $eventId,
+            ]);
 
-        $order->setLastStripeEventId($eventId);
-        $this->entityManager->flush();
+            $order->setLastStripeEventId($eventId);
+            $this->entityManager->flush();
+        });
     }
 
     private function apply(Order $order, string $eventId, OrderStatus $status, string $reason): void
@@ -150,6 +172,8 @@ final readonly class StripePaymentEventHandler
     }
 
     /**
+     * Called inside the transaction of the event: the order row stays locked until it ends.
+     *
      * @return Order|null the order to update, or null if there is nothing to do (unknown order,
      *                    event already processed, or a PaymentIntent that belongs to another payment)
      */
@@ -167,6 +191,12 @@ final readonly class StripePaymentEventHandler
 
             return null;
         }
+
+        // Verrou posé sur la seule table de la commande (SELECT 1 … FOR UPDATE), puis relecture : un refresh
+        // verrouillé ajouterait FOR UPDATE à la jointure externe de la facture, ce que PostgreSQL refuse.
+        // Toutes les décisions qui suivent portent ainsi sur la ligne telle qu'elle est en base.
+        $this->entityManager->lock($order, LockMode::PESSIMISTIC_WRITE);
+        $this->entityManager->refresh($order);
 
         if ($order->getLastStripeEventId() === $eventId) {
             $this->logger->info('Stripe event already processed for this order, skipping', [

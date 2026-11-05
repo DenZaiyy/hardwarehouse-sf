@@ -75,15 +75,17 @@ jobs:
                       # Variables
                       PROJECT_PATH="${{ secrets.PROJECT_PATH }}"
                       BACKUP_DIR="$HOME/backups/hardwarehouse"
-                      TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-
-                      # Backup current version
-                      echo "📦 Creating backup..."
-                      mkdir -p $BACKUP_DIR
-                      cp -r $PROJECT_PATH $BACKUP_DIR/backup-$TIMESTAMP || true
 
                       # Navigate to project
                       cd $PROJECT_PATH
+
+                      # Sauvegarde avant toute modification : base, configuration, factures, images, commit en place.
+                      # Le script vient de la version à déployer et il est pris seul : le code qui tourne ne change
+                      # pas encore. Un échec arrête le déploiement, site intact (restauration : DEPLOYMENT.md)
+                      echo "📦 Creating backup..."
+                      git fetch origin --prune
+                      git checkout origin/main -- bin/backup-before-deploy.sh
+                      BACKUP=$(sh bin/backup-before-deploy.sh "$BACKUP_DIR")
 
                       # Maintenance mode
                       echo "🔧 Enabling maintenance mode..."
@@ -91,7 +93,6 @@ jobs:
 
                       # Update code
                       echo "📥 Fetching latest code..."
-                      git fetch origin --prune
                       git reset --hard origin/main
 
                       # Build, install and deploy
@@ -107,7 +108,7 @@ jobs:
                       php bin/console about --env=prod > /dev/null
 
                       echo "🎉 Production deployment completed successfully!"
-                      echo "📋 Backup location: $BACKUP_DIR/backup-$TIMESTAMP"
+                      echo "📋 Backup location: $BACKUP"
 
             - name: Notify deployment status
               if: always()

@@ -40,9 +40,9 @@ graph LR
 ### 1. Structure recommandée
 ```bash
 /var/www/hardwarehouse/              # Projet principal
-/var/backups/hardwarehouse/          # Sauvegardes automatiques
-├── backup-20240129_143022/          # Backup horodaté
-├── backup-20240129_151045/          # Backup horodaté
+~/backups/hardwarehouse/             # Sauvegardes avant mise en production (les 5 dernières)
+├── deploy-20261105_143022/          # database.dump, files.tar.gz, commit.txt
+├── deploy-20261106_091045/
 ```
 
 ### 2. Utilisateur de déploiement
@@ -336,14 +336,16 @@ refroidissements). Entre les deux, le configurateur affiche des listes incomplè
 
 ### **Phase 2 : Déploiement SSH Optimisé**
 ```bash
-# Sauvegarde automatique
-sudo cp -r $PROJECT_PATH /var/backups/hardwarehouse/backup-$(date +%Y%m%d_%H%M%S)
+# Sauvegarde avant toute modification (voir Sauvegardes et restauration, plus bas) : le script de la
+# version à déployer, pris seul, le code qui tourne ne change pas encore. Un échec arrête le déploiement.
+git fetch origin --prune
+git checkout origin/main -- bin/backup-before-deploy.sh
+sh bin/backup-before-deploy.sh "$HOME/backups/hardwarehouse"
 
 # Mode maintenance temporaire
 touch var/maintenance.flag
 
 # Mise à jour code
-git fetch origin --prune
 git reset --hard origin/main
 
 # Dépendances optimisées
@@ -483,18 +485,42 @@ find var/ -not -writable -type d
 
 ## Dépannage Avancé
 
-### **Échec de Déploiement**
-```bash
-# 1. Consulter logs GitHub Actions
-# 2. Restaurer automatiquement depuis backup
-cd /var/www/
-sudo rm -rf hardwarehouse/
-sudo cp -r /var/backups/hardwarehouse/backup-YYYYMMDD_HHMMSS/ hardwarehouse/
-sudo chown -R deploy:www-data hardwarehouse/
+### **Sauvegardes et restauration**
 
-# 3. Re-lancer workflow manuellement
-# GitHub Interface → Actions → Re-run failed jobs
+Avant chaque mise en production, `ci-main.yml` lance `bin/backup-before-deploy.sh` avant de toucher au serveur.
+Le script crée `~/backups/hardwarehouse/deploy-AAAAMMJJ_HHMMSS/`, lisible par le seul compte du déploiement :
+
+- `database.dump` : la base PostgreSQL au format de `pg_restore`, prise avant les migrations
+- `files.tar.gz` : `.env.local`, les factures (`var/invoices/`) et les images envoyées (`public/uploads/`)
+- `commit.txt` : le commit qui était en production
+
+Les identifiants de la base sont lus comme Symfony les lit (`DATABASE_URL`) et passés à `pg_dump` par
+l'environnement, jamais en argument. Seules les 5 dernières sauvegardes `deploy-*` sont gardées. Les copies
+complètes faites avant novembre 2026 (`backup-*`, plusieurs Go) ne sont pas touchées par le script : les supprimer
+à la main une fois une première sauvegarde `deploy-*` vérifiée (`pg_restore --list database.dump`).
+
+### **Échec de Déploiement**
+
+Un échec avant `make prod` laisse le site tel quel : corriger la cause, puis relancer le job (GitHub Actions →
+Re-run failed jobs). Un échec pendant `make prod` laisse le site en maintenance :
+
+```bash
+cd "$PROJECT_PATH"
+BACKUP=$(ls -1d ~/backups/hardwarehouse/deploy-* | tail -n 1)
+
+# Code précédent
+git reset --hard "$(cat "$BACKUP/commit.txt")"
+
+# Base d'avant les migrations, seulement si une migration a échoué ou abîmé des données :
+# les commandes passées depuis la sauvegarde seraient perdues. Mot de passe : celui de DATABASE_URL
+pg_restore --clean --if-exists --no-owner -h 127.0.0.1 -U UTILISATEUR_DE_LA_BASE -d hardwarehouse_prod "$BACKUP/database.dump"
+
+make prod
+rm -f var/maintenance.flag
 ```
+
+`files.tar.gz` ne sert que si `.env.local`, des factures ou des images ont été perdus : `tar -xzf "$BACKUP/files.tar.gz"`
+depuis le dossier du projet.
 
 ### **Problèmes Fréquents**
 
@@ -633,5 +659,5 @@ qui rend la sortie idempotente est créé par `prisma db push`, que le déploiem
 production (`hardwarehouse-api/deploy/README.md`).
 
 **Factures.** Les PDF sont rangés dans `var/invoices/prod/AAAA/`, hors de `public/` : ils sont servis
-uniquement à leur titulaire par `/profile/orders/{référence}/invoice`. Le dossier `var/` fait partie de
-la sauvegarde automatique du déploiement.
+uniquement à leur titulaire par `/profile/orders/{référence}/invoice`. Ils font partie de la sauvegarde prise
+avant chaque mise en production (voir Sauvegardes et restauration).
