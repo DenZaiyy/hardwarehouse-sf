@@ -1,17 +1,36 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Crée votre config PC - HardWareHouse{% endblock %}
+{% block title %}{{ 'user.configurations.title'|trans(domain = 'title') }} - HardWareHouse{% endblock %}
 
 {% block body %}
-    <aside>
-        <h1>Construis ton ordinateur</h1>
-        <div class="flex flex-col">
-            <div class="actions">
-
-            </div>
+    <div class="container mx-auto space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+            <h1>{{ 'configurator.my_configurations'|trans }}</h1>
+            <a href="{{ path('configuration.new') }}" class="rounded-md bg-primary px-3 py-2 font-title text-paragraph transition-colors hover:bg-primary-dark">
+                {{ 'configurator.saved.open_configurator'|trans }}
+            </a>
         </div>
-    </aside>
-    <section>
 
-    </section>
+        {% if configurations is empty %}
+            <p class="rounded-md bg-paragraph p-4 text-muted">{{ 'configurator.saved.empty'|trans }}</p>
+        {% else %}
+            <ul class="space-y-2">
+                {% for configuration in configurations %}
+                    {# Prix enregistrés à la sauvegarde, hors taxe : affichés TTC comme partout dans la boutique #}
+                    {% set total = configuration.items|reduce((sum, item) => sum + (item.unitPriceSnapshot|ttc) * item.quantity, 0) %}
+                    <li class="relative flex flex-wrap items-center justify-between gap-3 rounded-md bg-paragraph p-4 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary">
+                        <div>
+                            <h2 class="text-lg font-title text-primary">
+                                <a href="{{ path('configuration.show', {id: configuration.id}) }}" class="after:absolute after:inset-0 focus-visible:outline-none">{{ configuration.name }}</a>
+                            </h2>
+                            <p class="text-sm text-muted">
+                                {{ 'configurator.saved.summary'|trans({'%count%': configuration.items|length, '%date%': (configuration.updatedAt ?? configuration.createdAt)|date('d/m/Y')}) }}
+                            </p>
+                        </div>
+                        <p class="font-title text-xl text-primary">{{ total|format_currency('EUR') }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
 {% endblock %}

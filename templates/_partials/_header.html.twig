@@ -75,6 +75,11 @@
             <!-- Menu items -->
             <ul class="flex flex-col px-6 pb-6 space-y-4">
                 <li>
+                    <a href="{{ path('configuration.new') }}" class="block py-3 px-4 text-lg rounded-lg hover:bg-secondary-dark transition-colors">
+                        {{ 'header.nav.configurator.label'|trans }}
+                    </a>
+                </li>
+                <li>
                     <a href="{{ path('brand.index') }}" class="block py-3 px-4 text-lg rounded-lg hover:bg-secondary-dark transition-colors">
                         {{ 'category.marques'|trans }}
                     </a>
@@ -92,6 +97,11 @@
         <!-- Desktop Menu -->
         <div class="hidden md:block">
             <ul class="flex gap-4 items-center overflow-x-auto px-4 py-2 text-sm justify-center font-display font-bold">
+                <li>
+                    <a href="{{ path('configuration.new') }}" class="hover:text-white transition-colors">
+                        {{ 'header.nav.configurator.label'|trans }}
+                    </a>
+                </li>
                 <li>
                     <a href="{{ path('brand.index') }}" class="hover:text-white transition-colors">
                         {{ 'category.marques'|trans }}

@@ -1,7 +1,9 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Nouvelle configuration - HardWareHouse{% endblock %}
+{% block title %}{{ 'configurator.title'|trans(domain = 'title') }} - HardWareHouse{% endblock %}
 
 {% block body %}
-
+    <div class="container mx-auto px-4 py-6">
+        {{ component('Configurator:ConfiguratorComponent') }}
+    </div>
 {% endblock %}
