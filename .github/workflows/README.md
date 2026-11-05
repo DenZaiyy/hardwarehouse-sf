@@ -30,9 +30,9 @@ dev → test (auto) → main (PR manuelle) → production (auto)
 **Déclenchement :** `workflow_call`  
 **Objectif :** Audit de sécurité  
 **Tâches :**
-- 🔒 Audit sécurité Composer
-- 📊 Ignore vulnérabilités low/medium
-- 📋 Génération rapport JSON
+- 🔒 Audit sécurité Composer des dépendances de production, **bloquant** : une faille élevée, critique ou pas encore notée arrête le pipeline
+- 📊 Gravités faible et moyenne signalées sans bloquer
+- 📋 Génération rapport JSON (toutes gravités)
 - ⬆️ Upload artifacts pour consultation
 
 #### `test.yml`
@@ -83,7 +83,7 @@ dev → test (auto) → main (PR manuelle) → production (auto)
 1. 🔍 **Triple validation** (audit + qualité + tests)
 2. 🚀 **Déploiement production optimisé**
 
-**Environnement :** `production`  
+**Environnement :** `prod`, réservé à la branche `main`  
 **Timeout :** 15 minutes  
 **Concurrency :** Protection contre déploiements simultanés
 
@@ -101,7 +101,7 @@ dev → test (auto) → main (PR manuelle) → production (auto)
 - 🧪 Dry-run installation
 
 #### **Phase 2: Déploiement SSH**
-- 📦 **Sauvegarde automatique** avec timestamp
+- 📦 **Sauvegarde avant toute modification** (`bin/backup-before-deploy.sh`) : base (`pg_dump`), `.env.local`, factures, images envoyées et commit en place, les 5 dernières gardées
 - 🔧 **Mode maintenance** temporaire
 - 📥 **Git fetch + reset hard** vers `main`
 - 📦 **Installation dépendances** optimisée
@@ -154,9 +154,9 @@ PAT_TOKEN=ghp_xxxxxxxxxxxx
 ### Structure recommandée :
 ```
 /var/www/hardwarehouse/          # Projet principal
-/var/backups/hardwarehouse/      # Sauvegardes auto
-├── backup-20240129_143022/      # Backup horodaté
-├── backup-20240129_151045/      # Backup horodaté
+~/backups/hardwarehouse/         # Sauvegardes avant mise en production (les 5 dernières)
+├── deploy-20261105_143022/      # database.dump, files.tar.gz, commit.txt
+├── deploy-20261106_091045/
 ```
 
 ## 📊 Monitoring
@@ -175,13 +175,8 @@ PAT_TOKEN=ghp_xxxxxxxxxxxx
 ## 🆘 Dépannage Rapide
 
 ### **Déploiement échoué :**
-```bash
-# Restaurer depuis backup
-cd /var/www/
-sudo rm -rf hardwarehouse/
-sudo cp -r /var/backups/hardwarehouse/backup-YYYYMMDD_HHMMSS/ hardwarehouse/
-sudo chown -R deploy:www-data hardwarehouse/
-```
+Restauration du code, de la base et des fichiers depuis la dernière sauvegarde : `DEPLOYMENT.md`, sections
+Sauvegardes et restauration et Échec de Déploiement.
 
 ### **Cache corrompu :**
 ```bash
@@ -216,13 +211,14 @@ rm -rf var/cache/prod/
 3. ✅ Si succès → Auto-merge vers `test`
 4. 🧪 Tests sur environnement test
 5. 📝 PR automatique vers `main`
-6. 👨‍💼 **Review manuelle** + merge
+6. 👨‍💼 **Relecture et fusion** de la PR, impossible tant que ses contrôles ne sont pas verts
 7. 🚀 **Déploiement automatique** en production
 
 ### **Points de contrôle :**
 - ✋ **Seule étape manuelle :** Validation de la PR `test → main`
 - 🔒 **Triple sécurité :** Tests sur dev, test, et main
-- 🛡️ **Protection :** Environment production avec review
+- 🛡️ **Protection de `main`** (ruleset GitHub `Protect main`) : PR obligatoire, contrôles `audit`, `quality` et `tests` de la branche au vert, ni force push ni suppression
+- 🔐 **Environnement `prod`** : seul un job lancé depuis `main` peut y déployer
 
 ---
 
