@@ -101,7 +101,7 @@ dev → test (auto) → main (PR manuelle) → production (auto)
 - 🧪 Dry-run installation
 
 #### **Phase 2: Déploiement SSH**
-- 📦 **Sauvegarde automatique** avec timestamp
+- 📦 **Sauvegarde avant toute modification** (`bin/backup-before-deploy.sh`) : base (`pg_dump`), `.env.local`, factures, images envoyées et commit en place, les 5 dernières gardées
 - 🔧 **Mode maintenance** temporaire
 - 📥 **Git fetch + reset hard** vers `main`
 - 📦 **Installation dépendances** optimisée
@@ -154,9 +154,9 @@ PAT_TOKEN=ghp_xxxxxxxxxxxx
 ### Structure recommandée :
 ```
 /var/www/hardwarehouse/          # Projet principal
-/var/backups/hardwarehouse/      # Sauvegardes auto
-├── backup-20240129_143022/      # Backup horodaté
-├── backup-20240129_151045/      # Backup horodaté
+~/backups/hardwarehouse/         # Sauvegardes avant mise en production (les 5 dernières)
+├── deploy-20261105_143022/      # database.dump, files.tar.gz, commit.txt
+├── deploy-20261106_091045/
 ```
 
 ## 📊 Monitoring
@@ -175,13 +175,8 @@ PAT_TOKEN=ghp_xxxxxxxxxxxx
 ## 🆘 Dépannage Rapide
 
 ### **Déploiement échoué :**
-```bash
-# Restaurer depuis backup
-cd /var/www/
-sudo rm -rf hardwarehouse/
-sudo cp -r /var/backups/hardwarehouse/backup-YYYYMMDD_HHMMSS/ hardwarehouse/
-sudo chown -R deploy:www-data hardwarehouse/
-```
+Restauration du code, de la base et des fichiers depuis la dernière sauvegarde : `DEPLOYMENT.md`, sections
+Sauvegardes et restauration et Échec de Déploiement.
 
 ### **Cache corrompu :**
 ```bash
