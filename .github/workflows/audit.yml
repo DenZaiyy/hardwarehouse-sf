@@ -38,29 +38,33 @@ jobs:
                   
                   echo "🔒 Running security audit..." | tee /tmp/security-reports/audit-output.log
                   
-                  # Audit complet avec format JSON
+                  # Rapport complet au format JSON, toutes gravités : gardé en artefact, il ne bloque pas
                   composer audit \
                     --no-dev \
                     --abandoned="report" \
-                    --ignore-severity="low" \
-                    --ignore-severity="medium" \
                     --format="json" \
                     --no-ansi \
                   > /tmp/security-reports/security-audit.json 2>&1 || true
-                  
-                  # Audit format texte pour lecture facile
-                  composer audit \
+
+                  # Vérification outdated packages
+                  echo "📦 Checking outdated packages..." | tee -a /tmp/security-reports/audit-output.log
+                  composer outdated --direct --format=json > /tmp/security-reports/outdated-packages.json 2>&1 || true
+
+                  # Contrôle bloquant sur les dépendances livrées en production : une faille de gravité élevée,
+                  # critique ou pas encore notée arrête le pipeline, donc la mise en production (comme
+                  # npm audit --audit-level=high dans l'API). Faible et moyenne restent signalées dans le rapport.
+                  if ! composer audit \
                     --no-dev \
                     --abandoned="report" \
                     --ignore-severity="low" \
                     --ignore-severity="medium" \
                     --no-ansi \
-                  > /tmp/security-reports/security-audit.txt 2>&1 || true
-                  
-                  # Vérification outdated packages
-                  echo "📦 Checking outdated packages..." | tee -a /tmp/security-reports/audit-output.log
-                  composer outdated --direct --format=json > /tmp/security-reports/outdated-packages.json 2>&1 || true
-                  
+                    > /tmp/security-reports/security-audit.txt 2>&1; then
+                      cat /tmp/security-reports/security-audit.txt
+                      echo "❌ Vulnerable production dependency: update it before shipping" | tee -a /tmp/security-reports/audit-output.log
+                      exit 1
+                  fi
+
                   echo "✅ Security audit completed" | tee -a /tmp/security-reports/audit-output.log
 
             - name: Upload security audit reports
