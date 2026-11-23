@@ -21,17 +21,17 @@ jobs:
                     --health-retries 5
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
             - name: Setup PHP
-              uses: shivammathur/setup-php@v2
+              uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
               with:
                   php-version: 8.4
                   extensions: pdo, pdo_pgsql, pgsql
                   tools: composer:v2
 
             - name: Cache Composer dependencies
-              uses: actions/cache@v4
+              uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
               with:
                   path: /tmp/composer-cache
                   key: ${{ runner.os }}-composer-test-${{ hashFiles('**/composer.lock') }}
@@ -48,7 +48,7 @@ jobs:
                   composer install --prefer-dist --no-interaction --no-progress --optimize-autoloader
 
             - name: Cache Tailwind binary
-              uses: actions/cache@v4
+              uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
               with:
                   path: var/tailwind
                   key: ${{ runner.os }}-tailwind-bin-${{ hashFiles('**/composer.lock') }}
@@ -57,7 +57,7 @@ jobs:
 
             - name: Cache Tailwind built CSS
               id: tailwind-css-cache
-              uses: actions/cache@v4
+              uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
               with:
                   path: var/tailwind/app.built.css
                   key: ${{ runner.os }}-tailwind-css-${{ hashFiles('assets/**') }}
@@ -94,7 +94,7 @@ jobs:
                   DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/hardwarehouse_test?serverVersion=16&charset=utf8
 
             - name: Upload test results
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
               if: always()
               with:
                   name: test-results-${{ github.run_number }}
@@ -105,7 +105,7 @@ jobs:
                   retention-days: 30
 
             - name: Upload PHPUnit coverage (if exists)
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
               if: always()
               with:
                   name: coverage-report-${{ github.run_number }}

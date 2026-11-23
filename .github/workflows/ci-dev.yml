@@ -21,14 +21,16 @@ jobs:
     tests:
         uses: ./.github/workflows/test.yml
 
-    # Auto-merge vers test si tout passe
+    # Auto-merge vers test si tout passe, après un push sur dev seulement. Sur une PR vers dev, le job fusionnerait
+    # dev tel quel, sans la PR, et une PR de Dependabot ne reçoit pas PAT_TOKEN : le checkout échouerait.
     auto-merge-to-test:
         name: Auto-merge to test
         needs: [audit, quality, tests]
+        if: github.event_name == 'push'
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
               with:
                   token: ${{ secrets.PAT_TOKEN }}
                   fetch-depth: 0
