@@ -1,0 +1,23 @@
+# Mises à jour des actions GitHub, épinglées par empreinte de commit dans les workflows (workflows/README.md).
+# Dependabot lit ce fichier sur la branche par défaut (main) et ouvre ses PR vers dev : elles suivent le circuit
+# habituel, CI sur dev, préproduction sur test, puis PR vers main.
+version: 2
+updates:
+    - package-ecosystem: github-actions
+      directory: "/"
+      target-branch: dev
+      schedule:
+          interval: weekly
+          day: monday
+          time: "07:00"
+          timezone: Europe/Paris
+      # Une version n'est proposée qu'une semaine après sa publication : le temps qu'une version piégée soit repérée
+      cooldown:
+          default-days: 7
+      # Une seule PR pour toutes les actions
+      groups:
+          github-actions:
+              patterns:
+                  - "*"
+      commit-message:
+          prefix: ci

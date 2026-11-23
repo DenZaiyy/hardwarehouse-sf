@@ -33,7 +33,7 @@ jobs:
             cancel-in-progress: false
         steps:
             - name: Deploy to preprod server
-              uses: appleboy/ssh-action@v1.2.0
+              uses: appleboy/ssh-action@7eaf76671a0d7eec5d98ee897acda4f968735a17 # v1.2.0
               with:
                   host: ${{ secrets.HOST }}
                   username: ${{ secrets.USERNAME }}

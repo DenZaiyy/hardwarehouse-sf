@@ -118,6 +118,33 @@ dev → test (auto) → main (PR manuelle) → production (auto)
 - 🎯 `--minify` pour Tailwind CSS
 - 🔧 Mode maintenance pour zero-downtime
 
+## 📌 Actions épinglées et mises à jour
+
+Chaque action est désignée par l'empreinte (SHA) du commit de sa version, suivie de la version en commentaire :
+
+```yaml
+uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+```
+
+Une étiquette (`v4`, et même `v1.2.0`) peut être déplacée par quiconque contrôle le dépôt de l'action. En mars 2025, celles de
+`tj-actions/changed-files` ont été redirigées vers un commit qui recopiait les secrets dans les journaux de CI, lisibles
+par tous sur un dépôt public. Une empreinte désigne un contenu qui ne change plus.
+
+Dependabot (`.github/dependabot.yml`) propose chaque lundi, en une seule PR vers `dev`, les versions publiées depuis au
+moins 7 jours. La PR suit le circuit habituel : CI sur `dev`, préproduction sur `test`, PR vers `main`. Dependabot lit
+sa configuration sur `main` : un changement de ce fichier ne compte qu'une fois en production.
+
+Pour ajouter une action, relever l'empreinte de la version voulue :
+
+```bash
+git ls-remote --tags https://github.com/actions/checkout 'refs/tags/v4.4.0*'
+```
+
+Pour une étiquette annotée, deux lignes sortent : celle qui finit par `^{}` donne le commit. Sinon, l'unique ligne le donne.
+
+Limite : `appleboy/ssh-action` télécharge à chaque exécution le binaire `drone-ssh` publié par son auteur, sans en
+vérifier l'empreinte. Épingler l'action fige son script, pas ce binaire.
+
 ## 🔐 Secrets Requis
 
 ### **Déploiement**
