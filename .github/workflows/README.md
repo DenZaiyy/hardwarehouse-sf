@@ -55,7 +55,7 @@ dev → test (auto) → main (PR manuelle) → production (auto)
 1. 🔍 **Audit sécurité** (`audit.yml`)
 2. ✅ **Analyse qualité** (`quality.yml`) 
 3. 🧪 **Tests complets** (`test.yml`)
-4. 🔀 **Auto-merge vers `test`** (si succès)
+4. 🔀 **Auto-merge vers `test`** (si succès), après un push sur `dev` seulement : une PR vers `dev` est testée, puis n'avance vers `test` qu'une fois fusionnée
 
 **Permissions :** `contents: write`  
 **Secrets requis :** `PAT_TOKEN`
