@@ -150,7 +150,8 @@ category:
     memoire-ram: 'Mémoire RAM'
     cartes-meres: 'Cartes mères'
     processeurs: Processeurs
-    refroidissement: Refroidissement
+    refroidissement: Ventirads
+    watercooling: Watercooling
 footer:
     description: 'Votre spécialiste en composants PC. Livraison rapide, expertise technique, meilleurs prix.'
     contact:
@@ -333,7 +334,9 @@ configurator:
         memory_support: 'Le processeur ne prend pas en charge ce type de mémoire.'
         form_factor: "La carte mère n'entre pas dans le boîtier."
         cooler_socket: 'Le refroidissement ne se fixe pas sur le socket du processeur.'
-        cooler_capacity: 'Le refroidissement ne dissipe pas assez de chaleur pour ce processeur.'
+        cooler_capacity: 'Le ventirad ne dissipe pas assez de chaleur pour ce processeur.'
+        cooler_height: 'Le ventirad est trop haut pour le boîtier.'
+        radiator_size: "Le boîtier n'accepte pas le radiateur du watercooling."
         power: "L'alimentation est trop faible pour le processeur et la carte graphique."
         references: 'Trois disques au plus.'
         quantity: "Plus de barrettes que la carte mère n'a d'emplacements."
