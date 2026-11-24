@@ -148,7 +148,8 @@ category:
     memoire-ram: 'RAM memory'
     cartes-meres: Motherboards
     processeurs: Processors
-    refroidissement: Cooling
+    refroidissement: 'Air coolers'
+    watercooling: 'Liquid coolers'
 footer:
     description: "Your PC components specialist. Fast delivery, technical expertise, best prices."
     contact:
@@ -331,7 +332,9 @@ configurator:
         memory_support: 'The processor does not support this type of memory.'
         form_factor: 'The motherboard does not fit in the case.'
         cooler_socket: 'The cooler does not mount on the processor socket.'
-        cooler_capacity: 'The cooler cannot dissipate enough heat for this processor.'
+        cooler_capacity: 'The air cooler cannot dissipate enough heat for this processor.'
+        cooler_height: 'The air cooler is too tall for the case.'
+        radiator_size: 'The case does not take the radiator of the liquid cooler.'
         power: 'The power supply is too weak for the processor and the graphics card.'
         references: 'Three drives at most.'
         quantity: 'More memory modules than the motherboard has slots.'

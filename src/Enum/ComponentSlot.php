@@ -21,6 +21,12 @@ enum ComponentSlot: string implements TranslatableInterface
     case CASE = 'case';
     case PSU = 'psu';
 
+    /** Ventirads : la catégorie garde l'identifiant de sa création, quand elle était le seul refroidissement */
+    public const string AIR_COOLING = 'refroidissement';
+
+    /** Watercoolings tout-en-un */
+    public const string LIQUID_COOLING = 'watercooling';
+
     /**
      * Catégories de l'API dont les produits peuvent occuper l'emplacement.
      *
@@ -30,7 +36,7 @@ enum ComponentSlot: string implements TranslatableInterface
     {
         return match ($this) {
             self::CPU => ['processeurs'],
-            self::COOLER => ['refroidissement'],
+            self::COOLER => [self::AIR_COOLING, self::LIQUID_COOLING],
             self::MOTHERBOARD => ['cartes-meres'],
             self::RAM => ['memoire-ram'],
             self::GPU => ['cartes-graphiques'],

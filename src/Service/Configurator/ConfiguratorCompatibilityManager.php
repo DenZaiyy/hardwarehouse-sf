@@ -14,7 +14,8 @@ use App\Enum\ComponentSlot;
  * sauvegarde ou son ajout au panier.
  *
  * Une règle porte sur une paire d'emplacements, sans sens imposé : le client commence par le composant qu'il veut.
- * Un produit dépourvu d'un attribut exigé par une règle est incompatible.
+ * Un produit dépourvu d'un attribut exigé par une règle est incompatible. Une règle peut être réservée à une famille de
+ * produits (une catégorie de l'un des deux emplacements) : elle ne vaut alors que pour les produits de cette catégorie.
  */
 final readonly class ConfiguratorCompatibilityManager
 {
@@ -25,35 +26,48 @@ final readonly class ConfiguratorCompatibilityManager
     public const float SAFETY_MARGIN = 1.3;
 
     /**
-     * Règles déclarées comme données : [type, emplacement A, attribut de A, emplacement B, attribut de B].
+     * Règles déclarées comme données : [type, emplacement A, attribut de A, emplacement B, attribut de B, famille].
      * match : les deux valeurs sont égales. contains : la valeur de A figure dans la liste de B. atLeast : le nombre
      * de A vaut au moins celui de B. Une nouvelle règle de l'un de ces types tient en une ligne.
+     *
+     * La famille est null pour une règle qui vaut quels que soient les produits. Les watercoolings n'ont pas de
+     * puissance dissipable publiée, ni de hauteur à comparer à celle du boîtier, mais un radiateur à y loger.
      */
     private const array RULES = [
-        'socket' => ['match', ComponentSlot::CPU, 'socket', ComponentSlot::MOTHERBOARD, 'socket'],
-        'memory_type' => ['match', ComponentSlot::RAM, 'ddr_type', ComponentSlot::MOTHERBOARD, 'ddr_type'],
-        'memory_support' => ['contains', ComponentSlot::RAM, 'ddr_type', ComponentSlot::CPU, 'ddr_supported'],
-        'form_factor' => ['contains', ComponentSlot::MOTHERBOARD, 'form_factor', ComponentSlot::CASE, 'form_factors_supported'],
-        'cooler_socket' => ['contains', ComponentSlot::CPU, 'socket', ComponentSlot::COOLER, 'sockets_supported'],
-        'cooler_capacity' => ['atLeast', ComponentSlot::COOLER, 'cooler_tdp_max', ComponentSlot::CPU, 'tdp'],
+        'socket' => ['match', ComponentSlot::CPU, 'socket', ComponentSlot::MOTHERBOARD, 'socket', null],
+        'memory_type' => ['match', ComponentSlot::RAM, 'ddr_type', ComponentSlot::MOTHERBOARD, 'ddr_type', null],
+        'memory_support' => ['contains', ComponentSlot::RAM, 'ddr_type', ComponentSlot::CPU, 'ddr_supported', null],
+        'form_factor' => ['contains', ComponentSlot::MOTHERBOARD, 'form_factor', ComponentSlot::CASE, 'form_factors_supported', null],
+        'cooler_socket' => ['contains', ComponentSlot::CPU, 'socket', ComponentSlot::COOLER, 'sockets_supported', null],
+        'cooler_capacity' => ['atLeast', ComponentSlot::COOLER, 'cooler_tdp_max', ComponentSlot::CPU, 'tdp', ComponentSlot::AIR_COOLING],
+        'cooler_height' => ['atLeast', ComponentSlot::CASE, 'cooler_height_max', ComponentSlot::COOLER, 'hauteur_mm', ComponentSlot::AIR_COOLING],
+        'radiator_size' => ['contains', ComponentSlot::COOLER, 'radiator_size', ComponentSlot::CASE, 'radiator_sizes_supported', ComponentSlot::LIQUID_COOLING],
     ];
 
     /**
-     * Filtres d'attributs qui ne laissent dans la liste de $target que des produits compatibles avec la sélection.
+     * Filtres d'attributs qui ne laissent, dans la catégorie $category de l'emplacement $target, que des produits
+     * compatibles avec la sélection. La catégorie compte : les deux familles de refroidissement n'ont pas les mêmes règles.
      *
      * @param array<string, ProductSpecDto> $selection produits choisis, indexés par emplacement (ComponentSlot::value)
      *
      * @return array<string, string>|null paramètres de requête de l'API, ou null si aucun produit ne peut convenir
      */
-    public function filtersFor(ComponentSlot $target, array $selection): ?array
+    public function filtersFor(ComponentSlot $target, string $category, array $selection): ?array
     {
+        if (!\in_array($category, $target->categorySlugs(), true)) {
+            throw new \InvalidArgumentException(\sprintf('La catégorie "%s" ne fournit pas l\'emplacement "%s".', $category, $target->value));
+        }
+
         $filters = new AttributeFilters();
 
-        foreach (self::RULES as [$type, $slotA, $attributeA, $slotB, $attributeB]) {
-            if ($target === $slotA && isset($selection[$slotB->value])) {
-                $this->filterFirst($filters, $type, $attributeA, $selection[$slotB->value], $attributeB);
-            } elseif ($target === $slotB && isset($selection[$slotA->value])) {
-                $this->filterSecond($filters, $type, $attributeB, $selection[$slotA->value], $attributeA);
+        foreach (self::RULES as [$type, $slotA, $attributeA, $slotB, $attributeB, $family]) {
+            $first = $selection[$slotA->value] ?? null;
+            $second = $selection[$slotB->value] ?? null;
+
+            if ($target === $slotA && null !== $second && $this->applies($family, $slotA, $category, $slotB, $second->categorySlug())) {
+                $this->filterFirst($filters, $type, $attributeA, $second, $attributeB);
+            } elseif ($target === $slotB && null !== $first && $this->applies($family, $slotA, $first->categorySlug(), $slotB, $category)) {
+                $this->filterSecond($filters, $type, $attributeB, $first, $attributeA);
             }
         }
 
@@ -77,11 +91,13 @@ final readonly class ConfiguratorCompatibilityManager
     public function violations(array $selection): array
     {
         $issues = [];
-        foreach (self::RULES as $rule => [$type, $slotA, $attributeA, $slotB, $attributeB]) {
+        foreach (self::RULES as $rule => [$type, $slotA, $attributeA, $slotB, $attributeB, $family]) {
             $first = $selection[$slotA->value] ?? null;
             $second = $selection[$slotB->value] ?? null;
 
-            if (null !== $first && null !== $second && !$this->satisfies($type, $first, $attributeA, $second, $attributeB)) {
+            if (null !== $first && null !== $second
+                && $this->applies($family, $slotA, $first->categorySlug(), $slotB, $second->categorySlug())
+                && !$this->satisfies($type, $first, $attributeA, $second, $attributeB)) {
                 $issues[] = new ConfiguratorIssue([$slotA, $slotB], $rule);
             }
         }
@@ -92,6 +108,19 @@ final readonly class ConfiguratorCompatibilityManager
         }
 
         return $issues;
+    }
+
+    /**
+     * Une règle réservée à une famille ne vaut que si le produit de l'emplacement de cette famille en fait partie.
+     * $categoryA et $categoryB sont les catégories des produits des emplacements A et B, choisis ou listés.
+     */
+    private function applies(?string $family, ComponentSlot $slotA, ?string $categoryA, ComponentSlot $slotB, ?string $categoryB): bool
+    {
+        if (null === $family) {
+            return true;
+        }
+
+        return \in_array($family, $slotA->categorySlugs(), true) ? $family === $categoryA : $family === $categoryB;
     }
 
     /**
