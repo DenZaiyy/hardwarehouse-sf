@@ -335,7 +335,7 @@ final class ConfiguratorComponent
             return null;
         }
 
-        $filters = $this->compatibility->filtersFor($this->slot, $this->stateManager->getState()->productsBySlot($review['products']));
+        $filters = $this->compatibility->filtersFor($this->slot, $this->category, $this->stateManager->getState()->productsBySlot($review['products']));
 
         try {
             $page = $this->catalog->compatibleProducts($this->slot, $this->category, $filters, $this->page);

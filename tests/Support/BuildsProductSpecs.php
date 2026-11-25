@@ -13,8 +13,9 @@ trait BuildsProductSpecs
 {
     /**
      * @param array<string, string|int|float|bool|list<string>> $attributes
+     * @param string|null                                       $category   slug de la catégorie du produit
      */
-    private static function product(array $attributes = []): ProductSpecDto
+    private static function product(array $attributes = [], ?string $category = null): ProductSpecDto
     {
         $values = [];
         foreach ($attributes as $code => $value) {
@@ -26,6 +27,6 @@ trait BuildsProductSpecs
             };
         }
 
-        return new ProductSpecDto(id: bin2hex(random_bytes(12)), attributes: $values);
+        return new ProductSpecDto(id: bin2hex(random_bytes(12)), attributes: $values, category: null === $category ? [] : ['slug' => $category]);
     }
 }
