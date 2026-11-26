@@ -38,6 +38,37 @@ class RatingRepository extends ServiceEntityRepository
     }
 
     /**
+     * Moyenne et nombre d'avis des produits d'une page de liste, en une seule requête groupée. Un produit sans avis
+     * n'a pas d'entrée.
+     *
+     * @param list<string> $productIds
+     *
+     * @return array<string, array{average: float, count: int}>
+     */
+    public function summaries(array $productIds): array
+    {
+        if ([] === $productIds) {
+            return [];
+        }
+
+        /** @var list<array{productId: string, average: string|float, count: int|string}> $rows */
+        $rows = $this->createQueryBuilder('rating')
+            ->select('rating.productId AS productId', 'AVG(rating.note) AS average', 'COUNT(rating.id) AS count')
+            ->where('rating.productId IN (:productIds)')
+            ->setParameter('productIds', array_values(array_unique($productIds)))
+            ->groupBy('rating.productId')
+            ->getQuery()
+            ->getArrayResult();
+
+        $summaries = [];
+        foreach ($rows as $row) {
+            $summaries[$row['productId']] = ['average' => round((float) $row['average'], 1), 'count' => (int) $row['count']];
+        }
+
+        return $summaries;
+    }
+
+    /**
      * @return array{average: float|null, count: int} moyenne des notes (null sans avis) et nombre d'avis
      */
     public function summary(string $productId): array

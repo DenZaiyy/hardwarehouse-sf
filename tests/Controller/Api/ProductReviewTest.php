@@ -8,6 +8,7 @@ use App\Entity\OrderLine;
 use App\Entity\Rating;
 use App\Entity\User;
 use App\Enum\OrderStatus;
+use App\Repository\RatingRepository;
 use App\Tests\Support\CreatesShopEntities;
 use App\Tests\Support\FakesCatalogApi;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -160,6 +161,39 @@ final class ProductReviewTest extends WebTestCase
         $client->request('POST', $form->getUri(), ['review' => ['note' => '6', '_token' => $form->get('review[_token]')->getValue()]]);
 
         self::assertSame([], $this->entityManager()->getRepository(Rating::class)->findBy(['productId' => $productId]));
+    }
+
+    public function testListedProductShowsItsAverageAndCount(): void
+    {
+        $client = static::createClient();
+        $reviewed = self::newProductSlug();
+        $silent = self::newProductSlug();
+        $this->apiListsProducts([self::productPayload($reviewed), self::productPayload($silent)]);
+        $this->review($this->createUser(), self::productId($reviewed), 5, 'Parfait.');
+        $this->review($this->createUser(), self::productId($reviewed), 4, 'Bien.');
+
+        $crawler = $client->request('GET', '/fr/produits');
+
+        self::assertSame('4,5 (2)', self::plain($crawler->filter('a[href$="/produits/'.$reviewed.'"] .product-card-rating')->text()));
+        self::assertCount(0, $crawler->filter('a[href$="/produits/'.$silent.'"] .product-card-rating'));
+    }
+
+    public function testSummariesOfAPageAreReadInOneQuery(): void
+    {
+        static::createClient();
+        $first = 'produit-'.bin2hex(random_bytes(4));
+        $second = 'produit-'.bin2hex(random_bytes(4));
+        $this->review($this->createUser(), $first, 5, 'Parfait.');
+        $this->review($this->createUser(), $first, 2, 'Bof.');
+        $this->review($this->createUser(), $second, 4, 'Bien.');
+
+        $summaries = static::getContainer()->get(RatingRepository::class)->summaries([$first, $second, 'sans-avis']);
+        $expected = [$first => ['average' => 3.5, 'count' => 2], $second => ['average' => 4.0, 'count' => 1]];
+        // GROUP BY ne fixe pas l'ordre des produits
+        ksort($summaries);
+        ksort($expected);
+
+        self::assertSame($expected, $summaries);
     }
 
     /** Client dont une commande, à ce statut, contient le produit */
