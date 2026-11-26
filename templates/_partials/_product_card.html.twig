@@ -24,6 +24,13 @@
                 {{ product.name }}
             </h2>
 
+            {% if rating|default(null) %}
+                <p class="product-card-rating flex items-center justify-center gap-1 text-xs text-muted">
+                    <twig:Stars :rating="rating.average" size="size-4" />
+                    <span>{{ rating.average|format_number({fraction_digit: 1}) }} ({{ rating.count }})</span>
+                </p>
+            {% endif %}
+
             <p class="line-clamp-3 min-h-[3.75rem] text-center text-sm leading-5 text-gray-700">
                 {{ product.shortDescription }}
             </p>

@@ -100,10 +100,13 @@ final class ConfiguratorComponent
     ) {
     }
 
-    /** Le configurateur s'ouvre sur le premier composant qui reste à choisir, sous le nom de la configuration rouverte. */
-    public function mount(): void
+    /**
+     * Le configurateur s'ouvre sur l'étape de $openCategory (produit ajouté depuis sa fiche), sinon sur le premier
+     * composant qui reste à choisir, sous le nom de la configuration rouverte.
+     */
+    public function mount(string $openCategory = ''): void
     {
-        $this->show($this->firstMissingSlot() ?? ComponentSlot::CPU);
+        $this->show(ComponentSlot::forCategory($openCategory) ?? $this->firstMissingSlot() ?? ComponentSlot::CPU, $openCategory);
         $this->name = $this->editedConfiguration($this->stateManager->getState())?->getName() ?? '';
     }
 

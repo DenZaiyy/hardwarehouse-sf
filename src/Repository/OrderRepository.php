@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Order;
 use App\Entity\User;
+use App\Enum\OrderStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -12,9 +13,31 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class OrderRepository extends ServiceEntityRepository
 {
+    /** Statuts d'une commande payée : son client a reçu ou recevra le produit, il peut le noter */
+    public const array PAID_STATUSES = [OrderStatus::CONFIRMED, OrderStatus::PROCESSING, OrderStatus::SHIPPED, OrderStatus::DELIVERED];
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Order::class);
+    }
+
+    /** Une commande payée du client contient-elle ce produit ? Règle des avis vérifiés. */
+    public function hasBought(User $customer, string $productId): bool
+    {
+        $match = $this->createQueryBuilder('o')
+            ->select('o.id')
+            ->innerJoin('o.orderLines', 'line')
+            ->where('o.user = :customer')
+            ->andWhere('o.status IN (:statuses)')
+            ->andWhere('line.productId = :productId')
+            ->setParameter('customer', $customer)
+            ->setParameter('statuses', self::PAID_STATUSES)
+            ->setParameter('productId', $productId)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return null !== $match;
     }
 
     /**

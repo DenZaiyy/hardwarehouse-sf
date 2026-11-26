@@ -1,26 +1,41 @@
-{% macro tabs(items, default = 0) %}
-    <div data-controller="tabs" data-tabs-index-value="{{ default }}" class="bg-paragraph text-primary rounded-section w-full">
-        <div class="border-b border-secondary">
-            <div class="flex gap-x-1" role="tablist">
-                {% for item in items %}
-                    <button
-                        type="button"
-                        role="tab"
-                        data-tabs-target="tab"
-                        data-action="tabs#select"
-                        class="px-4 py-2.5 text-xl font-bold bg-paragraph font-title transition-colors cursor-pointer text-primary"
-                    >
-                        {{ item.label }}
-                    </button>
-                {% endfor %}
-            </div>
-        </div>
-        <div class="p-5">
+{#
+    Onglets accessibles (motif Tabs des WAI-ARIA Authoring Practices) : l'onglet choisi est rendu par le serveur,
+    les flèches, Début et Fin passent d'un onglet à l'autre (tabs_controller.js).
+    items : liste de {label, content, trusted} ; trusted affiche content sans l'échapper (gabarit déjà rendu).
+    name préfixe les identifiants qui relient chaque onglet à son panneau.
+#}
+{% macro tabs(items, default = 0, name = 'tabs', label = null) %}
+    <div data-controller="tabs" data-tabs-index-value="{{ default }}" class="w-full">
+        <div role="tablist" {% if label %}aria-label="{{ label }}"{% endif %} class="flex gap-8 overflow-x-auto border-b border-paragraph">
             {% for item in items %}
-                <div data-tabs-target="panel" role="tabpanel" {% if loop.index0 != default %}hidden{% endif %}>
-                    {{ item.trusted|default(false) ? item.content|raw : item.content }}
-                </div>
+                {% set selected = loop.index0 == default %}
+                <button
+                    type="button"
+                    role="tab"
+                    id="{{ name }}-tab-{{ loop.index0 }}"
+                    aria-controls="{{ name }}-panel-{{ loop.index0 }}"
+                    aria-selected="{{ selected ? 'true' : 'false' }}"
+                    tabindex="{{ selected ? 0 : -1 }}"
+                    data-tabs-target="tab"
+                    data-action="tabs#select keydown->tabs#navigate"
+                    class="-mb-px whitespace-nowrap border-b-2 bg-transparent px-0 py-3 font-title text-lg font-semibold hover:bg-transparent hover:text-primary {{ selected ? 'border-primary text-primary' : 'border-transparent text-muted' }}"
+                >
+                    {{ item.label }}
+                </button>
             {% endfor %}
         </div>
+        {% for item in items %}
+            <div
+                id="{{ name }}-panel-{{ loop.index0 }}"
+                role="tabpanel"
+                aria-labelledby="{{ name }}-tab-{{ loop.index0 }}"
+                tabindex="0"
+                data-tabs-target="panel"
+                class="py-6"
+                {% if loop.index0 != default %}hidden{% endif %}
+            >
+                {{ item.trusted|default(false) ? item.content|raw : item.content }}
+            </div>
+        {% endfor %}
     </div>
 {% endmacro %}

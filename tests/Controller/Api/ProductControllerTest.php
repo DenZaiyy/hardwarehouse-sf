@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Tests\Controller\Api;
 
+use App\Entity\Carrier;
 use App\Service\Catalog\CatalogImageUrl;
 use App\Tests\Http\ApiMockResponseFactory;
 use App\Tests\Support\FakesCatalogApi;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -54,7 +56,7 @@ final class ProductControllerTest extends WebTestCase
 
         $client->request('GET', '/fr/produits/'.$slug);
 
-        self::assertSelectorTextSame('[role="tabpanel"] strong', 'Non');
+        self::assertSelectorTextSame('.product-specs td', 'Non');
     }
 
     public function testQuantityFieldHasALabel(): void
@@ -84,11 +86,12 @@ final class ProductControllerTest extends WebTestCase
         $slug = self::newProductSlug();
         $this->apiHasProduct($slug, price: 449.9);
 
-        $infos = $client->request('GET', '/fr/produits/'.$slug)->filter('.product-infos')->text();
+        $crawler = $client->request('GET', '/fr/produits/'.$slug);
 
-        // 449,90 € HT × 1,20, le prix que le client retrouvera au panier
-        self::assertStringContainsString('539,88', $infos);
-        self::assertStringNotContainsString('449,90', $infos);
+        // 449,90 € HT × 1,20, le prix que le client retrouvera au panier ; le prix HT n'est qu'une mention
+        self::assertStringContainsString('539,88', $crawler->filter('.product-price')->text());
+        self::assertStringNotContainsString('449,90', $crawler->filter('.product-price')->text());
+        self::assertSame('449,90 € HT', self::plain($crawler->filter('.product-price-excluding-tax')->text()));
     }
 
     public function testDiscountedPriceIsDisplayedIncludingTax(): void
@@ -101,8 +104,9 @@ final class ProductControllerTest extends WebTestCase
         $infos = $client->request('GET', '/fr/produits/'.$slug)->filter('.product-infos');
 
         self::assertStringContainsString('539,88', $infos->filter('del')->text());
-        self::assertStringContainsString('485,89', $infos->text());
+        self::assertStringContainsString('485,89', $infos->filter('.product-price')->text());
         self::assertStringContainsString('-10%', $infos->text());
+        self::assertSame('404,91 € HT', self::plain($infos->filter('.product-price-excluding-tax')->text()));
     }
 
     public function testFixedDiscountShowsItsActualRate(): void
@@ -197,6 +201,158 @@ final class ProductControllerTest extends WebTestCase
 
         self::assertSelectorNotExists('[data-controller="product-gallery"]');
         self::assertSelectorTextContains('main', 'Aucune image disponible');
+    }
+
+    public function testBreadcrumbLeadsFromHomeToTheProduct(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug);
+
+        $crawler = $client->request('GET', '/fr/produits/'.$slug);
+
+        $steps = $crawler->filter('nav[aria-label="Fil d\'Ariane"] li');
+        // Le séparateur « › » est masqué aux lecteurs d'écran (aria-hidden) : seuls le lien ou la page courante comptent
+        self::assertSame(['Accueil', 'Processeurs', 'AMD Ryzen 7 7800X3D'], $steps->each(static fn (Crawler $step): string => trim($step->filter('a, [aria-current]')->text())));
+        self::assertSame(['/fr', '/fr/categories/processeurs'], $steps->filter('a')->each(static fn (Crawler $link): ?string => $link->attr('href')));
+        self::assertSame('AMD Ryzen 7 7800X3D', $steps->filter('[aria-current="page"]')->text());
+
+        $schemas = $crawler->filter('script[type="application/ld+json"]')->each(static fn (Crawler $script): mixed => json_decode($script->text(), true));
+        $breadcrumb = array_values(array_filter($schemas, static fn (mixed $schema): bool => \is_array($schema) && 'BreadcrumbList' === ($schema['@type'] ?? null)));
+        self::assertCount(1, $breadcrumb);
+        self::assertSame(['Accueil', 'Processeurs', 'AMD Ryzen 7 7800X3D'], array_column($breadcrumb[0]['itemListElement'], 'name'));
+        self::assertSame('http://localhost/fr/categories/processeurs', $breadcrumb[0]['itemListElement'][1]['item']);
+    }
+
+    public function testBrandIsShownAboveTheName(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug);
+
+        $client->request('GET', '/fr/produits/'.$slug);
+
+        self::assertSelectorTextSame('a.product-brand[href="/fr/marques/amd"]', 'AMD');
+    }
+
+    public function testHighlightsSummariseTheFirstCharacteristics(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug, attributes: [
+            ['name' => 'Socket', 'type' => 'TEXT', 'value' => 'AM5'],
+            ['name' => 'Graphiques intégrés', 'type' => 'BOOLEAN', 'value' => 'true'],
+            ['name' => 'Nombre de cœurs', 'type' => 'NUMBER', 'value' => '8'],
+            ['name' => 'Fréquence de base (GHz)', 'type' => 'NUMBER', 'value' => '4.2'],
+            ['name' => 'TDP (W)', 'type' => 'NUMBER', 'value' => '120'],
+            ['name' => 'Cache L3 (MB)', 'type' => 'NUMBER', 'value' => '96'],
+        ]);
+
+        $crawler = $client->request('GET', '/fr/produits/'.$slug);
+
+        self::assertSame(
+            ['Socket AM5', 'Nombre de cœurs 8', 'Fréquence de base 4,2 GHz', 'TDP 120 W'],
+            $crawler->filter('.product-highlights li')->each(static fn (Crawler $pill): string => self::plain($pill->text())),
+        );
+    }
+
+    public function testCharacteristicsTableWritesTheUnitOnTheValue(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug, attributes: [['name' => 'Fréquence de base (GHz)', 'type' => 'NUMBER', 'value' => '4.2']]);
+
+        $crawler = $client->request('GET', '/fr/produits/'.$slug);
+
+        self::assertSame('Fréquence de base', $crawler->filter('.product-specs th')->text());
+        self::assertSame('4,2 GHz', self::plain($crawler->filter('.product-specs td')->text()));
+    }
+
+    public function testStockShowsTheQuantityAvailable(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug, stock: 3);
+
+        $client->request('GET', '/fr/produits/'.$slug);
+
+        self::assertSelectorTextSame('.product-stock', 'En stock (3 disponibles)');
+        self::assertSelectorExists('.product-infos button[type="submit"]:not([disabled])');
+    }
+
+    public function testOutOfStockProductCannotBeAddedToTheCart(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug, stock: 0);
+
+        $client->request('GET', '/fr/produits/'.$slug);
+
+        self::assertSelectorTextSame('.product-stock', 'Rupture de stock');
+        self::assertSelectorExists('.product-infos button[type="submit"][disabled]');
+    }
+
+    public function testQuantitySelectorStepsWithinTheStock(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug, stock: 3);
+
+        $client->request('GET', '/fr/produits/'.$slug);
+
+        self::assertSelectorExists('[data-controller="quantity"] button[data-action="quantity#decrement"][aria-label="Diminuer la quantité"]');
+        self::assertSelectorExists('[data-controller="quantity"] button[data-action="quantity#increment"][aria-label="Augmenter la quantité"]');
+        self::assertSelectorExists('input#quantity[data-quantity-target="input"][min="1"][max="3"]');
+    }
+
+    public function testReassuranceShowsTheCheapestDeliveryAndTheConfiguratorCheck(): void
+    {
+        $client = static::createClient();
+        $entityManager = static::getContainer()->get(EntityManagerInterface::class);
+        foreach (['Transporteur express' => '9.90', 'Transporteur standard' => '4.99'] as $name => $price) {
+            $entityManager->persist((new Carrier())->setName($name)->setPrice($price));
+        }
+        $entityManager->flush();
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug);
+
+        $reassurance = self::plain($client->request('GET', '/fr/produits/'.$slug)->filter('.product-reassurance')->text());
+
+        self::assertStringContainsString('Livraison suivie dès 4,99 €', $reassurance);
+        self::assertStringContainsString('Paiement sécurisé : carte bancaire ou PayPal', $reassurance);
+        self::assertStringContainsString('Compatibilité vérifiée dans le configurateur', $reassurance);
+    }
+
+    public function testProductOutsideTheConfiguratorRemindsTheWithdrawalPeriod(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug, category: 'ecrans');
+
+        $reassurance = self::plain($client->request('GET', '/fr/produits/'.$slug)->filter('.product-reassurance')->text());
+
+        self::assertStringContainsString('Rétractation sous 14 jours', $reassurance);
+        self::assertStringNotContainsString('configurateur', $reassurance);
+    }
+
+    public function testTabsGroupDescriptionCharacteristicsAndReviews(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug);
+
+        $crawler = $client->request('GET', '/fr/produits/'.$slug);
+
+        $tabs = $crawler->filter('[role="tablist"] [role="tab"]');
+        self::assertSame(['Description', 'Caractéristiques', 'Avis'], $tabs->each(static fn (Crawler $tab): string => trim($tab->text())));
+        self::assertSame('Caractéristiques', trim($crawler->filter('[role="tab"][aria-selected="true"]')->text()));
+        self::assertCount(1, $crawler->filter('[role="tabpanel"]:not([hidden])'));
+    }
+
+    /** Espaces insécables (avant une unité, entre milliers) ramenés à des espaces simples */
+    private static function plain(string $text): string
+    {
+        return trim(str_replace(["\u{a0}", "\u{202f}"], ' ', $text));
     }
 
     private function apiImages(string $slug): string

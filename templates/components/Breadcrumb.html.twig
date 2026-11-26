@@ -1,0 +1,37 @@
+{#
+    Fil d'Ariane : « Accueil » d'abord, puis les étapes que la page passe dans items, des listes {label, url}.
+    La dernière étape est la page courante, sans lien. Les mêmes étapes sont publiées en données structurées
+    (schema.org BreadcrumbList), que les moteurs de recherche affichent sous le titre de la page.
+    Exemple : <twig:Breadcrumb :items="[{label: 'Processeurs', url: path(…)}, {label: product.name}]" />
+#}
+{% props items = [] %}
+
+{% set trail = [{label: 'breadcrumb.home'|trans, url: path('homepage')}]|merge(items) %}
+
+<nav aria-label="{{ 'breadcrumb.label'|trans }}" {{ attributes.defaults({class: 'text-sm'}) }}>
+    <ol class="flex flex-wrap items-center gap-x-2 gap-y-1">
+        {% for step in trail %}
+            <li class="flex items-center gap-2">
+                {% if loop.last %}
+                    <span aria-current="page" class="font-semibold text-ink">{{ step.label }}</span>
+                {% else %}
+                    <a href="{{ step.url }}" class="text-secondary-dark hover:underline">{{ step.label }}</a>
+                    <span aria-hidden="true" class="text-muted">›</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ol>
+</nav>
+
+{% set positions = [] %}
+{% for step in trail %}
+    {% set position = {'@type': 'ListItem', position: loop.index, name: step.label} %}
+    {% if not loop.last and step.url is defined %}
+        {% set position = position|merge({item: absolute_url(step.url)}) %}
+    {% endif %}
+    {% set positions = positions|merge([position]) %}
+{% endfor %}
+{# JSON_HEX_TAG : un libellé qui contiendrait « </script> » ne peut pas fermer la balise (raw est sûr après lui) #}
+<script type="application/ld+json">
+    {{ {'@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: positions}|json_encode(constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP'))|raw }}
+</script>

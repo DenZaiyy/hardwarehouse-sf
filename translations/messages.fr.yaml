@@ -302,6 +302,7 @@ configurator:
     add_to_cart: 'Ajouter au panier'
     incomplete: '{1}Configuration incomplète : 1 composant reste à choisir.|]1,Inf[Configuration incomplète : %count% composants restent à choisir.'
     storage_full: 'Trois disques au plus : retirez-en un pour en choisir un autre.'
+    added: '%product% a rejoint votre configuration.'
     unavailable: 'Le catalogue ne répond pas pour le moment. Votre sélection est conservée : réessayez dans quelques instants.'
     save:
         name: 'Nom de la configuration'
@@ -341,3 +342,51 @@ configurator:
         references: 'Trois disques au plus.'
         quantity: "Plus de barrettes que la carte mère n'a d'emplacements."
         stock: '%slots% : stock insuffisant pour cette quantité.'
+breadcrumb:
+    label: "Fil d'Ariane"
+    home: Accueil
+product:
+    page:
+        tax_included: TTC
+        price_excluding_tax: '%price% HT'
+        stock:
+            available: '{1}En stock (1 disponible)|]1,Inf[En stock (%count% disponibles)'
+            out: 'Rupture de stock'
+        quantity:
+            decrease: 'Diminuer la quantité'
+            increase: 'Augmenter la quantité'
+        highlights: 'Caractéristiques clés'
+        add_to_configuration: 'Ajouter à ma configuration'
+        reassurance:
+            label: 'Nos engagements'
+            delivery: 'Livraison suivie dès %price%'
+            payment: 'Paiement sécurisé : carte bancaire ou PayPal'
+            compatibility: 'Compatibilité vérifiée dans le configurateur'
+            withdrawal: 'Rétractation sous 14 jours'
+        tabs:
+            label: 'Informations sur le produit'
+            description: Description
+            specs: Caractéristiques
+            reviews: '{0}Avis|]0,Inf[Avis (%count%)'
+        reviews:
+            empty: 'Aucun avis pour le moment.'
+            summary_average: '%average% / 5'
+            verified_count: '{1}1 avis vérifié|]1,Inf[%count% avis vérifiés'
+            header_count: '{1}(1 avis)|]1,Inf[(%count% avis)'
+            stars_label: 'Note : %rating% sur 5'
+            out_of: '%note%/5'
+            edited: 'Modifié le %date%'
+            anonymous: 'Client'
+            saved: 'Merci, votre avis est enregistré.'
+            invalid: "Votre avis n'a pas pu être enregistré : choisissez une note de 1 à 5."
+            access:
+                login: 'Connectez-vous pour donner votre avis.'
+                not_buyer: 'Seuls les clients qui ont acheté ce produit peuvent donner leur avis.'
+            form:
+                title_new: 'Donner mon avis'
+                title_edit: 'Modifier mon avis'
+                note: Note
+                stars: '{1}1 étoile|]1,Inf[%count% étoiles'
+                comment: 'Commentaire (facultatif)'
+                submit_new: 'Publier mon avis'
+                submit_edit: 'Enregistrer les modifications'

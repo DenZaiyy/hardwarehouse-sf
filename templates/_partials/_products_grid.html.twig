@@ -1,6 +1,8 @@
 <div class="mt-5 grid grid-cols-[repeat(auto-fit,minmax(210px,1fr))] gap-6 items-stretch"
      data-filter-grid>
+    {# Notes de toute la page en une requête : chaque carte reçoit la sienne #}
+    {% set ratings = rating_summaries(products) %}
     {% for product in products %}
-        {% include '_partials/_product_card.html.twig' with { product: product } only %}
+        {% include '_partials/_product_card.html.twig' with { product: product, rating: ratings[product.id] ?? null } only %}
     {% endfor %}
 </div>
