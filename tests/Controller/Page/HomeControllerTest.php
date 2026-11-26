@@ -25,4 +25,23 @@ final class HomeControllerTest extends WebTestCase
         // Notes de conception restées dans la page, visibles par les clients
         self::assertStringNotContainsString('premium et plus', $page);
     }
+
+    public function testCategoryCardShowsTheCategoryVisualWhenTheApiHasOne(): void
+    {
+        $client = static::createClient();
+        $this->apiListsCategories([
+            ['slug' => 'processeurs', 'name' => 'Processeurs', 'logo' => '/images/categories/processeurs/logo.webp'],
+            ['slug' => 'ssd', 'name' => 'SSD'],
+        ]);
+
+        $crawler = $client->request('GET', '/fr');
+
+        // Une seule image : la catégorie sans visuel garde le dégradé de la charte
+        $visual = $crawler->filter('#home-categories img');
+        self::assertCount(1, $visual);
+        self::assertStringEndsWith('/images/categories/processeurs/logo.webp', (string) $visual->attr('src'));
+        self::assertStringContainsString('/images/categories/processeurs/logo@2x.webp 800w', (string) $visual->attr('srcset'));
+        // Décorative : le texte de la carte nomme déjà la catégorie
+        self::assertSame('', $visual->attr('alt'));
+    }
 }

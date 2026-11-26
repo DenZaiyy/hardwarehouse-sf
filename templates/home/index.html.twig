@@ -151,13 +151,29 @@
                     <a
                         href="{{ path('category.show', { slug: cat.slug }) }}"
                         data-shared--reveal-target="item"
-                        class="group relative min-h-[320px] overflow-hidden rounded-[24px] border border-slate-200/80 bg-slate-950 no-underline shadow-[0_14px_40px_rgba(15,23,42,.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(15,23,42,.16)]"
+                        class="group relative min-h-[320px] overflow-hidden rounded-[24px] border border-slate-200/80 {{ cat.logo ? 'bg-primary-dark' : 'bg-slate-950' }} no-underline shadow-[0_14px_40px_rgba(15,23,42,.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(15,23,42,.16)]"
                     >
-                        {# Dégradé de la charte, comme la maquette : cat.logo ne contient pour l'instant que des
-                           photos de remplacement sans rapport avec la catégorie (voir B13, catalogue d'images) #}
-                        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,.14),transparent_30%)] bg-primary"></div>
+                        {% if cat.logo %}
+                            {# Visuel de la catégorie téléversé dans l'API (charte et icône, voir B82). Décoratif :
+                               le texte de la carte nomme déjà la catégorie. Remonté de 12 % pour que l'icône reste
+                               au-dessus du titre : sous lui, la carte prend le bleu foncé du bas du visuel #}
+                            <img
+                                src="{{ cat.logo|catalog_image }}"
+                                srcset="{{ cat.logo|catalog_image }} 400w, {{ cat.logo|catalog_image('@2x') }} 800w"
+                                sizes="(min-width: 1280px) 300px, (min-width: 768px) 50vw, 100vw"
+                                width="400"
+                                height="400"
+                                alt=""
+                                loading="lazy"
+                                class="absolute inset-x-0 -top-[12%] h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            >
+                        {% else %}
+                            {# Sans visuel, le dégradé de la charte, comme la maquette #}
+                            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,.14),transparent_30%)] bg-primary"></div>
+                        {% endif %}
 
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/45 to-transparent"></div>
+                        {# Voile plus léger sur un visuel : il garde le titre lisible sans griser l'icône #}
+                        <div class="absolute inset-0 bg-gradient-to-t {{ cat.logo ? 'from-slate-950/90 via-slate-950/20' : 'from-slate-950 via-slate-950/45' }} to-transparent"></div>
                         <div class="absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100 bg-[linear-gradient(135deg,transparent,rgba(255,255,255,.08),transparent)]"></div>
 
                         <div class="relative z-10 flex h-full flex-col justify-between p-5">
