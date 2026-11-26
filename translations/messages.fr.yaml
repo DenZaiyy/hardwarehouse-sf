@@ -367,6 +367,26 @@ product:
             label: 'Informations sur le produit'
             description: Description
             specs: Caractéristiques
-            reviews: Avis
+            reviews: '{0}Avis|]0,Inf[Avis (%count%)'
         reviews:
             empty: 'Aucun avis pour le moment.'
+            summary_average: '%average% / 5'
+            verified_count: '{1}1 avis vérifié|]1,Inf[%count% avis vérifiés'
+            header_count: '{1}(1 avis)|]1,Inf[(%count% avis)'
+            stars_label: 'Note : %rating% sur 5'
+            out_of: '%note%/5'
+            edited: 'Modifié le %date%'
+            anonymous: 'Client'
+            saved: 'Merci, votre avis est enregistré.'
+            invalid: "Votre avis n'a pas pu être enregistré : choisissez une note de 1 à 5."
+            access:
+                login: 'Connectez-vous pour donner votre avis.'
+                not_buyer: 'Seuls les clients qui ont acheté ce produit peuvent donner leur avis.'
+            form:
+                title_new: 'Donner mon avis'
+                title_edit: 'Modifier mon avis'
+                note: Note
+                stars: '{1}1 étoile|]1,Inf[%count% étoiles'
+                comment: 'Commentaire (facultatif)'
+                submit_new: 'Publier mon avis'
+                submit_edit: 'Enregistrer les modifications'

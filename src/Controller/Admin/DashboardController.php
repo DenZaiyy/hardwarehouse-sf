@@ -68,6 +68,8 @@ class DashboardController extends AbstractDashboardController
                 MenuItem::linkTo(InvoiceCrudController::class, 'Invoice', 'fa-solid fa-file-invoice'),
             ]),
 
+            MenuItem::linkTo(RatingCrudController::class, 'Reviews', 'fa-solid fa-star'),
+
             MenuItem::subMenu('Shipments', 'fa-solid fa-box')->setSubItems([
                 MenuItem::linkTo(CarrierCrudController::class, 'Carriers', 'fa-solid fa-truck'),
                 MenuItem::linkTo(CarrierCrudController::class, 'Add carrier', 'fa-solid fa-truck')->setAction(Action::NEW),

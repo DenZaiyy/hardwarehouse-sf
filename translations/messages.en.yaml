@@ -365,6 +365,26 @@ product:
             label: 'Product information'
             description: Description
             specs: Specifications
-            reviews: Reviews
+            reviews: '{0}Reviews|]0,Inf[Reviews (%count%)'
         reviews:
             empty: 'No reviews yet.'
+            summary_average: '%average% / 5'
+            verified_count: '{1}1 verified review|]1,Inf[%count% verified reviews'
+            header_count: '{1}(1 review)|]1,Inf[(%count% reviews)'
+            stars_label: 'Rated %rating% out of 5'
+            out_of: '%note%/5'
+            edited: 'Edited on %date%'
+            anonymous: 'Customer'
+            saved: 'Thank you, your review has been saved.'
+            invalid: 'Your review could not be saved: choose a rating from 1 to 5.'
+            access:
+                login: 'Sign in to write a review.'
+                not_buyer: 'Only customers who bought this product can review it.'
+            form:
+                title_new: 'Write a review'
+                title_edit: 'Edit my review'
+                note: Rating
+                stars: '{1}1 star|]1,Inf[%count% stars'
+                comment: 'Comment (optional)'
+                submit_new: 'Publish my review'
+                submit_edit: 'Save changes'

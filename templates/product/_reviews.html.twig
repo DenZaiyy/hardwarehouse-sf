@@ -1,1 +1,48 @@
-<p class="text-muted">{{ 'product.page.reviews.empty'|trans }}</p>
+{# Avis vérifiés : résumé, avis des plus récents aux plus anciens, puis dépôt réservé aux acheteurs (ProductReviewVoter) #}
+<section id="avis" class="flex scroll-mt-24 flex-col gap-6 lg:flex-row lg:items-start">
+    {% if reviewSummary.count > 0 %}
+        <div class="reviews-summary flex flex-col items-center gap-2 rounded-section bg-paragraph px-8 py-6 text-center lg:w-56 lg:shrink-0">
+            <p class="reviews-average font-title text-3xl font-bold text-primary">{{ 'product.page.reviews.summary_average'|trans({'%average%': reviewSummary.average|format_number({fraction_digit: 1})}) }}</p>
+            <twig:Stars :rating="reviewSummary.average" size="size-6" />
+            <p class="text-sm text-muted">{{ 'product.page.reviews.verified_count'|trans({'%count%': reviewSummary.count}) }}</p>
+        </div>
+    {% endif %}
+
+    <div class="flex flex-1 flex-col gap-4">
+        {% for review in reviews %}
+            <article class="review rounded-section border border-secondary p-4">
+                <header class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+                    <span class="font-semibold text-ink">{{ review.user ? review.user.username : 'product.page.reviews.anonymous'|trans }}</span>
+                    <twig:Stars :rating="review.note" />
+                    <span class="font-semibold text-ink">{{ 'product.page.reviews.out_of'|trans({'%note%': review.note|format_number}) }}</span>
+                    <time datetime="{{ review.createdAt|date('Y-m-d') }}" class="text-muted">{{ review.createdAt|format_date('long') }}</time>
+                    {% if review.updatedAt %}
+                        <span class="text-muted">{{ 'product.page.reviews.edited'|trans({'%date%': review.updatedAt|format_date('long')}) }}</span>
+                    {% endif %}
+                </header>
+                {% if review.comment %}
+                    <p class="mt-2 whitespace-pre-line text-ink">{{ review.comment }}</p>
+                {% endif %}
+            </article>
+        {% else %}
+            <p class="text-muted">{{ 'product.page.reviews.empty'|trans }}</p>
+        {% endfor %}
+
+        <div class="reviews-access rounded-section bg-paragraph p-4">
+            {% if reviewForm %}
+                <h3 class="mb-3 font-title text-lg font-semibold text-primary">{{ (ownReview ? 'product.page.reviews.form.title_edit' : 'product.page.reviews.form.title_new')|trans }}</h3>
+                {{ form_start(reviewForm, {attr: {class: 'flex flex-col gap-4'}}) }}
+                    {{ form_row(reviewForm.note) }}
+                    {{ form_row(reviewForm.comment) }}
+                    <button type="submit" class="self-start rounded-lg bg-primary px-6 py-3 font-title font-semibold text-paragraph hover:bg-primary-dark">
+                        {{ (ownReview ? 'product.page.reviews.form.submit_edit' : 'product.page.reviews.form.submit_new')|trans }}
+                    </button>
+                {{ form_end(reviewForm) }}
+            {% elseif not is_granted('IS_AUTHENTICATED') %}
+                <a href="{{ path('app.login') }}" class="font-semibold text-primary underline">{{ 'product.page.reviews.access.login'|trans }}</a>
+            {% else %}
+                <p class="text-ink">{{ 'product.page.reviews.access.not_buyer'|trans }}</p>
+            {% endif %}
+        </div>
+    </div>
+</section>

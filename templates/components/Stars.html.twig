@@ -1,0 +1,18 @@
+{#
+    Note en étoiles, arrondie à la demi-étoile pour l'affichage. Les étoiles sont décoratives : la note chiffrée les
+    suit toujours (règle de l'audit de contraste, orange réservé aux étoiles) et le libellé accessible la donne.
+    Pas d'attribut style : la politique CSP de la boutique les refuse, la demi-étoile est une classe Tailwind fixe.
+#}
+{% props rating = 0, size = 'size-5' %}
+
+{% set shown = (rating * 2)|round / 2 %}
+<span role="img" aria-label="{{ 'product.page.reviews.stars_label'|trans({'%rating%': rating|format_number({fraction_digit: 1})}) }}" {{ attributes.defaults({class: 'inline-flex items-center'}) }}>
+    {% for position in 1..5 %}
+        <span class="relative inline-flex" aria-hidden="true">
+            {{ ux_icon('heroicons-solid:star', {class: size ~ ' ' ~ (shown >= position ? 'text-rating' : 'text-disabled')}) }}
+            {% if shown == position - 0.5 %}
+                <span class="absolute inset-0 [clip-path:inset(0_50%_0_0)]">{{ ux_icon('heroicons-solid:star', {class: size ~ ' text-rating'}) }}</span>
+            {% endif %}
+        </span>
+    {% endfor %}
+</span>

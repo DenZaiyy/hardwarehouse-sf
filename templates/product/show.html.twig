@@ -34,6 +34,12 @@
                     <a href="{{ path('brand.show', {slug: product.brand.slug}) }}" class="product-brand self-start text-sm font-bold uppercase tracking-wide text-primary hover:underline">{{ product.brand.name }}</a>
                 {% endif %}
                 <h1 class="font-title text-3xl font-bold text-primary lg:text-4xl">{{ product.name }}</h1>
+                {% if reviewSummary.count > 0 %}
+                    <a href="{{ path('product.show', {slug: product.slug, onglet: 'avis'}) }}#avis" class="product-rating flex items-center gap-2 self-start text-sm text-muted hover:underline">
+                        <twig:Stars :rating="reviewSummary.average" />
+                        <span>{{ reviewSummary.average|format_number({fraction_digit: 1}) }} {{ 'product.page.reviews.header_count'|trans({'%count%': reviewSummary.count}) }}</span>
+                    </a>
+                {% endif %}
                 {% if product.shortDescription %}
                     <p class="text-ink">{{ product.shortDescription }}</p>
                 {% endif %}
@@ -111,8 +117,8 @@
         {{ tabs([
             {label: 'product.page.tabs.description'|trans, content: product.description},
             {label: 'product.page.tabs.specs'|trans, content: include('product/_specs.html.twig', {specs: specs}), trusted: true},
-            {label: 'product.page.tabs.reviews'|trans, content: include('product/_reviews.html.twig'), trusted: true},
-        ], 1, 'product', 'product.page.tabs.label'|trans) }}
+            {label: 'product.page.tabs.reviews'|trans({'%count%': reviewSummary.count}), content: include('product/_reviews.html.twig'), trusted: true},
+        ], openTab, 'product', 'product.page.tabs.label'|trans) }}
     </div>
 
     {# JSON_HEX_TAG : un texte du catalogue qui contiendrait « </script> » ne peut pas fermer la balise #}
