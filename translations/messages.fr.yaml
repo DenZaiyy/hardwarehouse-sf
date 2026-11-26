@@ -302,6 +302,7 @@ configurator:
     add_to_cart: 'Ajouter au panier'
     incomplete: '{1}Configuration incomplète : 1 composant reste à choisir.|]1,Inf[Configuration incomplète : %count% composants restent à choisir.'
     storage_full: 'Trois disques au plus : retirez-en un pour en choisir un autre.'
+    added: '%product% a rejoint votre configuration.'
     unavailable: 'Le catalogue ne répond pas pour le moment. Votre sélection est conservée : réessayez dans quelques instants.'
     save:
         name: 'Nom de la configuration'
@@ -355,6 +356,7 @@ product:
             decrease: 'Diminuer la quantité'
             increase: 'Augmenter la quantité'
         highlights: 'Caractéristiques clés'
+        add_to_configuration: 'Ajouter à ma configuration'
         reassurance:
             label: 'Nos engagements'
             delivery: 'Livraison suivie dès %price%'

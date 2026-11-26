@@ -300,6 +300,7 @@ configurator:
     add_to_cart: 'Add to cart'
     incomplete: '{1}Incomplete configuration: 1 component left to choose.|]1,Inf[Incomplete configuration: %count% components left to choose.'
     storage_full: 'Three drives at most: remove one to choose another.'
+    added: '%product% has joined your configuration.'
     unavailable: 'The catalogue is not responding right now. Your selection is kept: please try again in a few moments.'
     save:
         name: 'Configuration name'
@@ -353,6 +354,7 @@ product:
             decrease: 'Decrease quantity'
             increase: 'Increase quantity'
         highlights: 'Key features'
+        add_to_configuration: 'Add to my configuration'
         reassurance:
             label: 'Our commitments'
             delivery: 'Tracked delivery from %price%'

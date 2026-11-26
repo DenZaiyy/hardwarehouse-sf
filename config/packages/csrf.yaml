@@ -10,3 +10,4 @@ framework:
             - authenticate
             - logout
             - cart
+            - configuration_add

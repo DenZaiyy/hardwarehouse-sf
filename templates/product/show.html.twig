@@ -82,6 +82,16 @@
                         </button>
                     </form>
 
+                    {% if inConfigurator %}
+                        <form action="{{ path('configuration.add_product') }}" method="POST">
+                            <input type="hidden" name="slug" value="{{ product.slug }}">
+                            <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('configuration_add') }}">
+                            <button type="submit" class="w-full rounded-lg border-2 border-primary bg-white px-6 py-3 font-title font-semibold text-primary hover:bg-paragraph">
+                                {{ 'product.page.add_to_configuration'|trans }}
+                            </button>
+                        </form>
+                    {% endif %}
+
                     <ul class="product-reassurance flex flex-col gap-2 rounded-section bg-paragraph p-4 text-sm text-ink" aria-label="{{ 'product.page.reassurance.label'|trans }}">
                         {% if cheapestDelivery is not null %}
                             <li class="flex items-center gap-3">{{ ux_icon('lucide:truck', icon) }}{{ 'product.page.reassurance.delivery'|trans({'%price%': cheapestDelivery|format_currency('EUR')}) }}</li>
