@@ -24,18 +24,18 @@
         data-product-gallery-interval-value="4000"
         aria-label="Galerie d'images du produit"
     >
-        <div class="flex flex-col lg:flex-row gap-2">
+        <div class="flex flex-col gap-3">
             {# Image principale #}
             <div class="flex-1 relative group">
                 <div
-                    class="relative aspect-square w-full lg:max-w-[500px] lg:max-h-[500px] bg-slate-800 rounded-xl overflow-hidden cursor-zoom-in"
+                    class="relative aspect-[4/3] w-full overflow-hidden rounded-section border border-paragraph bg-white cursor-zoom-in"
                     data-action="click->product-gallery#openLightbox"
                 >
                     <img
                         data-product-gallery-target="mainImage"
                         src="{{ allImages[0].full }}"
                         srcset="{{ allImages[0].srcset }}"
-                        sizes="(min-width: 1024px) 500px, 100vw"
+                        sizes="(min-width: 1280px) 600px, (min-width: 1024px) 50vw, 100vw"
                         alt="{{ product.name }}"
                         class="w-full h-full object-contain transition-all duration-200 ease-out"
                     >
@@ -92,17 +92,10 @@
                 {% endif %}
             </div>
 
-            {# Miniatures - Responsive (verticales desktop, horizontales mobile) #}
+            {# Miniatures sous l'image principale, quatre par ligne #}
             {% if allImages|length > 1 %}
-                <div class="mt-0 w-full lg:w-[245px] lg:shrink-0">
-                    <div class="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto lg:max-h-[500px] lg:pr-1 snap-x lg:snap-none snap-mandatory
-                        [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
-                        lg:[&::-webkit-scrollbar]:block lg:[&::-webkit-scrollbar]:w-1.5
-                        lg:[&::-webkit-scrollbar-track]:bg-slate-800
-                        lg:[&::-webkit-scrollbar-track]:rounded-full
-                        lg:[&::-webkit-scrollbar-thumb]:bg-slate-600
-                        lg:[&::-webkit-scrollbar-thumb]:rounded-full
-                        lg:[&::-webkit-scrollbar-thumb]:hover:bg-slate-500">
+                <div class="w-full">
+                    <div class="grid grid-cols-4 gap-3">
                         {% for image in allImages %}
                             <button
                                 type="button"
@@ -111,34 +104,22 @@
                                 data-index="{{ loop.index0 }}"
                                 data-full-src="{{ image.full }}"
                                 data-srcset="{{ image.srcset }}"
-                                class="relative shrink-0 w-20 h-20 lg:w-[245px] lg:h-[245px] rounded-lg overflow-hidden snap-start border-2
-                               {{ loop.first ? 'border-primary opacity-100' : 'border-transparent hover:border-secondary opacity-60' }}
+                                class="relative aspect-[4/3] w-full overflow-hidden rounded-lg border-2 bg-white p-0
+                               {{ loop.first ? 'border-primary' : 'border-paragraph hover:border-secondary' }}
                                focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2
-                               active:scale-95 lg:hover:scale-105 transition-all duration-300 p-0"
+                               transition-colors duration-200"
                                 aria-label="Voir l'image {{ loop.index }}"
                                 aria-current="{{ loop.first ? 'true' : 'false' }}"
                             >
                                 <img
                                     src="{{ image.preview }}"
                                     alt="{{ product.name ~ ' - Image ' ~ loop.index }}"
-                                    class="absolute inset-0 w-full h-full object-cover"
+                                    class="absolute inset-0 w-full h-full object-contain"
                                     loading="{{ loop.index <= 4 ? 'eager' : 'lazy' }}"
                                 >
                             </button>
                         {% endfor %}
                     </div>
-
-                    {# Indicateur scroll si beaucoup d'images - Desktop uniquement #}
-                    {% if allImages|length > 5 %}
-                        <div class="hidden lg:block text-center text-xs text-muted mt-1">
-                    <span class="inline-flex items-center gap-1">
-                        <svg class="w-3 h-3 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                        Scroll
-                    </span>
-                        </div>
-                    {% endif %}
                 </div>
             {% endif %}
         </div>

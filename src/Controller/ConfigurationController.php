@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\DTO\Api\Products\ProductDto;
 use App\DTO\Configurator\ConfiguratorIssue;
 use App\Entity\Configuration;
 use App\Entity\User;
@@ -11,6 +12,7 @@ use App\Enum\ComponentSlot;
 use App\Exception\Api\ApiException;
 use App\Repository\ConfigurationRepository;
 use App\Security\Voter\ConfigurationVoter;
+use App\Service\ApiService;
 use App\Service\ConfigurationService;
 use App\Service\Configurator\ConfiguratorStateManager;
 use Doctrine\ORM\EntityManagerInterface;
@@ -28,6 +30,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[Route('/configurations', name: 'configuration.')]
 final class ConfigurationController extends AbstractController
 {
+    /** Slug d'un produit du catalogue : lettres minuscules, chiffres et tirets */
+    private const string SLUG_PATTERN = '/^[a-z0-9]+(?:-[a-z0-9]+)*$/';
+
     public function __construct(
         private readonly ConfigurationService $configurationService,
         private readonly ConfiguratorStateManager $stateManager,
@@ -48,11 +53,52 @@ final class ConfigurationController extends AbstractController
         ]);
     }
 
-    /** La sélection est gardée en session : le configurateur ne demande pas de compte. */
+    /**
+     * La sélection est gardée en session : le configurateur ne demande pas de compte. ?categorie= l'ouvre sur l'étape
+     * de cette catégorie (après « Ajouter à ma configuration »), une catégorie inconnue est ignorée.
+     */
     #[Route('/new', name: 'new', methods: ['GET'])]
-    public function new(): Response
+    public function new(Request $request): Response
     {
-        return $this->render('configuration/new.html.twig');
+        return $this->render('configuration/new.html.twig', [
+            'openCategory' => $request->query->getString('categorie'),
+        ]);
+    }
+
+    /**
+     * « Ajouter à ma configuration » depuis une fiche produit : le produit prend son emplacement dans la sélection en
+     * cours (il remplace le précédent, sauf pour les disques, qui s'ajoutent jusqu'à trois), puis le configurateur
+     * s'ouvre sur sa catégorie. La compatibilité est vérifiée là, comme pour un produit choisi dans le configurateur.
+     */
+    #[Route('/ajouter', name: 'add_product', methods: ['POST'])]
+    public function addProduct(Request $request, ApiService $apiService): Response
+    {
+        $slug = $request->request->getString('slug');
+        // Le slug compose l'adresse de l'API : un « ../ » ne doit jamais l'atteindre
+        if (1 !== preg_match(self::SLUG_PATTERN, $slug)) {
+            throw $this->createNotFoundException();
+        }
+
+        if (!$this->isCsrfTokenValid('configuration_add', $request->request->getString('_csrf_token'))) {
+            return $this->redirectToRoute('product.show', ['slug' => $slug]);
+        }
+
+        $product = $apiService->fetchOne('products/'.$slug, ProductDto::class);
+        $slot = null === $product->category ? null : ComponentSlot::forCategory($product->category->slug);
+        if (!$product->active || null === $product->category || null === $slot) {
+            throw $this->createNotFoundException();
+        }
+
+        $state = $this->stateManager->getState();
+        if (!$state->choose($slot, $product->id)) {
+            $this->addFlash('danger', $this->translator->trans('configurator.storage_full'));
+
+            return $this->redirectToRoute('product.show', ['slug' => $slug]);
+        }
+        $this->stateManager->saveState($state);
+        $this->addFlash('success', $this->translator->trans('configurator.added', ['%product%' => $product->name]));
+
+        return $this->redirectToRoute('configuration.new', ['categorie' => $product->category->slug]);
     }
 
     #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'], methods: ['GET'])]

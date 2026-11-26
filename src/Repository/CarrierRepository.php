@@ -16,6 +16,20 @@ class CarrierRepository extends ServiceEntityRepository
         parent::__construct($registry, Carrier::class);
     }
 
+    /**
+     * Prix de la livraison la moins chère, tel que le tunnel de commande l'affiche, ou null sans transporteur.
+     */
+    public function findCheapestPrice(): ?float
+    {
+        /** @var string|null $price */
+        $price = $this->createQueryBuilder('carrier')
+            ->select('MIN(carrier.price)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return null === $price ? null : (float) $price;
+    }
+
     //    /**
     //     * @return Carrier[] Returns an array of Carrier objects
     //     */

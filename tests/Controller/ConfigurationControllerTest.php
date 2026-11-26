@@ -11,10 +11,12 @@ use App\Entity\ConfigurationItem;
 use App\Entity\User;
 use App\Enum\ComponentSlot;
 use App\Service\ConfigurationService;
+use App\Service\Configurator\ConfiguratorStateManager;
 use App\Tests\Support\CreatesShopEntities;
 use App\Tests\Support\FakesConfiguratorCatalog;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DomCrawler\Form;
 
 /**
  * Le configurateur est ouvert à tous. Mes configurations et chaque configuration sauvegardée ne le sont qu'à leur
@@ -167,6 +169,138 @@ final class ConfigurationControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(422);
         self::assertSelectorTextContains('main', "n'ont pas le même socket");
         self::assertSame([], $this->entityManager()->getRepository(CartLine::class)->findBy(['productId' => $cpu]));
+    }
+
+    public function testProductPageOffersToAddTheProductToTheConfiguration(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug);
+
+        $client->request('GET', '/fr/produits/'.$slug);
+
+        self::assertSelectorTextSame('form[action="/fr/configurations/ajouter"] button[type="submit"]', 'Ajouter à ma configuration');
+    }
+
+    public function testProductOutsideTheConfiguratorHasNoConfigurationButton(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug, category: 'ecrans');
+
+        $client->request('GET', '/fr/produits/'.$slug);
+
+        self::assertSelectorNotExists('form[action="/fr/configurations/ajouter"]');
+    }
+
+    public function testAddedProductTakesItsSlotAndOpensTheConfiguratorOnItsCategory(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $productId = $this->apiHasProduct($slug, category: 'watercooling');
+
+        $client->submit($this->addToConfigurationForm($client, $slug));
+
+        self::assertResponseRedirects('/fr/configurations/new?categorie=watercooling');
+        self::assertSame([['productId' => $productId, 'quantity' => 1]], $this->configuratorLines($client)['cooler'] ?? null);
+    }
+
+    public function testAddedProductReplacesTheOneAlreadyChosen(): void
+    {
+        $client = static::createClient();
+        $first = self::newProductSlug();
+        $second = self::newProductSlug();
+        $this->apiHasProduct($first);
+        $secondId = $this->apiHasProduct($second);
+
+        $client->submit($this->addToConfigurationForm($client, $first));
+        $client->submit($this->addToConfigurationForm($client, $second));
+
+        self::assertSame([['productId' => $secondId, 'quantity' => 1]], $this->configuratorLines($client)['cpu'] ?? null);
+    }
+
+    public function testStorageKeepsAtMostThreeDrives(): void
+    {
+        $client = static::createClient();
+        $slugs = [self::newProductSlug(), self::newProductSlug(), self::newProductSlug(), self::newProductSlug()];
+        foreach ($slugs as $slug) {
+            $this->apiHasProduct($slug, category: 'ssd');
+        }
+
+        foreach ($slugs as $slug) {
+            $client->submit($this->addToConfigurationForm($client, $slug));
+        }
+
+        self::assertResponseRedirects('/fr/produits/'.$slugs[3]);
+        self::assertCount(3, $this->configuratorLines($client)['storage'] ?? []);
+        $client->followRedirect();
+        self::assertSelectorTextContains('.flash-danger[role="alert"]', 'Trois disques au plus');
+    }
+
+    public function testProductOutsideTheConfiguratorCannotBeAdded(): void
+    {
+        $client = static::createClient();
+        $component = self::newProductSlug();
+        $screen = self::newProductSlug();
+        $this->apiHasProduct($component);
+        $this->apiHasProduct($screen, category: 'ecrans');
+
+        $client->submit($this->addToConfigurationForm($client, $component), ['slug' => $screen]);
+
+        self::assertResponseStatusCodeSame(404);
+        self::assertSame([], $this->configuratorLines($client));
+    }
+
+    public function testMalformedSlugIsNotSentToTheCatalogue(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug);
+
+        $client->submit($this->addToConfigurationForm($client, $slug), ['slug' => '../categories']);
+
+        self::assertResponseStatusCodeSame(404);
+    }
+
+    public function testAddingWithoutAValidTokenChangesNothing(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug);
+
+        $client->request('POST', '/fr/configurations/ajouter', ['slug' => $slug, '_csrf_token' => 'invalide']);
+
+        self::assertResponseRedirects('/fr/produits/'.$slug);
+        self::assertSame([], $this->configuratorLines($client));
+    }
+
+    public function testConfiguratorOpensOnTheCategoryAsked(): void
+    {
+        $client = static::createClient();
+        $this->emptyConfiguratorCategories();
+
+        $client->request('GET', '/fr/configurations/new?categorie=watercooling');
+
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('button[data-live-category-param="watercooling"][aria-pressed="true"]');
+    }
+
+    private function addToConfigurationForm(KernelBrowser $client, string $slug): Form
+    {
+        return $client->request('GET', '/fr/produits/'.$slug)->filter('form[action="/fr/configurations/ajouter"]')->form();
+    }
+
+    /**
+     * @return array<string, list<array{productId: string, quantity: int}>> sélection en session, par emplacement
+     */
+    private function configuratorLines(KernelBrowser $client): array
+    {
+        $state = $client->getRequest()->getSession()->get(ConfiguratorStateManager::SESSION_KEY, []);
+
+        /** @var array<string, list<array{productId: string, quantity: int}>> $lines */
+        $lines = \is_array($state) && \is_array($state['lines'] ?? null) ? $state['lines'] : [];
+
+        return array_filter($lines);
     }
 
     /** Connecte le client sur la page d'une de ses configurations, complète et compatible. */

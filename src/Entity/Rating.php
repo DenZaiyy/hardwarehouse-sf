@@ -10,6 +10,8 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: RatingRepository::class)]
+// Dates du TimestampTrait : dépôt (PrePersist) et dernière modification (PreUpdate), affichée « Modifié le … »
+#[ORM\HasLifecycleCallbacks]
 // Un client donne un seul avis par produit ; chaque client peut noter le même produit
 #[ORM\UniqueConstraint(name: 'UNIQ_RATING_USER_PRODUCT', fields: ['user', 'productId'])]
 #[UniqueEntity(fields: ['user', 'productId'], message: 'Vous avez déjà donné votre avis sur ce produit.')]
@@ -23,14 +25,16 @@ class Rating
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Assert\NotNull]
     #[Assert\Range(
         notInRangeMessage: 'La note doit être comprise entre {{ min }} et {{ max }}.',
-        min: 0,
+        min: 1,
         max: 5,
     )]
     private ?float $note = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(max: 1000)]
     private ?string $comment = null;
 
     #[ORM\ManyToOne(inversedBy: 'ratings')]
@@ -49,7 +53,7 @@ class Rating
         return $this->note;
     }
 
-    public function setNote(float $note): static
+    public function setNote(?float $note): static
     {
         $this->note = $note;
 

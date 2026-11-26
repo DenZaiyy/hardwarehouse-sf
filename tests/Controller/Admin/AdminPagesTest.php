@@ -22,7 +22,7 @@ final class AdminPagesTest extends WebTestCase
     /** @return iterable<string, array{string}> */
     public static function adminPages(): iterable
     {
-        foreach (['', '/address', '/carrier', '/cart', '/cart-line', '/invoice', '/order', '/order-line', '/shipment', '/user'] as $path) {
+        foreach (['', '/address', '/carrier', '/cart', '/cart-line', '/invoice', '/order', '/order-line', '/rating', '/shipment', '/user'] as $path) {
             yield '/fr/admin'.$path => ['/fr/admin'.$path];
         }
     }

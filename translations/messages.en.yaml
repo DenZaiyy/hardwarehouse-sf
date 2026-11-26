@@ -300,6 +300,7 @@ configurator:
     add_to_cart: 'Add to cart'
     incomplete: '{1}Incomplete configuration: 1 component left to choose.|]1,Inf[Incomplete configuration: %count% components left to choose.'
     storage_full: 'Three drives at most: remove one to choose another.'
+    added: '%product% has joined your configuration.'
     unavailable: 'The catalogue is not responding right now. Your selection is kept: please try again in a few moments.'
     save:
         name: 'Configuration name'
@@ -339,3 +340,51 @@ configurator:
         references: 'Three drives at most.'
         quantity: 'More memory modules than the motherboard has slots.'
         stock: '%slots%: not enough stock for this quantity.'
+breadcrumb:
+    label: Breadcrumb
+    home: Home
+product:
+    page:
+        tax_included: 'incl. VAT'
+        price_excluding_tax: '%price% excl. VAT'
+        stock:
+            available: '{1}In stock (1 available)|]1,Inf[In stock (%count% available)'
+            out: 'Out of stock'
+        quantity:
+            decrease: 'Decrease quantity'
+            increase: 'Increase quantity'
+        highlights: 'Key features'
+        add_to_configuration: 'Add to my configuration'
+        reassurance:
+            label: 'Our commitments'
+            delivery: 'Tracked delivery from %price%'
+            payment: 'Secure payment: card or PayPal'
+            compatibility: 'Compatibility checked in the configurator'
+            withdrawal: '14-day right of withdrawal'
+        tabs:
+            label: 'Product information'
+            description: Description
+            specs: Specifications
+            reviews: '{0}Reviews|]0,Inf[Reviews (%count%)'
+        reviews:
+            empty: 'No reviews yet.'
+            summary_average: '%average% / 5'
+            verified_count: '{1}1 verified review|]1,Inf[%count% verified reviews'
+            header_count: '{1}(1 review)|]1,Inf[(%count% reviews)'
+            stars_label: 'Rated %rating% out of 5'
+            out_of: '%note%/5'
+            edited: 'Edited on %date%'
+            anonymous: 'Customer'
+            saved: 'Thank you, your review has been saved.'
+            invalid: 'Your review could not be saved: choose a rating from 1 to 5.'
+            access:
+                login: 'Sign in to write a review.'
+                not_buyer: 'Only customers who bought this product can review it.'
+            form:
+                title_new: 'Write a review'
+                title_edit: 'Edit my review'
+                note: Rating
+                stars: '{1}1 star|]1,Inf[%count% stars'
+                comment: 'Comment (optional)'
+                submit_new: 'Publish my review'
+                submit_edit: 'Save changes'
