@@ -41,6 +41,28 @@ final class AdminPagesTest extends WebTestCase
     }
 
     /**
+     * Le filtre Utilisateur des adresses suggère les comptes par autocomplétion. EasyAdmin 5.10.4 vérifie désormais
+     * la page et le champ d'où vient la demande : ce test passe par l'URL que le formulaire de filtres fournit.
+     */
+    public function testAddressUserFilterSuggestsCustomers(): void
+    {
+        $client = static::createClient();
+        $client->loginUser($this->createUser('admin')->setRoles(['ROLE_SUPER_ADMIN']));
+        $customer = $this->createUser('cliente');
+        $this->entityManager()->flush();
+
+        $filters = $client->request('GET', '/fr/admin/address/render-filters');
+        $endpoint = $filters->filter('[data-ea-autocomplete-endpoint-url]')->attr('data-ea-autocomplete-endpoint-url');
+        self::assertNotNull($endpoint);
+        $client->request('GET', $endpoint.'&query='.rawurlencode((string) $customer->getUsername()));
+
+        self::assertResponseIsSuccessful();
+        /** @var array{results: list<array{entityId: string}>} $suggestions */
+        $suggestions = json_decode((string) $client->getResponse()->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+        self::assertContains((string) $customer->getId(), array_column($suggestions['results'], 'entityId'));
+    }
+
+    /**
      * Les factures, les commandes et les comptes ne se créent pas depuis le back-office (actions désactivées).
      *
      * @return iterable<string, array{string}>
