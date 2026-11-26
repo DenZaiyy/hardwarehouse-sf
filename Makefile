@@ -109,12 +109,14 @@ prod: APP_ENV=prod
 prod: APP_DEBUG=0
 prod: vendor-prod assets cache-prod migrate-prod sitemap workers ## Execute all commands needed to prod env
 
+# Un seul cache:clear, préchauffage compris : Symfony prépare le nouveau cache à côté, écarte ce qu'une requête servie
+# par www-data a reconstruit entre-temps, puis échange les dossiers. Séparés (--no-warmup puis cache:warmup), un fichier
+# recréé par www-data pendant le déploiement bloquait le préchauffage (déploiement de préproduction du 26/11/2026).
 cache-prod: APP_ENV=prod
 cache-prod: APP_DEBUG=0
 cache-prod: ## Clear and warmup cache for production
 	$(call banner,$(INFO),Clearing and warming cache for production...)
-	$(CONSOLE) cache:clear --no-warmup --no-debug
-	$(CONSOLE) cache:warmup --no-debug
+	$(CONSOLE) cache:clear --no-debug
 
 twb: APP_ENV=prod
 twb: APP_DEBUG=0
