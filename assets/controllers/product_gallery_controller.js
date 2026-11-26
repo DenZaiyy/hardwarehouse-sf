@@ -98,9 +98,7 @@ export default class extends Controller {
         this.imagesTargets.forEach((thumb, index) => {
             const isActive = index === this.indexValue
             thumb.classList.toggle('border-primary', isActive)
-            thumb.classList.toggle('border-transparent', !isActive)
-            thumb.classList.toggle('opacity-100', isActive)
-            thumb.classList.toggle('opacity-60', !isActive)
+            thumb.classList.toggle('border-paragraph', !isActive)
             // aria-selected n'est pas permis sur un bouton : aria-current désigne l'image affichée
             thumb.setAttribute('aria-current', isActive)
         })

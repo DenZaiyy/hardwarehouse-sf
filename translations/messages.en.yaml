@@ -339,3 +339,30 @@ configurator:
         references: 'Three drives at most.'
         quantity: 'More memory modules than the motherboard has slots.'
         stock: '%slots%: not enough stock for this quantity.'
+breadcrumb:
+    label: Breadcrumb
+    home: Home
+product:
+    page:
+        tax_included: 'incl. VAT'
+        price_excluding_tax: '%price% excl. VAT'
+        stock:
+            available: '{1}In stock (1 available)|]1,Inf[In stock (%count% available)'
+            out: 'Out of stock'
+        quantity:
+            decrease: 'Decrease quantity'
+            increase: 'Increase quantity'
+        highlights: 'Key features'
+        reassurance:
+            label: 'Our commitments'
+            delivery: 'Tracked delivery from %price%'
+            payment: 'Secure payment: card or PayPal'
+            compatibility: 'Compatibility checked in the configurator'
+            withdrawal: '14-day right of withdrawal'
+        tabs:
+            label: 'Product information'
+            description: Description
+            specs: Specifications
+            reviews: Reviews
+        reviews:
+            empty: 'No reviews yet.'

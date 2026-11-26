@@ -5,8 +5,11 @@ namespace App\Controller\Api;
 use App\DTO\Api\Brands\BrandDto;
 use App\DTO\Api\Categories\CategoryDto;
 use App\DTO\Api\Products\ProductDto;
+use App\Enum\ComponentSlot;
+use App\Repository\CarrierRepository;
 use App\SEO\Schema\ProductSchemaBuilder;
 use App\Service\ApiService;
+use App\Service\Catalog\ProductSpecFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -102,7 +105,7 @@ final class ProductController extends AbstractController
     }
 
     #[Route('/{slug}', name: 'show', methods: ['GET'])]
-    public function show(string $slug, ProductSchemaBuilder $productSchemaBuilder): Response
+    public function show(string $slug, ProductSchemaBuilder $productSchemaBuilder, ProductSpecFormatter $specFormatter, CarrierRepository $carrierRepository): Response
     {
         $product = $this->apiService->fetchOne('products/'.$slug, ProductDto::class);
 
@@ -111,12 +114,15 @@ final class ProductController extends AbstractController
             throw $this->createNotFoundException();
         }
 
-        $productSchema = $productSchemaBuilder->build($product);
+        $specs = $specFormatter->specs($product->productAttributeValues);
 
         return $this->render('product/show.html.twig', [
             'product' => $product,
-            'attributes' => $product->productAttributeValues,
-            'productSchema' => $productSchema,
+            'specs' => $specs,
+            'highlights' => $specFormatter->highlights($specs),
+            'cheapestDelivery' => $carrierRepository->findCheapestPrice(),
+            'inConfigurator' => null !== $product->category && null !== ComponentSlot::forCategory($product->category->slug),
+            'productSchema' => $productSchemaBuilder->build($product),
         ]);
     }
 }

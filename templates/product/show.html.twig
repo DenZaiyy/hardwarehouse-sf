@@ -9,55 +9,108 @@
 {% block meta_description %}{{ product.shortDescription }}{% endblock %}
 
 {% block body %}
-    <div class="flex flex-col gap-4">
-        <div class="flex flex-col md:flex-row gap-3.75">
-            {{ include('product/_gallery.html.twig', { product: product }) }}
-            <div class="flex flex-col flex-grow">
-                <h1>{{ product.name }}</h1>
-                <p>{{ product.shortDescription }}</p>
-                <div class="reviews flex-grow">
+    {% set discounted = product.promote and product.discountPrice is not null and product.discountPrice < product.price %}
+    {% set paidPrice = discounted ? product.discountPrice : product.price %}
+    {% set stock = product.stock.quantity|default(0) %}
+    {% set icon = {class: 'size-5 shrink-0 text-primary', 'aria-hidden': 'true'} %}
 
-                </div>
-                <div class="product-infos flex flex-col gap-4 items-center">
-                    {{ include('_partials/_product_price.html.twig', {product: product, price_class: 'text-xl font-semibold text-primary text-center'}, with_context = false) }}
-                    <form class="flex flex-col gap-2" data-turbo-stream="" action="{{ path('cart.add') }}" method="POST">
+    <div class="mx-auto flex w-full max-w-7xl flex-col gap-8 py-2 md:py-4">
+        {% if product.category %}
+            {# Libellé du menu (traduit), le nom de l'API à défaut #}
+            {% set categoryKey = 'category.' ~ product.category.slug %}
+            {% set categoryLabel = categoryKey|trans != categoryKey ? categoryKey|trans : product.category.name %}
+            <twig:Breadcrumb :items="[{label: categoryLabel, url: path('category.show', {slug: product.category.slug})}, {label: product.name}]" />
+        {% else %}
+            <twig:Breadcrumb :items="[{label: product.name}]" />
+        {% endif %}
+
+        <div class="grid gap-8 lg:grid-cols-2 lg:gap-12">
+            <div>
+                {{ include('product/_gallery.html.twig', {product: product}) }}
+            </div>
+
+            <div class="flex flex-col gap-4">
+                {% if product.brand %}
+                    <a href="{{ path('brand.show', {slug: product.brand.slug}) }}" class="product-brand self-start text-sm font-bold uppercase tracking-wide text-primary hover:underline">{{ product.brand.name }}</a>
+                {% endif %}
+                <h1 class="font-title text-3xl font-bold text-primary lg:text-4xl">{{ product.name }}</h1>
+                {% if product.shortDescription %}
+                    <p class="text-ink">{{ product.shortDescription }}</p>
+                {% endif %}
+
+                {% if highlights is not empty %}
+                    <ul class="product-highlights flex flex-wrap gap-2" aria-label="{{ 'product.page.highlights'|trans }}">
+                        {% for spec in highlights %}
+                            <li class="rounded-full bg-paragraph px-3 py-1 text-sm font-semibold text-primary">{{ spec.label }} {{ spec.value }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <div class="product-infos flex flex-col gap-4 border-t border-paragraph pt-4">
+                    {# Prix payé TTC (même calcul que le panier), le prix HT de l'API en mention #}
+                    <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                        {% if discounted %}
+                            <span class="self-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-danger">-{{ discount_rate(product.price, product.discountPrice) }}%</span>
+                            <del class="text-muted">{{ product.price|ttc|format_currency('EUR') }}</del>
+                        {% endif %}
+                        <span class="product-price font-title text-4xl font-bold text-primary">{{ paidPrice|ttc|format_currency('EUR') }}</span>
+                        <span class="text-sm font-semibold text-ink">{{ 'product.page.tax_included'|trans }}</span>
+                        <span class="product-price-excluding-tax text-sm text-muted">{{ 'product.page.price_excluding_tax'|trans({'%price%': paidPrice|format_currency('EUR')}) }}</span>
+                    </div>
+
+                    <p class="product-stock flex items-center gap-2 font-semibold {{ stock > 0 ? 'text-success' : 'text-danger' }}">
+                        <span aria-hidden="true" class="size-2.5 shrink-0 rounded-full {{ stock > 0 ? 'bg-success' : 'bg-danger' }}"></span>
+                        {{- stock > 0 ? 'product.page.stock.available'|trans({'%count%': stock}) : 'product.page.stock.out'|trans -}}
+                    </p>
+
+                    <form class="flex flex-wrap gap-3" data-turbo-stream="" action="{{ path('cart.add') }}" method="POST">
                         <input type="hidden" name="slug" value="{{ product.slug }}">
                         <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('cart') }}">
-                        <label for="quantity" class="sr-only">{{ 'listing.product.quantity'|trans }}</label>
-                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ product.stock.quantity }}" class="border rounded px-3 py-2">
-                        <button type="submit" class="text-center text-paragraph rounded-md bg-primary font-title px-4 py-2 hover:bg-primary-dark">
+                        <div data-controller="quantity" class="flex items-center rounded-lg border border-primary">
+                            <button type="button" data-action="quantity#decrement" aria-label="{{ 'product.page.quantity.decrease'|trans }}" class="rounded-l-lg bg-transparent px-3 py-3 text-primary hover:bg-paragraph disabled:text-muted" {{ stock < 1 ? 'disabled' }}>
+                                {{ ux_icon('lucide:minus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                            </button>
+                            <label for="quantity" class="sr-only">{{ 'listing.product.quantity'|trans }}</label>
+                            <input type="number" id="quantity" name="quantity" value="1" min="1" max="{{ max(stock, 1) }}" data-quantity-target="input" {{ stock < 1 ? 'disabled' }}
+                                   class="w-12 border-0 bg-transparent p-0 text-center font-semibold text-ink [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none">
+                            <button type="button" data-action="quantity#increment" aria-label="{{ 'product.page.quantity.increase'|trans }}" class="rounded-r-lg bg-transparent px-3 py-3 text-primary hover:bg-paragraph disabled:text-muted" {{ stock < 1 ? 'disabled' }}>
+                                {{ ux_icon('lucide:plus', {class: 'size-4', 'aria-hidden': 'true'}) }}
+                            </button>
+                        </div>
+                        <button type="submit" class="min-w-48 flex-1 rounded-lg bg-primary px-6 py-3 font-title font-semibold text-paragraph hover:bg-primary-dark disabled:bg-disabled disabled:text-muted" {{ stock < 1 ? 'disabled' }}>
                             {{ 'listing.product.button.add_to_cart'|trans }}
                         </button>
                     </form>
-                    <span class="text-sm">En stock ({{ product.stock.quantity }})</span>
+
+                    <ul class="product-reassurance flex flex-col gap-2 rounded-section bg-paragraph p-4 text-sm text-ink" aria-label="{{ 'product.page.reassurance.label'|trans }}">
+                        {% if cheapestDelivery is not null %}
+                            <li class="flex items-center gap-3">{{ ux_icon('lucide:truck', icon) }}{{ 'product.page.reassurance.delivery'|trans({'%price%': cheapestDelivery|format_currency('EUR')}) }}</li>
+                        {% endif %}
+                        <li class="flex items-center gap-3">{{ ux_icon('lucide:credit-card', icon) }}{{ 'product.page.reassurance.payment'|trans }}</li>
+                        {% if inConfigurator %}
+                            <li class="flex items-center gap-3">{{ ux_icon('lucide:cpu', icon) }}{{ 'product.page.reassurance.compatibility'|trans }}</li>
+                        {% else %}
+                            <li class="flex items-center gap-3">{{ ux_icon('lucide:rotate-ccw', icon) }}{{ 'product.page.reassurance.withdrawal'|trans }}</li>
+                        {% endif %}
+                    </ul>
                 </div>
             </div>
         </div>
 
         {% from 'components/tabs.html.twig' import tabs %}
-
-        <div class="flex flex-col gap-4 md:flex-row">
-            <div class="md:w-1/3">
-                {{ tabs([
-                    { label: 'Specs', content: include('product/_specs.html.twig', { 'attributes': attributes }), trusted: true },
-                ]) }}
-            </div>
-
-            <div class="md:w-2/3">
-                {{ tabs([
-                    { label: 'Description', content: product.description },
-                    { label: 'Avis', content: include('product/_reviews.html.twig'), trusted: true }
-                ]) }}
-            </div>
-
-        </div>
+        {{ tabs([
+            {label: 'product.page.tabs.description'|trans, content: product.description},
+            {label: 'product.page.tabs.specs'|trans, content: include('product/_specs.html.twig', {specs: specs}), trusted: true},
+            {label: 'product.page.tabs.reviews'|trans, content: include('product/_reviews.html.twig'), trusted: true},
+        ], 1, 'product', 'product.page.tabs.label'|trans) }}
     </div>
 
+    {# JSON_HEX_TAG : un texte du catalogue qui contiendrait « </script> » ne peut pas fermer la balise #}
     <script type="application/ld+json">
         {{ productSchema|json_encode(
             constant('JSON_PRETTY_PRINT')
             b-or constant('JSON_UNESCAPED_UNICODE')
+            b-or constant('JSON_HEX_TAG')
         )|raw }}
     </script>
 {% endblock %}
-

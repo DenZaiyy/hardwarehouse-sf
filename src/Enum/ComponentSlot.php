@@ -46,6 +46,18 @@ enum ComponentSlot: string implements TranslatableInterface
         };
     }
 
+    /** Emplacement que les produits d'une catégorie de l'API peuvent occuper, ou null hors du configurateur (écrans…). */
+    public static function forCategory(string $categorySlug): ?self
+    {
+        foreach (self::cases() as $slot) {
+            if (\in_array($categorySlug, $slot->categorySlugs(), true)) {
+                return $slot;
+            }
+        }
+
+        return null;
+    }
+
     /** Références différentes admises : jusqu'à trois disques, une seule référence ailleurs. */
     public function maxReferences(): int
     {

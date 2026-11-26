@@ -341,3 +341,30 @@ configurator:
         references: 'Trois disques au plus.'
         quantity: "Plus de barrettes que la carte mère n'a d'emplacements."
         stock: '%slots% : stock insuffisant pour cette quantité.'
+breadcrumb:
+    label: "Fil d'Ariane"
+    home: Accueil
+product:
+    page:
+        tax_included: TTC
+        price_excluding_tax: '%price% HT'
+        stock:
+            available: '{1}En stock (1 disponible)|]1,Inf[En stock (%count% disponibles)'
+            out: 'Rupture de stock'
+        quantity:
+            decrease: 'Diminuer la quantité'
+            increase: 'Augmenter la quantité'
+        highlights: 'Caractéristiques clés'
+        reassurance:
+            label: 'Nos engagements'
+            delivery: 'Livraison suivie dès %price%'
+            payment: 'Paiement sécurisé : carte bancaire ou PayPal'
+            compatibility: 'Compatibilité vérifiée dans le configurateur'
+            withdrawal: 'Rétractation sous 14 jours'
+        tabs:
+            label: 'Informations sur le produit'
+            description: Description
+            specs: Caractéristiques
+            reviews: Avis
+        reviews:
+            empty: 'Aucun avis pour le moment.'

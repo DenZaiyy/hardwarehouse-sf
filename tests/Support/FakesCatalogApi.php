@@ -24,10 +24,11 @@ trait FakesCatalogApi
      * Les prix sont hors taxe, comme dans l'API ; une remise passe par $discountPrice.
      *
      * @param list<array{name: string, type: string, value: string}> $attributes caractéristiques techniques
+     * @param string                                                 $category   slug de la catégorie de l'API
      */
-    private function apiHasProduct(string $slug, bool $active = true, int $stock = 3, array $attributes = [], float $price = 449.9, ?float $discountPrice = null, ?float $discountAmount = null): string
+    private function apiHasProduct(string $slug, bool $active = true, int $stock = 3, array $attributes = [], float $price = 449.9, ?float $discountPrice = null, ?float $discountAmount = null, string $category = 'processeurs'): string
     {
-        ApiMockResponseFactory::respondWith('products/'.$slug, self::productPayload($slug, $active, $stock, $attributes, $price, $discountPrice, $discountAmount));
+        ApiMockResponseFactory::respondWith('products/'.$slug, self::productPayload($slug, $active, $stock, $attributes, $price, $discountPrice, $discountAmount, $category));
 
         return self::productId($slug);
     }
@@ -56,7 +57,7 @@ trait FakesCatalogApi
      *
      * @return array<string, mixed> fiche produit telle que l'API la renvoie
      */
-    private static function productPayload(string $slug, bool $active = true, int $stock = 3, array $attributes = [], float $price = 449.9, ?float $discountPrice = null, ?float $discountAmount = null): array
+    private static function productPayload(string $slug, bool $active = true, int $stock = 3, array $attributes = [], float $price = 449.9, ?float $discountPrice = null, ?float $discountAmount = null, string $category = 'processeurs'): array
     {
         return [
             'id' => self::productId($slug),
@@ -72,7 +73,7 @@ trait FakesCatalogApi
             'images' => [],
             'shortDescription' => 'Processeur 8 cœurs pour le jeu',
             'description' => 'Fiche produit de test',
-            'category' => ['id' => 'cat-processeurs', 'name' => 'Processeurs', 'slug' => 'processeurs', 'active' => true, 'productsCount' => 1],
+            'category' => ['id' => 'cat-'.$category, 'name' => ucfirst($category), 'slug' => $category, 'active' => true, 'productsCount' => 1],
             'brand' => ['id' => 'brand-amd', 'name' => 'AMD', 'slug' => 'amd', 'active' => true, 'productsCount' => 1],
             'stock' => ['quantity' => $stock],
             'productAttributeValues' => array_map(static fn (int $index, array $attribute): array => [
