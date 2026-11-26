@@ -359,9 +359,9 @@ php bin/console tailwind:build --minify
 # Base de données
 php bin/console doctrine:migrations:migrate --no-interaction --env=prod
 
-# Cache Symfony optimisé
-php bin/console cache:clear --env=prod --no-warmup
-php bin/console cache:warmup --env=prod
+# Cache Symfony optimisé : cache:clear le préchauffe à côté puis l'échange. Pas de --no-warmup suivi de
+# cache:warmup : une requête servie entre les deux recrée des fichiers que le préchauffage ne peut plus écraser
+php bin/console cache:clear --env=prod
 
 # Permissions et services
 sudo chown -R www-data:www-data var/ public/
