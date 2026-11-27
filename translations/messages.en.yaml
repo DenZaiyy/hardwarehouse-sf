@@ -254,6 +254,7 @@ checkout:
         save: 'Save the address'
         save_billing: 'Save the billing address'
     delivery:
+        choose: 'Choose your delivery method:'
         selected: 'Selected delivery method'
     payment:
         choose: 'Choose your payment method:'

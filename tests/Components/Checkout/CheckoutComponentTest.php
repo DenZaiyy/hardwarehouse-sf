@@ -211,6 +211,34 @@ final class CheckoutComponentTest extends WebTestCase
         self::assertStringContainsString('Livraison 4,90', self::plain($afterChoice));
     }
 
+    public function testDeliveryCostComesFromTheCarrierPrice(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+
+        // Lu dans le libellé « … - 1 234,50 € », le prix devenait 234,50 € : l'espace des milliers coupait le nombre
+        $summary = $this->readyToPay($client, $this->carrier('Transport lourd', '1234.50'), $this->cartWith($this->apiHasProduct($slug), $slug))->render()->crawler()->text();
+
+        self::assertStringContainsString('Livraison 1 234,50 €', self::plain($summary));
+    }
+
+    public function testDeliveryStepShowsACardPerCarrier(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->carrier('Chronopost', '9.90', '<div>Livraison <strong>le lendemain</strong> avant 13 h</div>', 'chronopost.png');
+
+        $crawler = $this->readyToPay($client, 0, $this->cartWith($this->apiHasProduct($slug), $slug), step: 3)->render()->crawler();
+
+        $card = $crawler->filter('[data-step-status="current"] label')->reduce(static fn (Crawler $label): bool => str_contains($label->text(), 'Chronopost'));
+        self::assertCount(1, $card);
+        // Description de l'éditeur de l'admin affichée en texte : ses balises ne passent pas
+        self::assertSame('Chronopost Livraison le lendemain avant 13 h 9,90 €', self::plain(trim($card->text())));
+        self::assertCount(0, $card->filter('strong'));
+        self::assertStringEndsWith('/uploads/images/carriers/chronopost.png', (string) $card->filter('img')->attr('src'));
+        self::assertCount(1, $card->filter('input[type="radio"][data-live-action-param="saveDeliveryChoice"]'));
+    }
+
     public function testEnglishCheckoutIsTranslated(): void
     {
         $client = static::createClient();
@@ -391,9 +419,9 @@ final class CheckoutComponentTest extends WebTestCase
         return $token;
     }
 
-    private function carrier(string $name): Carrier
+    private function carrier(string $name, string $price = '4.90', ?string $description = null, ?string $logo = null): Carrier
     {
-        $carrier = (new Carrier())->setName($name)->setPrice('4.90');
+        $carrier = (new Carrier())->setName($name)->setPrice($price)->setDescription($description)->setLogo($logo);
         $this->entityManager()->persist($carrier);
         $this->entityManager()->flush();
 

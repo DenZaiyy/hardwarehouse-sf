@@ -13,8 +13,16 @@
         {{ form_start(form) }}
         <div class="space-y-3">
             {% if form.carrierId is defined %}
+                <p class="font-medium">{{ 'checkout.delivery.choose'|trans }}</p>
                 {% for child in form.carrierId %}
-                    <div class="flex items-center gap-2">
+                    {% set carrier = carriers|filter(c => c.id == child.vars.value)|first %}
+                    {# Une carte par transporteur, cliquable en entier. Le bouton radio garde ses attributs Live : le
+                       choix enregistre le transporteur et le résumé recalcule la livraison et le total. font-normal :
+                       la carte est un label, que la règle globale des formulaires met en gras #}
+                    <label
+                        for="{{ child.vars.id }}"
+                        class="flex cursor-pointer flex-wrap items-center gap-4 rounded-lg p-4 font-normal transition-colors {{ child.vars.checked ? 'border-2 border-primary bg-paragraph' : 'border border-secondary/40 bg-white hover:border-primary' }}"
+                    >
                         <input
                             type="radio"
                             id="{{ child.vars.id }}"
@@ -24,9 +32,23 @@
                             data-action="change->live#action"
                             data-live-action-param="saveDeliveryChoice"
                             data-live-carrier-id-param="{{ child.vars.value }}"
+                            class="size-5 shrink-0 accent-primary"
                         >
-                        <label for="{{ child.vars.id }}">{{ child.vars.label }}</label>
-                    </div>
+                        {% if carrier and carrier.logo %}
+                            {# Décoratif : le nom du transporteur suit #}
+                            <img src="{{ asset('uploads/images/carriers/' ~ carrier.logo) }}" alt="" loading="lazy" class="h-8 w-20 shrink-0 object-contain">
+                        {% endif %}
+                        <span class="min-w-40 flex-1">
+                            <span class="block font-semibold text-ink">{{ carrier ? carrier.name : child.vars.label }}</span>
+                            {% if carrier and carrier.description %}
+                                {# Texte de l'éditeur de l'admin : affiché sans ses balises #}
+                                <span class="block text-sm font-normal text-muted">{{ carrier.description|striptags }}</span>
+                            {% endif %}
+                        </span>
+                        {% if carrier %}
+                            <span class="font-semibold text-primary">{{ carrier.price|format_currency('EUR') }}</span>
+                        {% endif %}
+                    </label>
                 {% endfor %}
             {% endif %}
         </div>

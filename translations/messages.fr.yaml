@@ -256,6 +256,7 @@ checkout:
         save: "Enregistrer l'adresse"
         save_billing: "Enregistrer l'adresse de facturation"
     delivery:
+        choose: 'Choisissez votre mode de livraison :'
         selected: 'Mode de livraison sélectionné'
     payment:
         choose: 'Choisissez votre moyen de paiement :'
