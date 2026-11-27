@@ -88,6 +88,25 @@ trait FakesCatalogApi
         ];
     }
 
+    /**
+     * L'API renvoie ces catégories actives (menu, filtres, accueil). Les champs absents prennent une valeur neutre.
+     *
+     * @param list<array{slug: string, name?: string, logo?: string|null, productsCount?: int}> $categories
+     */
+    private function apiListsCategories(array $categories): void
+    {
+        ApiMockResponseFactory::respondWith('categories', ['data' => array_map(
+            static fn (array $category): array => $category + [
+                'id' => 'categorie-'.$category['slug'],
+                'name' => ucfirst($category['slug']),
+                'active' => true,
+                'productsCount' => 0,
+                'logo' => null,
+            ],
+            $categories,
+        )]);
+    }
+
     private function apiFailsOn(string $path, int $status = 503): void
     {
         ApiMockResponseFactory::respondWith($path, ['error' => 'Service Unavailable'], $status);
