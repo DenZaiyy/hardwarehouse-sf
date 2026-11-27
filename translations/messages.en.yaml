@@ -259,10 +259,17 @@ error:
         text: 'This page could not be displayed. Try again in a moment or go back to the homepage.'
     home: 'Back to the homepage'
 cart:
+    title: 'My cart'
+    empty: 'Your cart is empty.'
     summary:
         title: "Cart summary"
+        quantity: 'Qty: %quantity%'
+        clear: 'Empty the cart'
+        clear_confirm: 'Are you sure you want to empty the cart?'
         articles: "Items"
     line:
+        unit: 'incl. VAT / unit'
+        no_image: 'No image'
         decrease: 'Remove one'
         increase: 'Add one'
         remove: 'Remove this item from the cart'

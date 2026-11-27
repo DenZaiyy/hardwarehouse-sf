@@ -21,3 +21,5 @@ checkout:
     title: Commande
 configurator:
     title: 'Configurateur PC'
+cart:
+    title: Panier

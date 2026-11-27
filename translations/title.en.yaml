@@ -20,3 +20,5 @@ checkout:
     title: Checkout
 configurator:
     title: 'PC configurator'
+cart:
+    title: Cart
