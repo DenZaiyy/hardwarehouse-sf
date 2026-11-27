@@ -1,10 +1,4 @@
-<div class="group relative flex h-full w-full flex-col overflow-hidden rounded-md bg-paragraph p-3 shadow-md transition-all duration-200 md:hover:-translate-y-1 md:hover:shadow-lg">
-    <div id="product-like-{{ product.id }}" class="absolute top-2 right-2 z-50 drop-shadow-sm">
-        {{ ux_icon('heroicons-solid:heart', {
-            class: 'size-7 text-secondary transition-all duration-200 ease-in-out hover:scale-110 hover:text-red-500 hover:animate-wiggle'
-        }) }}
-    </div>
-
+<div class="product-card group relative flex h-full w-full flex-col overflow-hidden rounded-md bg-paragraph p-3 shadow-md transition-all duration-200 md:hover:-translate-y-1 md:hover:shadow-lg">
     <a href="{{ path('product.show', {slug: product.slug}) }}" class="flex flex-1 flex-col no-underline">
         <div class="aspect-square overflow-hidden rounded-md">
             <img
@@ -23,13 +17,6 @@
             <h2 class="line-clamp-2 min-h-[3.25rem] text-center text-sm font-semibold md:text-base">
                 {{ product.name }}
             </h2>
-
-            {% if rating|default(null) %}
-                <p class="product-card-rating flex items-center justify-center gap-1 text-xs text-muted">
-                    <twig:Stars :rating="rating.average" size="size-4" />
-                    <span>{{ rating.average|format_number({fraction_digit: 1}) }} ({{ rating.count }})</span>
-                </p>
-            {% endif %}
 
             <p class="line-clamp-3 min-h-[3.75rem] text-center text-sm leading-5 text-gray-700">
                 {{ product.shortDescription }}
@@ -53,5 +40,15 @@
                 {{ 'listing.product.button.add_to_cart'|trans }}
             </button>
         </form>
+    </div>
+
+    {# Note sous le bouton, comme la maquette. Ligne réservée même sans avis : les boutons d'une rangée restent alignés #}
+    <div class="mt-2 flex min-h-5 items-center justify-center">
+        {% if rating|default(null) %}
+            <p class="product-card-rating flex items-center gap-1 text-sm text-muted">
+                <twig:Stars :rating="rating.average" size="size-5" />
+                <span>{{ rating.average|format_number({fraction_digit: 1}) }} {{ 'product.page.reviews.header_count'|trans({'%count%': rating.count}) }}</span>
+            </p>
+        {% endif %}
     </div>
 </div>

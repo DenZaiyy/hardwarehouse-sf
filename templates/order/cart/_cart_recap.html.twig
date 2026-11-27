@@ -12,7 +12,7 @@
                 <div class="flex justify-between items-start gap-2">
                     <div class="flex-1 min-w-0">
                         <p class="font-semibold truncate">{{ item.name }}</p>
-                        <p class="text-white text-xs">Qté : {{ item.quantity }}</p>
+                        <p class="text-white text-xs">{{ 'cart.summary.quantity'|trans({'%quantity%': item.quantity}) }}</p>
                         {% if item.promote and item.discount_amount %}
                             <span class="inline-flex items-center gap-1 mt-1 rounded-full bg-red-500/20 border border-red-400/40 px-2 py-0.5 text-xs font-semibold text-red-300">
                                 -{{ discount_rate(item.price_ht, item.effective_ht) }}%
@@ -47,11 +47,11 @@
     </a>
 
     <form data-turbo-stream="" action="{{ path('cart.clear') }}" method="POST"
-          data-turbo-confirm="Êtes-vous sûr de vouloir vider le panier ?"
+          data-turbo-confirm="{{ 'cart.summary.clear_confirm'|trans }}"
           class="text-center">
         <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('cart') }}">
         <button type="submit" class="btn-ghost text-white hover:text-white">
-            Vider le panier
+            {{ 'cart.summary.clear'|trans }}
         </button>
     </form>
 

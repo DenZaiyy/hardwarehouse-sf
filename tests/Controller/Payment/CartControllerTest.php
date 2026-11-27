@@ -145,6 +145,19 @@ final class CartControllerTest extends WebTestCase
         self::assertSame(2, $this->quantityInCarts($productId));
     }
 
+    public function testEnglishCartIsTranslated(): void
+    {
+        $slug = self::newProductSlug();
+        $this->apiHasProduct($slug);
+        $this->client->submit($this->addToCartForm($slug));
+
+        $this->client->request('GET', '/en/cart');
+
+        self::assertSelectorTextContains('h1', 'My cart');
+        self::assertSelectorTextContains('main', 'incl. VAT / unit');
+        self::assertSelectorTextContains('main', 'Empty the cart');
+    }
+
     public function testCartTotalIsShownIncludingTaxWithItsVat(): void
     {
         $slug = self::newProductSlug();

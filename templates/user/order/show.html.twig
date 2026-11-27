@@ -63,7 +63,7 @@
             </div>
             <div class="flex justify-between">
                 <dt class="text-muted">{{ 'user.orders.detail.shipping'|trans }}</dt>
-                <dd class="text-ink">{{ order.shippingAmount|format_currency('EUR') }}</dd>
+                <dd class="text-ink">{% if order.carrierNameSnapshot %}{{ order.carrierNameSnapshot }}, {% endif %}{{ order.shippingAmount|format_currency('EUR') }}</dd>
             </div>
             <div class="flex justify-between border-t border-secondary/20 pt-2 text-base">
                 <dt class="font-semibold text-primary">{{ 'user.orders.detail.total'|trans }}</dt>

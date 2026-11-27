@@ -67,7 +67,8 @@
                 open: true
             } %}
                 {% block content %}
-                    <div class="space-y-3 max-h-48 overflow-y-auto">
+                    {# Toutes les catégories visibles : une zone défilante, dont macOS masque la barre, cachait les dernières #}
+                    <div class="space-y-3">
                         {% for category in categories %}
                             <label class="flex cursor-pointer items-center gap-3">
                                 <input

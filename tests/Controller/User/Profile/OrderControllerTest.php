@@ -59,6 +59,18 @@ final class OrderControllerTest extends WebTestCase
         self::assertStringContainsString('France', $page->filter('main')->text());
     }
 
+    public function testOrderDetailNamesTheCarrierPaidFor(): void
+    {
+        $customer = $this->createUser();
+        $order = $this->orderWithLine($customer, quantity: 2)->setCarrierNameSnapshot('Chronopost');
+        $this->entityManager()->flush();
+
+        $this->client->loginUser($customer);
+        $page = $this->client->request('GET', '/fr/profile/orders/'.$order->getReference())->filter('main')->text();
+
+        self::assertStringContainsString('Chronopost, 4,90', str_replace(["\u{a0}", "\u{202f}"], ' ', $page));
+    }
+
     public function testOrderDetailShowsItsTotalsIncludingTax(): void
     {
         $customer = $this->createUser();

@@ -20,3 +20,10 @@ checkout:
     title: Checkout
 configurator:
     title: 'PC configurator'
+cart:
+    title: Cart
+payment:
+    success:
+        title: 'Payment successful'
+    cancel:
+        title: 'Payment cancelled'

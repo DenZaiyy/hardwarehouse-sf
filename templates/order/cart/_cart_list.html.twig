@@ -1,11 +1,12 @@
-<div class="flex-1 sm:space-y-2 md:space-y-4">
+{# Lignes dans un cadre, fond alterné, comme la maquette #}
+<div class="flex-1 overflow-hidden rounded-lg border border-secondary/30">
     {% for item in cart %}
-        <div class="group relative flex items-center gap-4 {% if not loop.last %}border-b{% endif%} {% if loop.index is even %}bg-secondary/10{% endif%} p-4">
+        <div class="flex flex-wrap items-center gap-4 {% if not loop.last %}border-b border-secondary/30{% endif %} {% if loop.index is even %}bg-paragraph{% endif %} p-4">
             {% if item.imageUrl %}
                 <img src="{{ item.imageUrl|catalog_image }}" alt="{{ item.name }}" loading="lazy" class="w-16 h-16 object-cover rounded">
             {% else %}
                 <div class="w-16 h-16 bg-gray-100 rounded flex items-center justify-center text-muted text-xs">
-                    No image
+                    {{ 'cart.line.no_image'|trans }}
                 </div>
             {% endif %}
 
@@ -20,32 +21,34 @@
                             -{{ discount_rate(item.price_ht, item.effective_ht) }}%
                         </span>
                     </div>
-                    <p class="text-muted text-xs">TTC / unité</p>
+                    <p class="text-muted text-xs">{{ 'cart.line.unit'|trans }}</p>
                 {% else %}
-                    <p class="text-muted text-sm"><strong>{{ item.price_ttc|format_currency('EUR') }}</strong> TTC / unité</p>
+                    <p class="text-muted text-sm"><strong>{{ item.price_ttc|format_currency('EUR') }}</strong> {{ 'cart.line.unit'|trans }}</p>
                 {% endif %}
 
-                <p class="text-sm">{{ item.category }}</p>
+                <p class="text-sm text-secondary">{{ item.category }}</p>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="ml-auto flex items-center gap-2">
                 <form action="{{ path('cart.decrease', {productId: item.productId}) }}" method="POST">
                     <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('cart') }}">
                     <button type="submit" class="rounded-md p-2 bg-primary" aria-label="{{ 'cart.line.decrease'|trans }}">{{ ux_icon('heroicons:minus', {class: 'size-5'}) }}</button>
                 </form>
-                <span class="p-2">{{ item.quantity }}</span>
+                <span class="min-w-6 p-2 text-center">{{ item.quantity }}</span>
                 <form action="{{ path('cart.increase', {productId: item.productId}) }}" method="POST">
                     <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('cart') }}">
                     <button type="submit" class="rounded-md p-2 bg-primary" aria-label="{{ 'cart.line.increase'|trans }}">{{ ux_icon('heroicons:plus', {class: 'size-5'}) }}</button>
                 </form>
-            </div>
 
-            <form action="{{ path('cart.remove', {productId: item.productId}) }}" method="POST" class="md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100 absolute top-0 right-0 md:-top-2 md:-right-2 duration-300 transition-opacity">
-                <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('cart') }}">
-                <button type="submit" class="bg-danger text-white text-sm p-2 rounded-full hover:bg-red-800" aria-label="{{ 'cart.line.remove'|trans }}">
-                    {{ ux_icon('heroicons:x-mark', {class: 'size-3'}) }}
-                </button>
-            </form>
+                {# Toujours visible, comme la maquette : sur ordinateur, il n'apparaissait qu'au survol de la ligne.
+                   p-0 : la règle globale des boutons à icône (px-4) écrasait la croix dans un rond de 28 px #}
+                <form action="{{ path('cart.remove', {productId: item.productId}) }}" method="POST" class="ml-2">
+                    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('cart') }}">
+                    <button type="submit" class="flex size-7 shrink-0 items-center justify-center rounded-full bg-danger p-0 text-white hover:bg-red-800" aria-label="{{ 'cart.line.remove'|trans }}">
+                        {{ ux_icon('heroicons:x-mark', {class: 'size-4'}) }}
+                    </button>
+                </form>
+            </div>
         </div>
     {% endfor %}
 </div>

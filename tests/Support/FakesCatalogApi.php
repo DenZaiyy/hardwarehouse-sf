@@ -88,6 +88,48 @@ trait FakesCatalogApi
         ];
     }
 
+    /**
+     * L'API renvoie ces catégories actives (menu, filtres, accueil). Les champs absents prennent une valeur neutre.
+     *
+     * @param list<array{slug: string, name?: string, logo?: string|null, productsCount?: int}> $categories
+     */
+    private function apiListsCategories(array $categories): void
+    {
+        ApiMockResponseFactory::respondWith('categories', ['data' => array_map(
+            static fn (array $category): array => $category + [
+                'id' => 'categorie-'.$category['slug'],
+                'name' => ucfirst($category['slug']),
+                'active' => true,
+                'productsCount' => 0,
+                'logo' => null,
+            ],
+            $categories,
+        )]);
+    }
+
+    /**
+     * L'API renvoie ces marques actives.
+     *
+     * @param list<string> $names
+     */
+    private function apiListsBrands(array $names): void
+    {
+        ApiMockResponseFactory::respondWith('brands', ['data' => array_map(
+            static fn (string $name): array => ['id' => 'marque-'.strtolower($name), 'name' => $name, 'slug' => strtolower($name), 'active' => true, 'productsCount' => 0],
+            $names,
+        )]);
+    }
+
+    /**
+     * L'API renvoie ces remises (GET /discounts), telles quelles.
+     *
+     * @param list<array<string, mixed>> $discounts
+     */
+    private function apiListsDiscounts(array $discounts): void
+    {
+        ApiMockResponseFactory::respondWith('discounts', ['data' => $discounts]);
+    }
+
     private function apiFailsOn(string $path, int $status = 503): void
     {
         ApiMockResponseFactory::respondWith($path, ['error' => 'Service Unavailable'], $status);

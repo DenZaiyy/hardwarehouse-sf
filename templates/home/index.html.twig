@@ -21,22 +21,22 @@
                         class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-blue-200 backdrop-blur-sm"
                     >
                         <span class="h-1.5 w-1.5 rounded-full bg-blue-300"></span>
-                        {{ hero.eyebrow }}
+                        {{ 'home.hero.eyebrow'|trans }}
                     </span>
 
                     <h1
                         data-homepage--home-hero-target="title"
                         class="mt-6 max-w-xl text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl"
                     >
-                        {{ hero.title }}
-                        <span class="mt-2 block text-blue-300">{{ hero.highlight }}</span>
+                        {{ 'home.hero.title'|trans }}
+                        <span class="mt-2 block text-blue-300">{{ 'home.hero.highlight'|trans }}</span>
                     </h1>
 
                     <p
                         data-homepage--home-hero-target="text"
                         class="mt-6 max-w-xl text-base leading-7 text-white/72 sm:text-lg"
                     >
-                        {{ hero.description }}
+                        {{ 'home.hero.description'|trans }}
                     </p>
 
                     <div
@@ -44,18 +44,18 @@
                         class="mt-8 flex flex-col gap-3 sm:flex-row"
                     >
                         <a
-                            href="{{ hero.primary_cta_url }}"
+                            href="{{ path('product.index') }}"
                             class="inline-flex items-center justify-center gap-2 rounded-full bg-secondary px-6 py-3 text-sm font-semibold text-white no-underline shadow-[0_16px_40px_rgba(0,0,0,.24)] transition duration-300 hover:-translate-y-0.5 hover:bg-white hover:text-primary"
                         >
-                            {{ hero.primary_cta_label }}
+                            {{ 'home.hero.primary_cta'|trans }}
                             <span aria-hidden="true">→</span>
                         </a>
 
                         <a
-                            href="{{ hero.secondary_cta_url }}"
+                            href="#home-categories"
                             class="inline-flex items-center justify-center rounded-full border border-white/18 bg-white/7 px-6 py-3 text-sm font-semibold text-white no-underline backdrop-blur-sm transition duration-300 hover:border-white/35 hover:bg-white/12"
                         >
-                            {{ hero.secondary_cta_label }}
+                            {{ 'home.hero.secondary_cta'|trans }}
                         </a>
                     </div>
                 </div>
@@ -72,8 +72,8 @@
                             <img
                                 data-homepage--home-hero-target="image"
                                 fetchpriority="high"
-                                src="{{ asset(hero.image) }}"
-                                alt="Configuration PC premium"
+                                src="{{ asset('images/header_50.webp') }}"
+                                alt="{{ 'home.hero.image_alt'|trans }}"
                                 class="h-[320px] w-full object-cover sm:h-[420px] lg:h-[520px]"
                             >
 
@@ -81,17 +81,17 @@
 
                             <div class="absolute left-4 top-4 flex items-center gap-2 rounded-full border border-white/12 bg-slate-950/55 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.20em] text-white/80 backdrop-blur-sm">
                                 <span class="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_16px_rgba(52,211,153,.8)]"></span>
-                                Build ready
+                                {{ 'home.hero.badge'|trans }}
                             </div>
 
                             <div class="absolute bottom-4 left-4 right-4 grid gap-3 sm:grid-cols-2">
                                 <div class="rounded-2xl border border-white/10 bg-slate-950/55 p-4 backdrop-blur-md">
-                                    <p class="text-[11px] uppercase tracking-[0.22em] text-white/70">Focus</p>
-                                    <p class="mt-2 text-sm font-semibold text-white">Composants triés pour la performance</p>
+                                    <p class="text-[11px] uppercase tracking-[0.22em] text-white/70">{{ 'home.hero.focus.label'|trans }}</p>
+                                    <p class="mt-2 text-sm font-semibold text-white">{{ 'home.hero.focus.text'|trans }}</p>
                                 </div>
                                 <div class="rounded-2xl border border-white/10 bg-slate-950/55 p-4 backdrop-blur-md">
-                                    <p class="text-[11px] uppercase tracking-[0.22em] text-white/70">Configurateur</p>
-                                    <p class="mt-2 text-sm font-semibold text-white">Compatibilité vérifiée à chaque choix</p>
+                                    <p class="text-[11px] uppercase tracking-[0.22em] text-white/70">{{ 'home.hero.configurator.label'|trans }}</p>
+                                    <p class="mt-2 text-sm font-semibold text-white">{{ 'home.hero.configurator.text'|trans }}</p>
                                 </div>
                             </div>
                         </figure>
@@ -109,14 +109,15 @@
                         <div class="flex flex-col items-center px-6 py-5 text-center">
                             <span
                                 data-homepage--stats-counter-target="number"
-                                data-value="{{ stat.number }}"
-                                data-decimals="{{ stat.decimals|default(0) }}"
-                                data-suffix="{{ stat.suffix|default('') }}"
+                                data-value="{{ stat.value }}"
+                                data-decimals="{{ stat.decimals }}"
+                                data-suffix="{{ stat.suffix }}"
                                 class="font-title text-3xl font-bold text-blue-300"
                             >
-                                0
+                                {# Valeur finale dès le rendu serveur (sans JavaScript, moteurs de recherche) : le compteur repart de 0 en s'animant #}
+                                {{ stat.value|format_number({fraction_digit: stat.decimals}) }}{{ stat.suffix }}
                             </span>
-                            <span class="mt-1 text-xs uppercase tracking-[0.22em] text-white/70">{{ stat.label }}</span>
+                            <span class="mt-1 text-xs uppercase tracking-[0.22em] text-white/70">{{ stat.label|trans({'%count%': stat.count}) }}</span>
                         </div>
                     {% endfor %}
                 </div>
@@ -131,10 +132,10 @@
         >
             <div class="mb-8 flex items-end justify-between gap-4">
                 <div class="max-w-xl">
-                    <span class="text-xs font-semibold uppercase tracking-[0.22em] text-secondary">Catalogue</span>
-                    <h2 class="mt-2">Explore les catégories les plus recherchées</h2>
+                    <span class="text-xs font-semibold uppercase tracking-[0.22em] text-secondary">{{ 'home.categories.eyebrow'|trans }}</span>
+                    <h2 class="mt-2">{{ 'home.categories.title'|trans }}</h2>
                     <p class="mt-3 text-muted">
-                        Accède directement aux univers les plus consultés de la boutique.
+                        {{ 'home.categories.subtitle'|trans }}
                     </p>
                 </div>
 
@@ -142,7 +143,7 @@
                     href="{{ path('category.index') }}"
                     class="hidden text-sm font-semibold text-secondary no-underline transition hover:text-primary md:inline-flex"
                 >
-                    Voir toutes les catégories →
+                    {{ 'home.categories.all'|trans }} →
                 </a>
             </div>
 
@@ -151,13 +152,29 @@
                     <a
                         href="{{ path('category.show', { slug: cat.slug }) }}"
                         data-shared--reveal-target="item"
-                        class="group relative min-h-[320px] overflow-hidden rounded-[24px] border border-slate-200/80 bg-slate-950 no-underline shadow-[0_14px_40px_rgba(15,23,42,.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(15,23,42,.16)]"
+                        class="group relative min-h-[320px] overflow-hidden rounded-[24px] border border-slate-200/80 {{ cat.logo ? 'bg-primary-dark' : 'bg-slate-950' }} no-underline shadow-[0_14px_40px_rgba(15,23,42,.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(15,23,42,.16)]"
                     >
-                        {# Dégradé de la charte, comme la maquette : cat.logo ne contient pour l'instant que des
-                           photos de remplacement sans rapport avec la catégorie (voir B13, catalogue d'images) #}
-                        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,.14),transparent_30%)] bg-primary"></div>
+                        {% if cat.logo %}
+                            {# Visuel de la catégorie téléversé dans l'API (charte et icône, voir B82). Décoratif :
+                               le texte de la carte nomme déjà la catégorie. Remonté de 12 % pour que l'icône reste
+                               au-dessus du titre : sous lui, la carte prend le bleu foncé du bas du visuel #}
+                            <img
+                                src="{{ cat.logo|catalog_image }}"
+                                srcset="{{ cat.logo|catalog_image }} 400w, {{ cat.logo|catalog_image('@2x') }} 800w"
+                                sizes="(min-width: 1280px) 300px, (min-width: 768px) 50vw, 100vw"
+                                width="400"
+                                height="400"
+                                alt=""
+                                loading="lazy"
+                                class="absolute inset-x-0 -top-[12%] h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            >
+                        {% else %}
+                            {# Sans visuel, le dégradé de la charte, comme la maquette #}
+                            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,.14),transparent_30%)] bg-primary"></div>
+                        {% endif %}
 
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/45 to-transparent"></div>
+                        {# Voile plus léger sur un visuel : il garde le titre lisible sans griser l'icône #}
+                        <div class="absolute inset-0 bg-gradient-to-t {{ cat.logo ? 'from-slate-950/90 via-slate-950/20' : 'from-slate-950 via-slate-950/45' }} to-transparent"></div>
                         <div class="absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100 bg-[linear-gradient(135deg,transparent,rgba(255,255,255,.08),transparent)]"></div>
 
                         <div class="relative z-10 flex h-full flex-col justify-between p-5">
@@ -170,7 +187,7 @@
 
                             <div>
                                 <h3 class="text-xl font-bold text-white">{{ cat.name }}</h3>
-                                <p class="mt-2 text-sm text-white/80">{{ cat.productsCount }} produits</p>
+                                <p class="mt-2 text-sm text-white/80">{{ 'home.categories.products_count'|trans({'%count%': cat.productsCount ?? 0}) }}</p>
                             </div>
                         </div>
                     </a>
@@ -182,12 +199,19 @@
                     href="{{ path('category.index') }}"
                     class="inline-flex text-sm font-semibold text-secondary no-underline"
                 >
-                    Voir toutes les catégories →
+                    {{ 'home.categories.all'|trans }} →
                 </a>
             </div>
         </section>
 
-        {# PROMO #}
+        {# PROMO : la remise en cours de l'API (PromotionSelector). Sans remise en cours, pas de bandeau #}
+        {% if promotion %}
+        {% set onCategory = promotion.category is not null %}
+        {% set target = onCategory ? promotion.category : promotion.product %}
+        {% set kind = onCategory ? 'category' : 'product' %}
+        {# Libellé de la boutique (Ventirads pour refroidissement), le nom de l'API à défaut #}
+        {% set label = onCategory ? ('category.' ~ target.slug)|trans : target.name %}
+        {% if label == 'category.' ~ target.slug %}{% set label = target.name %}{% endif %}
         <section
             data-controller="shared--reveal homepage--promo-motion"
             class="mx-auto max-w-7xl px-4 pb-18 md:px-6 lg:px-8"
@@ -200,30 +224,31 @@
                 <div class="relative z-10 grid items-center gap-8 lg:grid-cols-[1.4fr_auto]">
                     <div class="max-w-2xl">
                         <span class="inline-flex rounded-full bg-yellow-400 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.22em] text-yellow-950">
-                            {{ promo.badge }}
+                            {{ promotion.endDate ? 'home.promo.badge_until'|trans({'%date%': promotion.endDate|format_date('long')}) : 'home.promo.badge'|trans }}
                         </span>
 
                         <h2 class="mt-4 text-3xl font-bold leading-tight text-white md:text-4xl">
-                            {{ promo.title }}
+                            {{ ('home.promo.title.' ~ kind)|trans({'%amount%': (promotion.discountAmount / 100)|format_number(style = 'percent'), '%target%': label}) }}
                         </h2>
 
                         <p class="mt-4 max-w-xl text-sm leading-7 text-white/72 md:text-base">
-                            {{ promo.description }}
+                            {{ ('home.promo.description.' ~ kind)|trans }}
                         </p>
                     </div>
 
                     <div class="flex">
                         <a
-                            href="{{ promo.cta_url }}"
+                            href="{{ onCategory ? path('category.show', {slug: target.slug}) : path('product.show', {slug: target.slug}) }}"
                             class="inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-primary no-underline shadow-[0_14px_34px_rgba(0,0,0,.18)] transition duration-300 hover:-translate-y-0.5 hover:bg-blue-50"
                         >
-                            {{ promo.cta_label }}
+                            {{ ('home.promo.cta.' ~ kind)|trans }}
                             <span aria-hidden="true">→</span>
                         </a>
                     </div>
                 </div>
             </div>
         </section>
+        {% endif %}
 
         {# PRODUITS PHARES #}
         {% if featured_products is defined and featured_products is not empty %}
@@ -320,13 +345,20 @@
             class="mx-auto max-w-7xl px-4 py-18 md:px-6 lg:px-8"
         >
             <div class="mx-auto max-w-2xl text-center">
-                <span class="text-xs font-semibold uppercase tracking-[0.22em] text-secondary">Pourquoi HardWareHouse</span>
-                <h2 class="mt-2">Une expérience plus claire, plus technique, plus premium</h2>
+                <span class="text-xs font-semibold uppercase tracking-[0.22em] text-secondary">{{ 'home.perks.eyebrow'|trans }}</span>
+                <h2 class="mt-2">{{ 'home.perks.title'|trans }}</h2>
                 <p class="mt-4 text-muted">
-                    Des composants sélectionnés, des fiches techniques détaillées et une livraison rapide pour monter ton setup en confiance.
+                    {{ 'home.perks.subtitle'|trans }}
                 </p>
             </div>
 
+            {# Arguments vérifiables : aucun délai de livraison promis, les transporteurs n'en garantissent pas #}
+            {% set perks = [
+                {icon: 'ph:seal-check-duotone', key: 'reviews'},
+                {icon: 'ph:magnifying-glass-duotone', key: 'selection'},
+                {icon: 'ph:shield-check-duotone', key: 'compatibility'},
+                {icon: 'ph:trophy-duotone', key: 'prices'},
+            ] %}
             <div class="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
                 {% for perk in perks %}
                     <article
@@ -337,8 +369,8 @@
                             {{ ux_icon(perk.icon, { class: 'h-7 w-7' }) }}
                         </div>
 
-                        <h3 class="mt-5 text-lg font-bold text-slate-800">{{ perk.title }}</h3>
-                        <p class="mt-3 text-sm leading-7 text-muted">{{ perk.desc }}</p>
+                        <h3 class="mt-5 text-lg font-bold text-slate-800">{{ ('home.perks.' ~ perk.key ~ '.title')|trans }}</h3>
+                        <p class="mt-3 text-sm leading-7 text-muted">{{ ('home.perks.' ~ perk.key ~ '.text')|trans }}</p>
                     </article>
                 {% endfor %}
             </div>
@@ -351,7 +383,7 @@
         >
             <div class="mx-auto max-w-7xl px-4 text-center md:px-6 lg:px-8">
                 <p class="text-xs font-semibold uppercase tracking-[0.26em] text-muted">
-                    Les marques que nous distribuons
+                    {{ 'home.brands.title'|trans }}
                 </p>
 
                 <div class="mt-8 overflow-hidden">

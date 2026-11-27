@@ -40,6 +40,27 @@ final class AdminPagesTest extends WebTestCase
         self::assertResponseIsSuccessful();
     }
 
+    /** @return iterable<string, array{string, bool}> */
+    public static function usersLinkVisibility(): iterable
+    {
+        yield 'administrateur' => ['ROLE_ADMIN', false];
+        yield 'super-administrateur' => ['ROLE_SUPER_ADMIN', true];
+    }
+
+    /** La liste des comptes exige ROLE_SUPER_ADMIN (elle attribue les rôles) : son lien suit la même règle. */
+    #[DataProvider('usersLinkVisibility')]
+    public function testUsersLinkIsOnlyShownToWhoCanOpenIt(string $role, bool $visible): void
+    {
+        $client = static::createClient();
+        $client->loginUser($this->createUser('admin')->setRoles([$role]));
+        $this->entityManager()->flush();
+
+        $crawler = $client->request('GET', '/fr/admin');
+
+        self::assertResponseIsSuccessful();
+        self::assertCount($visible ? 1 : 0, $crawler->filter('a[href$="/admin/user"]'));
+    }
+
     /**
      * Le filtre Utilisateur des adresses suggère les comptes par autocomplétion. EasyAdmin 5.10.4 vérifie désormais
      * la page et le champ d'où vient la demande : ce test passe par l'URL que le formulaire de filtres fournit.

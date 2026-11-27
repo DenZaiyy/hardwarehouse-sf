@@ -56,6 +56,7 @@ class OrderCrudController extends AbstractSecuredCrudController
             'CANCELLED' => 'danger',
         ]);
         yield ChoiceField::new('paymentMethod', 'Paiement')->hideOnForm();
+        yield TextField::new('carrierNameSnapshot', 'Transporteur')->hideOnForm();
         yield MoneyField::new('totalAmount', 'Total TTC')->setCurrency('EUR')->setStoredAsCents(false)->hideOnForm();
     }
 }

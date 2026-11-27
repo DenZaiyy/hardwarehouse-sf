@@ -235,6 +235,43 @@ shipmentStatus:
     delivered:
         label: Livré
 checkout:
+    heading: 'Récapitulatif de commande'
+    step:
+        identity: '1. Informations personnelles'
+        address: '2. Adresse'
+        delivery: '3. Livraison'
+        payment: '4. Paiement'
+        edit: Modifier
+    identity:
+        guest: "Commander en tant qu'invité"
+        login: 'Se connecter'
+        choose: 'Choisis un mode pour continuer.'
+        continue: Continuer
+        logged_in: Connecté
+        password: 'Mot de passe'
+    address:
+        same_billing: 'Utiliser la même adresse pour la facturation'
+        default: 'Par défaut'
+        new: 'Ajouter une nouvelle adresse'
+        save: "Enregistrer l'adresse"
+        save_billing: "Enregistrer l'adresse de facturation"
+    delivery:
+        choose: 'Choisissez votre mode de livraison :'
+        selected: 'Mode de livraison sélectionné'
+    payment:
+        choose: 'Choisissez votre moyen de paiement :'
+        secured: 'Paiement sécurisé par Stripe : vos données bancaires ne transitent pas par HardWareHouse.'
+        pay: 'Payer %amount%'
+    summary:
+        title: 'Résumé de commande'
+        articles: Articles
+        quantity: 'Qté : %quantity%'
+        subtotal: 'Sous-total TTC'
+        delivery: Livraison
+        delivery_pending: 'À choisir'
+        total: 'Total TTC'
+        vat: 'Dont TVA (%rate%%)'
+        continue_shopping: 'Continuer mes achats'
     form:
         title: Civilité
         mr: M.
@@ -261,10 +298,17 @@ error:
         text: "Cette page n'a pas pu s'afficher. Réessayez dans un instant ou revenez à l'accueil."
     home: "Retour à l'accueil"
 cart:
+    title: 'Mon panier'
+    empty: 'Votre panier est vide.'
     summary:
         title: Résumé du panier
+        quantity: 'Qté : %quantity%'
+        clear: 'Vider le panier'
+        clear_confirm: 'Êtes-vous sûr de vouloir vider le panier ?'
         articles: Articles
     line:
+        unit: 'TTC / unité'
+        no_image: "Pas d'image"
         decrease: 'Retirer un exemplaire'
         increase: 'Ajouter un exemplaire'
         remove: 'Retirer cet article du panier'
@@ -390,3 +434,80 @@ product:
                 comment: 'Commentaire (facultatif)'
                 submit_new: 'Publier mon avis'
                 submit_edit: 'Enregistrer les modifications'
+home:
+    hero:
+        eyebrow: 'Spécialiste composants PC'
+        title: 'Construis un setup premium, pièce par pièce.'
+        highlight: 'Performance. Compatibilité. Fiabilité.'
+        description: "CPU, GPU, cartes mères, RAM, SSD et périphériques sélectionnés pour offrir une expérience d'achat claire, rapide et orientée performance."
+        primary_cta: 'Explorer le catalogue'
+        secondary_cta: 'Voir les catégories'
+        image_alt: 'Configuration PC premium'
+        badge: 'Build ready'
+        focus:
+            label: Focus
+            text: 'Composants triés pour la performance'
+        configurator:
+            label: Configurateur
+            text: 'Compatibilité vérifiée à chaque choix'
+    stats:
+        products: '{0}Référence au catalogue|{1}Référence au catalogue|]1,Inf[Références au catalogue'
+        brands: '{0}Marque|{1}Marque|]1,Inf[Marques'
+        categories: '{0}Catégorie|{1}Catégorie|]1,Inf[Catégories'
+        rating: '{1}Note de 1 avis vérifié|]1,Inf[Note moyenne de %count% avis vérifiés'
+    categories:
+        eyebrow: Catalogue
+        title: 'Explore le catalogue'
+        subtitle: 'Accède directement aux grandes familles de composants.'
+        all: 'Voir toutes les catégories'
+        products_count: '{0}Aucun produit|{1}1 produit|]1,Inf[%count% produits'
+    promo:
+        badge_until: "Jusqu'au %date%"
+        badge: 'Offre en cours'
+        title:
+            category: '-%amount% sur la catégorie %target%'
+            product: '-%amount% sur %target%'
+        description:
+            category: 'La remise est déjà appliquée au prix affiché de chaque produit de la catégorie, et au panier.'
+            product: 'La remise est déjà appliquée au prix affiché du produit, et au panier.'
+        cta:
+            category: 'Voir les produits'
+            product: 'Voir le produit'
+    perks:
+        eyebrow: 'Pourquoi HardWareHouse'
+        title: 'Une expérience plus claire, plus technique, plus premium'
+        subtitle: 'Des composants sélectionnés, des fiches techniques détaillées et une livraison rapide pour monter ton setup en confiance.'
+        reviews:
+            title: 'Avis vérifiés'
+            text: "Seuls les clients qui ont acheté un produit peuvent le noter : chaque avis vient d'une commande réelle."
+        selection:
+            title: 'Sélection experte'
+            text: 'Des composants choisis pour leur fiabilité, leurs performances et leur cohérence dans des builds modernes.'
+        compatibility:
+            title: 'Compatibilité maîtrisée'
+            text: 'Un catalogue pensé pour réduire les erreurs de choix et sécuriser tes achats techniques.'
+        prices:
+            title: 'Prix compétitifs'
+            text: 'Des offres suivies régulièrement pour garder un positionnement premium sans dérive tarifaire.'
+    brands:
+        title: 'Les marques que nous distribuons'
+payment_page:
+    success:
+        heading: 'Paiement réussi !'
+        message: 'Votre commande %reference% a bien été enregistrée.'
+        recap: Récapitulatif
+        reference: Référence
+        date: Date
+        delivery: Livraison
+        payment_method: 'Moyen de paiement'
+        amount: 'Montant payé'
+        email: 'Vous recevrez bientôt un e-mail de confirmation avec le détail de votre commande.'
+        orders: 'Voir mes commandes'
+        continue: 'Continuer mes achats'
+    cancel:
+        heading: 'Paiement annulé'
+        message: 'Le paiement a été annulé. Vous pouvez reprendre votre commande.'
+        cart_kept: 'Votre panier est toujours disponible et vous pouvez finaliser votre commande à tout moment.'
+        resume: 'Reprendre ma commande'
+        cart: 'Voir mon panier'
+        home: "Retour à l'accueil"

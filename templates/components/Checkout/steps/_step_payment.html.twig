@@ -1,5 +1,7 @@
-<section class="rounded-lg border p-4 space-y-4">
-    <h2 class="text-lg font-semibold">4. Paiement</h2>
+{% import 'components/Checkout/steps/_macros.html.twig' as step %}
+{% set status = state.deliveryCompleted and state.currentStep == 4 ? 'current' : 'locked' %}
+<section class="space-y-4 rounded-lg p-4 {{ status == 'current' ? 'border-2 border-primary' : 'border border-secondary/40' }}" data-step-status="{{ status }}">
+    {{ step.header('checkout.step.payment'|trans, status) }}
 
     {% if paymentNotices is not empty %}
         <ul class="flash-warning space-y-1 text-sm" role="alert">
@@ -10,12 +12,10 @@
     {% endif %}
 
     {% if not state.deliveryCompleted %}
-        <div class="text-sm text-muted">
-            Complète d'abord la livraison.
-        </div>
+        {# Étape verrouillée : seul son titre s'affiche, comme la maquette #}
     {% elseif state.currentStep == 4 %}
         <fieldset class="space-y-3">
-            <legend class="font-medium">Choisissez votre moyen de paiement :</legend>
+            <legend class="font-medium">{{ 'checkout.payment.choose'|trans }}</legend>
 
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {% for method in availablePaymentMethods %}
@@ -37,7 +37,7 @@
         </fieldset>
 
         <p class="text-xs text-muted">
-            Paiement sécurisé par Stripe : vos données bancaires ne transitent pas par HardWareHouse.
+            {{ 'checkout.payment.secured'|trans }}
         </p>
 
         {# Désactivé pendant la requête : un double clic créait deux commandes et deux sessions Stripe #}
@@ -47,7 +47,7 @@
             data-live-action-param="processPayment"
             data-loading="addAttribute(disabled)"
         >
-            Payer {{ orderTotal|format_currency('EUR') }}
+            {{ 'checkout.payment.pay'|trans({'%amount%': orderTotal|format_currency('EUR')}) }}
         </button>
     {% endif %}
 </section>
