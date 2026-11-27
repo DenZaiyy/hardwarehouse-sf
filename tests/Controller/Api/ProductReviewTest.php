@@ -174,8 +174,13 @@ final class ProductReviewTest extends WebTestCase
 
         $crawler = $client->request('GET', '/fr/produits');
 
-        self::assertSame('4,5 (2)', self::plain($crawler->filter('a[href$="/produits/'.$reviewed.'"] .product-card-rating')->text()));
-        self::assertCount(0, $crawler->filter('a[href$="/produits/'.$silent.'"] .product-card-rating'));
+        // Sous le bouton, hors du lien vers la fiche, comme la maquette
+        $reviewedCard = $crawler->filter('a[href$="/produits/'.$reviewed.'"]')->closest('.product-card');
+        $silentCard = $crawler->filter('a[href$="/produits/'.$silent.'"]')->closest('.product-card');
+        self::assertNotNull($reviewedCard);
+        self::assertNotNull($silentCard);
+        self::assertSame('4,5 (2 avis)', self::plain($reviewedCard->filter('.product-card-rating')->text()));
+        self::assertCount(0, $silentCard->filter('.product-card-rating'));
     }
 
     public function testSummariesOfAPageAreReadInOneQuery(): void

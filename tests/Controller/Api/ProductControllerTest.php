@@ -122,6 +122,18 @@ final class ProductControllerTest extends WebTestCase
         self::assertStringNotContainsString('-50%', $infos);
     }
 
+    public function testProductCardHasNoFavoritesButton(): void
+    {
+        $client = static::createClient();
+        $this->apiListsProducts([self::productPayload(self::newProductSlug())]);
+
+        $crawler = $client->request('GET', '/fr/produits');
+
+        // Les favoris sont hors du périmètre : pas de cœur qui ne ferait rien
+        self::assertCount(1, $crawler->filter('.product-card'));
+        self::assertCount(0, $crawler->filter('.product-card [id^="product-like-"]'));
+    }
+
     public function testListedProductShowsItsDiscountIncludingTax(): void
     {
         $client = static::createClient();

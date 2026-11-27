@@ -4,7 +4,8 @@
             Affichage {{ pagination.start }}-{{ pagination.end }} de {{ pagination.total }} article(s)
         </span>
 
-        <nav class="flex items-center gap-1">
+        {# Jusqu'à une dizaine de boutons de 40 px : ils passent à la ligne sur mobile au lieu de déborder #}
+        <nav class="flex flex-wrap items-center justify-center gap-1">
             {# Première page + précédente #}
             {% if pagination.hasPrev %}
                 <button data-page="1"
