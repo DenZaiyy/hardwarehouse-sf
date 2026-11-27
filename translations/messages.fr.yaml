@@ -235,6 +235,42 @@ shipmentStatus:
     delivered:
         label: Livré
 checkout:
+    heading: 'Récapitulatif de commande'
+    step:
+        identity: '1. Informations personnelles'
+        address: '2. Adresse'
+        delivery: '3. Livraison'
+        payment: '4. Paiement'
+        edit: Modifier
+    identity:
+        guest: "Commander en tant qu'invité"
+        login: 'Se connecter'
+        choose: 'Choisis un mode pour continuer.'
+        continue: Continuer
+        logged_in: Connecté
+        password: 'Mot de passe'
+    address:
+        same_billing: 'Utiliser la même adresse pour la facturation'
+        default: 'Par défaut'
+        new: 'Ajouter une nouvelle adresse'
+        save: "Enregistrer l'adresse"
+        save_billing: "Enregistrer l'adresse de facturation"
+    delivery:
+        selected: 'Mode de livraison sélectionné'
+    payment:
+        choose: 'Choisissez votre moyen de paiement :'
+        secured: 'Paiement sécurisé par Stripe : vos données bancaires ne transitent pas par HardWareHouse.'
+        pay: 'Payer %amount%'
+    summary:
+        title: 'Résumé de commande'
+        articles: Articles
+        quantity: 'Qté : %quantity%'
+        subtotal: 'Sous-total TTC'
+        delivery: Livraison
+        delivery_pending: 'À choisir'
+        total: 'Total TTC'
+        vat: 'Dont TVA (%rate%%)'
+        continue_shopping: 'Continuer mes achats'
     form:
         title: Civilité
         mr: M.

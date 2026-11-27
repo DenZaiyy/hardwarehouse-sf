@@ -233,6 +233,42 @@ shipmentStatus:
     delivered:
         label: Delivered
 checkout:
+    heading: 'Order summary'
+    step:
+        identity: '1. Personal details'
+        address: '2. Address'
+        delivery: '3. Delivery'
+        payment: '4. Payment'
+        edit: Edit
+    identity:
+        guest: 'Order as a guest'
+        login: 'Log in'
+        choose: 'Choose an option to continue.'
+        continue: Continue
+        logged_in: 'Logged in'
+        password: Password
+    address:
+        same_billing: 'Use the same address for billing'
+        default: Default
+        new: 'Add a new address'
+        save: 'Save the address'
+        save_billing: 'Save the billing address'
+    delivery:
+        selected: 'Selected delivery method'
+    payment:
+        choose: 'Choose your payment method:'
+        secured: 'Payment secured by Stripe: your card details never go through HardWareHouse.'
+        pay: 'Pay %amount%'
+    summary:
+        title: 'Order summary'
+        articles: Items
+        quantity: 'Qty: %quantity%'
+        subtotal: 'Subtotal incl. VAT'
+        delivery: Delivery
+        delivery_pending: 'To be chosen'
+        total: 'Total incl. VAT'
+        vat: 'Including VAT (%rate%%)'
+        continue_shopping: 'Continue shopping'
     form:
         title: Title
         mr: Mr

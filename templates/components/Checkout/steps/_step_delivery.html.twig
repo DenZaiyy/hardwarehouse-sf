@@ -1,24 +1,13 @@
-<section class="rounded-lg border p-4 space-y-4">
-    <h2 class="text-lg font-semibold">3. Livraison</h2>
+{% import 'components/Checkout/steps/_macros.html.twig' as step %}
+{% set status = not state.addressCompleted ? 'locked' : (state.deliveryCompleted and state.currentStep != 3 ? 'done' : (state.currentStep == 3 ? 'current' : 'locked')) %}
+<section class="space-y-4 rounded-lg p-4 {{ status == 'current' ? 'border-2 border-primary' : 'border border-secondary/40' }}" data-step-status="{{ status }}">
+    {{ step.header('checkout.step.delivery'|trans, status, 'editDelivery') }}
 
     {% if not state.addressCompleted %}
-        <div class="text-sm text-muted">
-            Complète d'abord l'adresse.
-        </div>
+        {# Étape verrouillée : seul son titre s'affiche, comme la maquette #}
     {% elseif state.deliveryCompleted and state.currentStep != 3 %}
-        <div class="flex items-center justify-between gap-4">
-            <div class="text-sm">
-                {{ selectedCarrierLabel ?? 'Mode de livraison sélectionné' }}
-            </div>
-
-            <button
-                type="button"
-                data-action="live#action"
-                data-live-action-param="editDelivery"
-                class="rounded border px-4 py-2"
-            >
-                Modifier
-            </button>
+        <div class="text-sm">
+            {{ selectedCarrierLabel ?? 'checkout.delivery.selected'|trans }}
         </div>
     {% elseif state.currentStep == 3 %}
         {{ form_start(form) }}

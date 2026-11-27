@@ -177,6 +177,53 @@ final class CheckoutComponentTest extends WebTestCase
         self::assertStringContainsString('544,78', $page->filter('button[data-live-action-param="processPayment"]')->text());
     }
 
+    public function testStepsShowWhereTheCustomerIs(): void
+    {
+        $crawler = $this->guestCheckout()->render()->crawler();
+
+        self::assertSame(['current', 'locked', 'locked', 'locked'], $this->stepStatuses($crawler));
+        self::assertStringContainsString("Commander en tant qu'invité", $crawler->filter('[data-step-status="current"]')->text());
+    }
+
+    public function testCompletedStepsCanBeEditedFromTheirTitle(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+
+        $crawler = $this->readyToPay($client, $this->carrier('Colissimo'), $this->cartWith($this->apiHasProduct($slug), $slug))->render()->crawler();
+
+        self::assertSame(['done', 'done', 'done', 'current'], $this->stepStatuses($crawler));
+        foreach (['editIdentity', 'editAddress', 'editDelivery'] as $action) {
+            self::assertCount(1, $crawler->filter('[data-step-status="done"] [data-live-action-param="'.$action.'"]'), $action);
+        }
+    }
+
+    public function testDeliveryIsToBeChosenUntilACarrierIsPicked(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $cart = $this->cartWith($this->apiHasProduct($slug), $slug);
+
+        $beforeChoice = $this->readyToPay($client, 0, $cart, step: 3)->render()->crawler()->text();
+        self::assertStringContainsString('Livraison À choisir', self::plain($beforeChoice));
+
+        $afterChoice = $this->readyToPay($client, $this->carrier('Colissimo'), $cart)->render()->crawler()->text();
+        self::assertStringContainsString('Livraison 4,90', self::plain($afterChoice));
+    }
+
+    public function testEnglishCheckoutIsTranslated(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->prepareSession($client, ['cart_session_token' => $this->cartWith($this->apiHasProduct($slug), $slug)]);
+
+        $client->request('GET', '/en/checkout');
+
+        self::assertSelectorTextContains('h1', 'Order summary');
+        self::assertSelectorTextContains('[data-step-status="current"]', '1. Personal details');
+        self::assertSelectorTextContains('main', 'Total incl. VAT');
+    }
+
     public function testSummaryShowsAmountsIncludingTax(): void
     {
         $client = static::createClient();
@@ -310,17 +357,19 @@ final class CheckoutComponentTest extends WebTestCase
     }
 
     /** Tunnel rempli jusqu'au paiement par un visiteur, dont le panier est rangé sous ce jeton. */
-    private function readyToPay(KernelBrowser $client, Carrier|int $carrier, ?string $cartToken): TestLiveComponent
+    /** À l'étape 3 avec un transporteur à 0, le client n'a pas encore choisi sa livraison */
+    private function readyToPay(KernelBrowser $client, Carrier|int $carrier, ?string $cartToken, int $step = 4): TestLiveComponent
     {
+        $carrierId = $carrier instanceof Carrier ? $carrier->getId() : $carrier;
         $session = ['checkout_state' => (new CheckoutState(
-            currentStep: 4,
+            currentStep: $step,
             identityMode: 'guest',
             identity: self::IDENTITY,
             deliveryAddress: self::ADDRESS,
-            carrierId: $carrier instanceof Carrier ? $carrier->getId() : $carrier,
+            carrierId: 0 === $carrierId ? null : $carrierId,
             identityCompleted: true,
             addressCompleted: true,
-            deliveryCompleted: true,
+            deliveryCompleted: 4 === $step,
         ))->toArray()];
         if (null !== $cartToken) {
             $session['cart_session_token'] = $cartToken;
@@ -373,6 +422,17 @@ final class CheckoutComponentTest extends WebTestCase
         $request->setLocale('fr');
         $request->setSession(new Session(new MockArraySessionStorage()));
         static::getContainer()->get(RequestStack::class)->push($request);
+    }
+
+    /** @return list<string> état de chaque étape, dans l'ordre (current, done, locked) */
+    private function stepStatuses(Crawler $crawler): array
+    {
+        return $crawler->filter('[data-step-status]')->each(static fn (Crawler $step): string => (string) $step->attr('data-step-status'));
+    }
+
+    private static function plain(string $text): string
+    {
+        return (string) preg_replace('/\s+/u', ' ', str_replace(["\u{a0}", "\u{202f}"], ' ', $text));
     }
 
     private function guestCheckout(): TestLiveComponent

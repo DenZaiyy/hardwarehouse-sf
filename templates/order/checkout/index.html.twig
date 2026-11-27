@@ -4,7 +4,7 @@
 
 {% block body %}
     <div class="md:container md:mx-auto md:px-4 md:py-8">
-        <h1>Récapitulatif de commande</h1>
+        <h1>{{ 'checkout.heading'|trans }}</h1>
 
         <div class="container py-8">
             {{ component('Checkout:CheckoutComponent') }}
