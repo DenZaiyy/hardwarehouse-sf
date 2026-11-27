@@ -371,6 +371,19 @@ final class CheckoutComponentTest extends WebTestCase
         self::assertSame(PaymentMethod::PAYPAL, $orders[0]->getPaymentMethod());
     }
 
+    public function testOrderKeepsTheCarrierChosenInTheShop(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $checkout = $this->readyToPay($client, $this->carrier('Chronopost', '9.90'), $this->cartWith($this->apiHasProduct($slug), $slug));
+
+        $checkout->call('processPayment');
+
+        // Figé à la commande : l'admin sait quel transporteur le client a payé, même renommé ou supprimé depuis
+        $orders = $this->entityManager()->getRepository(Order::class)->findBy(['userFullNameSnapshot' => 'Jean Dupont'], ['id' => 'DESC'], 1);
+        self::assertSame(['Chronopost', '9.90'], [$orders[0]->getCarrierNameSnapshot(), $orders[0]->getShippingAmount()]);
+    }
+
     public function testOrderKeepsTheCustomerEmailForTheConfirmation(): void
     {
         $client = static::createClient();

@@ -97,7 +97,7 @@
         <td class="number">{{ order.taxAmount|format_currency('EUR', locale = 'fr') }}</td>
     </tr>
     <tr>
-        <td>Frais de livraison</td>
+        <td>Frais de livraison{% if order.carrierNameSnapshot %} ({{ order.carrierNameSnapshot }}){% endif %}</td>
         <td class="number">{{ order.shippingAmount|format_currency('EUR', locale = 'fr') }}</td>
     </tr>
     <tr class="grand-total">

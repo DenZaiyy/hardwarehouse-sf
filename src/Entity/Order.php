@@ -65,6 +65,13 @@ class Order
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private ?string $shippingAmount = null;
 
+    /**
+     * Transporteur choisi dans le tunnel, figé à la commande comme le nom du client : il peut être renommé ou supprimé
+     * ensuite. Sans lui, seul le prix de la livraison restait (B86). Null pour les commandes antérieures.
+     */
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $carrierNameSnapshot = null;
+
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private ?string $discountAmount = null;
 
@@ -264,6 +271,18 @@ class Order
     public function setShippingAmount(string $shippingAmount): static
     {
         $this->shippingAmount = $shippingAmount;
+
+        return $this;
+    }
+
+    public function getCarrierNameSnapshot(): ?string
+    {
+        return $this->carrierNameSnapshot;
+    }
+
+    public function setCarrierNameSnapshot(?string $carrierNameSnapshot): static
+    {
+        $this->carrierNameSnapshot = $carrierNameSnapshot;
 
         return $this;
     }

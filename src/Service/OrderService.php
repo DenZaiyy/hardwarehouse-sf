@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\DTO\Checkout\CheckoutState;
+use App\Entity\Carrier;
 use App\Entity\Order;
 use App\Entity\OrderAddress;
 use App\Entity\OrderLine;
@@ -44,7 +45,8 @@ class OrderService
             static fn (array $item): array => ['unit_price' => $item['effective_ht'], 'quantity' => $item['quantity']],
             array_values($cartItems),
         ));
-        $shipping = (int) round($this->getCarrierCost($checkoutState->carrierId) * 100);
+        $carrier = $this->findCarrier($checkoutState->carrierId);
+        $shipping = (int) round((float) ($carrier?->getPrice() ?? 0) * 100);
 
         // Create order
         $order = new Order();
@@ -64,6 +66,8 @@ class OrderService
         $order->setSubtotal(PriceCalculator::toDecimal($totals['subtotal']));
         $order->setTaxAmount(PriceCalculator::toDecimal($totals['vat']));
         $order->setShippingAmount(PriceCalculator::toDecimal($shipping));
+        // Figé comme le prix : l'admin expédie avec le transporteur payé, même renommé ou supprimé depuis (B86)
+        $order->setCarrierNameSnapshot($carrier?->getName());
         $order->setDiscountAmount('0.00');
         $order->setTotalAmount(PriceCalculator::toDecimal($totals['total'] + $shipping));
         $order->setCurrency('EUR');
@@ -148,21 +152,11 @@ class OrderService
     }
 
     /**
-     * Get carrier cost by carrier ID.
+     * Transporteur choisi dans le tunnel, ou null : la livraison compte alors 0 €.
      */
-    private function getCarrierCost(?int $carrierId): float
+    private function findCarrier(?int $carrierId): ?Carrier
     {
-        if (!$carrierId) {
-            return 0.0;
-        }
-
-        $carrier = $this->carrierRepository->find($carrierId);
-
-        if (!$carrier) {
-            return 0.0;
-        }
-
-        return (float) $carrier->getPrice();
+        return $carrierId ? $this->carrierRepository->find($carrierId) : null;
     }
 
     /**

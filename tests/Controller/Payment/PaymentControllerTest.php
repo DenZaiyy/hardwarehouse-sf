@@ -31,14 +31,15 @@ final class PaymentControllerTest extends WebTestCase
     {
         $client = static::createClient();
         $customer = $this->createUser('customer');
-        $order = $this->withAddresses($this->createOrder($customer));
+        $order = $this->withAddresses($this->createOrder($customer))->setCarrierNameSnapshot('Colissimo');
+        $this->entityManager()->flush();
         $client->loginUser($customer);
 
         $crawler = $client->request('GET', '/fr/payment/success/'.$order->getReference());
 
         $recap = self::plain($crawler->filter('.payment-recap')->text());
         self::assertStringContainsString('Référence '.$order->getReference(), $recap);
-        self::assertStringContainsString('Livraison 4,90 €, 12 rue des Essais, 68100 Mulhouse', $recap);
+        self::assertStringContainsString('Livraison Colissimo (4,90 €), 12 rue des Essais, 68100 Mulhouse', $recap);
         self::assertStringContainsString('Montant payé 124,90 €', $recap);
         self::assertSelectorExists('a[href$="/profile/orders"]');
     }

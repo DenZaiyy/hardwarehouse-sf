@@ -12,8 +12,7 @@
         <p class="mt-2 text-green-700">{{ 'payment_page.success.message'|trans({'%reference%': order.reference}) }}</p>
     </div>
 
-    {# Récapitulatif tiré de la commande enregistrée. Le transporteur n'y figure pas : la commande ne garde que le
-       prix de la livraison (voir B86) #}
+    {# Récapitulatif tiré de la commande enregistrée, transporteur compris (figé à la commande depuis B86) #}
     {% set delivery = order.orderAddresses|filter(address => address.type and address.type.value == 'DELIVERY')|first %}
     <section class="payment-recap mt-6 rounded-lg border border-secondary/40 p-6">
         <h2 class="text-lg font-semibold text-primary">{{ 'payment_page.success.recap'|trans }}</h2>
@@ -29,7 +28,7 @@
             <div class="flex justify-between gap-4">
                 <dt class="text-muted">{{ 'payment_page.success.delivery'|trans }}</dt>
                 <dd class="text-right font-semibold text-ink">
-                    {{ order.shippingAmount|format_currency('EUR') }}{% if delivery %}, {{ delivery.address }}, {{ delivery.postalCode }} {{ delivery.city }}{% endif %}
+                    {% if order.carrierNameSnapshot %}{{ order.carrierNameSnapshot }} ({{ order.shippingAmount|format_currency('EUR') }}){% else %}{{ order.shippingAmount|format_currency('EUR') }}{% endif %}{% if delivery %}, {{ delivery.address }}, {{ delivery.postalCode }} {{ delivery.city }}{% endif %}
                 </dd>
             </div>
             <div class="flex justify-between gap-4">
