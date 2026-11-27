@@ -96,7 +96,8 @@
 
         <!-- Desktop Menu -->
         <div class="hidden md:block">
-            <ul class="flex gap-4 items-center overflow-x-auto px-4 py-2 text-sm justify-center font-display font-bold">
+            {# Une entrée ne se coupe jamais : sur un écran étroit, ce sont les entrées entières qui passent à la ligne #}
+            <ul class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 whitespace-nowrap px-4 py-2 text-sm font-display font-bold">
                 <li>
                     <a href="{{ path('configuration.new') }}" class="hover:text-white transition-colors">
                         {{ 'header.nav.configurator.label'|trans }}

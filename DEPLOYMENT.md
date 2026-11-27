@@ -45,6 +45,10 @@ graph LR
 ├── deploy-20261106_091045/
 ```
 
+Les chemins et l'utilisateur de ce guide (`/var/www/hardwarehouse`, `deploy`) sont des exemples. La CI lit le vrai
+chemin dans le secret `PROJECT_PATH`. Sur le serveur actuel, le projet est dans le dossier personnel de
+l'utilisateur de déploiement, `~/symfony` : les commandes de ce guide se lancent depuis ce dossier.
+
 ### 2. Utilisateur de déploiement
 ```bash
 # Créer utilisateur deploy
@@ -457,8 +461,9 @@ git push origin dev
 # Logs de déploiement
 tail -f /var/log/syslog | grep deploy
 
-# Logs Symfony
-tail -f /var/www/hardwarehouse/var/log/prod.log
+# Logs Symfony : un fichier par jour (rotating_file, 10 jours), depuis le dossier du projet
+tail -f var/log/prod-$(date +%F).log
+grep -hE "CRITICAL|ERROR" var/log/prod-$(date +%F).log | tail -n 5   # dernières erreurs
 
 # Logs Nginx
 tail -f /var/log/nginx/access.log
