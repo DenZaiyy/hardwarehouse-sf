@@ -489,3 +489,23 @@ home:
             text: 'Offers reviewed regularly to keep a premium positioning without price drift.'
     brands:
         title: 'The brands we sell'
+payment_page:
+    success:
+        heading: 'Payment successful!'
+        message: 'Your order %reference% has been recorded.'
+        recap: Summary
+        reference: Reference
+        date: Date
+        delivery: Delivery
+        payment_method: 'Payment method'
+        amount: 'Amount paid'
+        email: 'You will soon receive a confirmation email with the details of your order.'
+        orders: 'View my orders'
+        continue: 'Continue shopping'
+    cancel:
+        heading: 'Payment cancelled'
+        message: 'The payment was cancelled. You can resume your order.'
+        cart_kept: 'Your cart is still available and you can complete your order at any time.'
+        resume: 'Resume my order'
+        cart: 'View my cart'
+        home: 'Back to the homepage'

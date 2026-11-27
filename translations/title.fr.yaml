@@ -23,3 +23,8 @@ configurator:
     title: 'Configurateur PC'
 cart:
     title: Panier
+payment:
+    success:
+        title: 'Paiement réussi'
+    cancel:
+        title: 'Paiement annulé'

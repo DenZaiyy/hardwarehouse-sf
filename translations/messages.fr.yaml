@@ -491,3 +491,23 @@ home:
             text: 'Des offres suivies régulièrement pour garder un positionnement premium sans dérive tarifaire.'
     brands:
         title: 'Les marques que nous distribuons'
+payment_page:
+    success:
+        heading: 'Paiement réussi !'
+        message: 'Votre commande %reference% a bien été enregistrée.'
+        recap: Récapitulatif
+        reference: Référence
+        date: Date
+        delivery: Livraison
+        payment_method: 'Moyen de paiement'
+        amount: 'Montant payé'
+        email: 'Vous recevrez bientôt un e-mail de confirmation avec le détail de votre commande.'
+        orders: 'Voir mes commandes'
+        continue: 'Continuer mes achats'
+    cancel:
+        heading: 'Paiement annulé'
+        message: 'Le paiement a été annulé. Vous pouvez reprendre votre commande.'
+        cart_kept: 'Votre panier est toujours disponible et vous pouvez finaliser votre commande à tout moment.'
+        resume: 'Reprendre ma commande'
+        cart: 'Voir mon panier'
+        home: "Retour à l'accueil"
