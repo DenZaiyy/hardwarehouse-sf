@@ -69,6 +69,22 @@ class RatingRepository extends ServiceEntityRepository
     }
 
     /**
+     * Moyenne et nombre de tous les avis vérifiés de la boutique, pour le bandeau de l'accueil.
+     *
+     * @return array{average: float|null, count: int} moyenne des notes (null sans avis) et nombre d'avis
+     */
+    public function globalSummary(): array
+    {
+        /** @var array{average: string|float|null, count: int|string} $row */
+        $row = $this->createQueryBuilder('rating')
+            ->select('AVG(rating.note) AS average', 'COUNT(rating.id) AS count')
+            ->getQuery()
+            ->getSingleResult();
+
+        return ['average' => null === $row['average'] ? null : round((float) $row['average'], 1), 'count' => (int) $row['count']];
+    }
+
+    /**
      * @return array{average: float|null, count: int} moyenne des notes (null sans avis) et nombre d'avis
      */
     public function summary(string $productId): array

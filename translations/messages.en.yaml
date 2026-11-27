@@ -388,3 +388,60 @@ product:
                 comment: 'Comment (optional)'
                 submit_new: 'Publish my review'
                 submit_edit: 'Save changes'
+home:
+    hero:
+        eyebrow: 'PC component specialist'
+        title: 'Build a premium setup, part by part.'
+        highlight: 'Performance. Compatibility. Reliability.'
+        description: 'CPUs, GPUs, motherboards, RAM, SSDs and peripherals selected for a clear, fast and performance-oriented shopping experience.'
+        primary_cta: 'Explore the catalogue'
+        secondary_cta: 'See the categories'
+        image_alt: 'Premium PC build'
+        badge: 'Build ready'
+        focus:
+            label: Focus
+            text: 'Components sorted for performance'
+        configurator:
+            label: Configurator
+            text: 'Compatibility checked at every step'
+    stats:
+        products: '{0}Products in the catalogue|{1}Product in the catalogue|]1,Inf[Products in the catalogue'
+        brands: '{0}Brands|{1}Brand|]1,Inf[Brands'
+        categories: '{0}Categories|{1}Category|]1,Inf[Categories'
+        rating: '{1}Rating from 1 verified review|]1,Inf[Average rating from %count% verified reviews'
+    categories:
+        eyebrow: Catalogue
+        title: 'Explore the catalogue'
+        subtitle: 'Go straight to the main families of components.'
+        all: 'See all categories'
+        products_count: '{0}No products|{1}1 product|]1,Inf[%count% products'
+    promo:
+        badge_until: 'Until %date%'
+        badge: 'Current offer'
+        title:
+            category: '%amount% off the %target% category'
+            product: '%amount% off %target%'
+        description:
+            category: 'The discount is already applied to the displayed price of every product in the category, and in the cart.'
+            product: 'The discount is already applied to the displayed price of the product, and in the cart.'
+        cta:
+            category: 'See the products'
+            product: 'See the product'
+    perks:
+        eyebrow: 'Why HardWareHouse'
+        title: 'A clearer, more technical, more premium experience'
+        subtitle: 'Selected components, detailed technical sheets and fast delivery to build your setup with confidence.'
+        reviews:
+            title: 'Verified reviews'
+            text: 'Only customers who bought a product can rate it: every review comes from a real order.'
+        selection:
+            title: 'Expert selection'
+            text: 'Components chosen for their reliability, their performance and how well they fit modern builds.'
+        compatibility:
+            title: 'Compatibility under control'
+            text: 'A catalogue designed to avoid wrong choices and secure your technical purchases.'
+        prices:
+            title: 'Competitive prices'
+            text: 'Offers reviewed regularly to keep a premium positioning without price drift.'
+    brands:
+        title: 'The brands we sell'

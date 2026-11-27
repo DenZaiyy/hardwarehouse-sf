@@ -390,3 +390,60 @@ product:
                 comment: 'Commentaire (facultatif)'
                 submit_new: 'Publier mon avis'
                 submit_edit: 'Enregistrer les modifications'
+home:
+    hero:
+        eyebrow: 'Spécialiste composants PC'
+        title: 'Construis un setup premium, pièce par pièce.'
+        highlight: 'Performance. Compatibilité. Fiabilité.'
+        description: "CPU, GPU, cartes mères, RAM, SSD et périphériques sélectionnés pour offrir une expérience d'achat claire, rapide et orientée performance."
+        primary_cta: 'Explorer le catalogue'
+        secondary_cta: 'Voir les catégories'
+        image_alt: 'Configuration PC premium'
+        badge: 'Build ready'
+        focus:
+            label: Focus
+            text: 'Composants triés pour la performance'
+        configurator:
+            label: Configurateur
+            text: 'Compatibilité vérifiée à chaque choix'
+    stats:
+        products: '{0}Référence au catalogue|{1}Référence au catalogue|]1,Inf[Références au catalogue'
+        brands: '{0}Marque|{1}Marque|]1,Inf[Marques'
+        categories: '{0}Catégorie|{1}Catégorie|]1,Inf[Catégories'
+        rating: '{1}Note de 1 avis vérifié|]1,Inf[Note moyenne de %count% avis vérifiés'
+    categories:
+        eyebrow: Catalogue
+        title: 'Explore le catalogue'
+        subtitle: 'Accède directement aux grandes familles de composants.'
+        all: 'Voir toutes les catégories'
+        products_count: '{0}Aucun produit|{1}1 produit|]1,Inf[%count% produits'
+    promo:
+        badge_until: "Jusqu'au %date%"
+        badge: 'Offre en cours'
+        title:
+            category: '-%amount% sur la catégorie %target%'
+            product: '-%amount% sur %target%'
+        description:
+            category: 'La remise est déjà appliquée au prix affiché de chaque produit de la catégorie, et au panier.'
+            product: 'La remise est déjà appliquée au prix affiché du produit, et au panier.'
+        cta:
+            category: 'Voir les produits'
+            product: 'Voir le produit'
+    perks:
+        eyebrow: 'Pourquoi HardWareHouse'
+        title: 'Une expérience plus claire, plus technique, plus premium'
+        subtitle: 'Des composants sélectionnés, des fiches techniques détaillées et une livraison rapide pour monter ton setup en confiance.'
+        reviews:
+            title: 'Avis vérifiés'
+            text: "Seuls les clients qui ont acheté un produit peuvent le noter : chaque avis vient d'une commande réelle."
+        selection:
+            title: 'Sélection experte'
+            text: 'Des composants choisis pour leur fiabilité, leurs performances et leur cohérence dans des builds modernes.'
+        compatibility:
+            title: 'Compatibilité maîtrisée'
+            text: 'Un catalogue pensé pour réduire les erreurs de choix et sécuriser tes achats techniques.'
+        prices:
+            title: 'Prix compétitifs'
+            text: 'Des offres suivies régulièrement pour garder un positionnement premium sans dérive tarifaire.'
+    brands:
+        title: 'Les marques que nous distribuons'

@@ -5,106 +5,58 @@ declare(strict_types=1);
 namespace App\Controller\Page;
 
 use App\DTO\Api\Brands\BrandDto;
+use App\DTO\Api\Categories\CategoryDto;
+use App\Repository\RatingRepository;
 use App\Service\ApiService;
 use App\Service\Catalog\CategoryCatalog;
+use App\Service\Catalog\PromotionSelector;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
+/**
+ * Accueil : les textes sont dans les traductions (home.*), le contrôleur ne fournit que des données réelles, à savoir
+ * les chiffres du catalogue, la remise en cours et les catégories mises en avant.
+ */
 class HomeController extends AbstractController
 {
-    /**
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws ExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
-     */
     #[Route('/', name: 'homepage', options: ['sitemap' => true])]
-    public function index(ApiService $apiService, CategoryCatalog $categoryCatalog): Response
-    {
+    public function index(
+        ApiService $apiService,
+        CategoryCatalog $categoryCatalog,
+        RatingRepository $ratingRepository,
+        PromotionSelector $promotionSelector,
+    ): Response {
         $brands = $apiService->fetchAllCached('brands', BrandDto::class);
         $categories = $categoryCatalog->all();
 
-        $hero = [
-            'eyebrow' => 'Spécialiste composants PC',
-            'title' => 'Construis un setup premium, pièce par pièce.',
-            'highlight' => 'Performance. Compatibilité. Fiabilité.',
-            'description' => 'CPU, GPU, cartes mères, RAM, SSD et périphériques sélectionnés pour offrir une expérience d’achat claire, rapide et orientée performance.',
-            'image' => 'images/header_50.webp',
-            'primary_cta_label' => 'Explorer le catalogue',
-            'primary_cta_url' => $this->generateUrl('product.index'),
-            'secondary_cta_label' => 'Voir les catégories',
-            'secondary_cta_url' => '#home-categories',
-        ];
-
-        $stats = [
-            [
-                'number' => 2000,
-                'suffix' => '+',
-                'decimals' => 0,
-                'label' => 'Références en stock',
-            ],
-            [
-                'number' => 24,
-                'suffix' => 'h',
-                'decimals' => 0,
-                'label' => 'Livraison express',
-            ],
-            [
-                'number' => 4.9,
-                'suffix' => '',
-                'decimals' => 1,
-                'label' => 'Note clients',
-            ],
-        ];
-
-        $promo = [
-            'badge' => 'Offre limitée',
-            'title' => '-15% sur une sélection de processeurs',
-            'description' => 'Des performances premium à prix réduit sur une sélection de CPU Intel et AMD. Offre valable jusqu’à épuisement des stocks.',
-            'cta_label' => 'Découvrir l’offre',
-            'cta_url' => $this->generateUrl('category.show', ['slug' => 'processeurs']),
-        ];
-
-        $perks = [
-            [
-                'icon' => 'ph:lightning-duotone',
-                'title' => 'Livraison express 24h',
-                'desc' => 'Commande traitée rapidement depuis notre entrepôt pour accélérer la mise en production de ton setup.',
-            ],
-            [
-                'icon' => 'ph:magnifying-glass-duotone',
-                'title' => 'Sélection experte',
-                'desc' => 'Des composants choisis pour leur fiabilité, leurs performances et leur cohérence dans des builds modernes.',
-            ],
-            [
-                'icon' => 'ph:shield-check-duotone',
-                'title' => 'Compatibilité maîtrisée',
-                'desc' => 'Un catalogue pensé pour réduire les erreurs de choix et sécuriser tes achats techniques.',
-            ],
-            [
-                'icon' => 'ph:trophy-duotone',
-                'title' => 'Prix compétitifs',
-                'desc' => 'Des offres suivies régulièrement pour garder un positionnement premium sans dérive tarifaire.',
-            ],
-        ];
-
         return $this->render('home/index.html.twig', [
-            'hero' => $hero,
-            'stats' => $stats,
-            'promo' => $promo,
-            'perks' => $perks,
+            'stats' => $this->stats($categories, \count($brands), $ratingRepository->globalSummary()),
+            'promotion' => $promotionSelector->featured(),
             'brands' => $brands,
-            'featured_categories' => array_slice($categories, 0, 4),
-            // 'featured_products' => ...
+            'featured_categories' => \array_slice($categories, 0, 4),
         ]);
+    }
+
+    /**
+     * Chiffres du bandeau, tous réels : références et marques du catalogue, puis la note moyenne des avis vérifiés,
+     * ou le nombre de catégories tant qu'aucun avis n'est publié.
+     *
+     * @param list<CategoryDto>                      $categories
+     * @param array{average: float|null, count: int} $reviews
+     *
+     * @return list<array{value: int|float, decimals: int, suffix: string, label: string, count: int}>
+     */
+    private function stats(array $categories, int $brands, array $reviews): array
+    {
+        $products = array_sum(array_map(static fn (CategoryDto $category): int => $category->productsCount ?? 0, $categories));
+
+        return [
+            ['value' => $products, 'decimals' => 0, 'suffix' => '', 'label' => 'home.stats.products', 'count' => $products],
+            ['value' => $brands, 'decimals' => 0, 'suffix' => '', 'label' => 'home.stats.brands', 'count' => $brands],
+            null !== $reviews['average']
+                ? ['value' => $reviews['average'], 'decimals' => 1, 'suffix' => '/5', 'label' => 'home.stats.rating', 'count' => $reviews['count']]
+                : ['value' => \count($categories), 'decimals' => 0, 'suffix' => '', 'label' => 'home.stats.categories', 'count' => \count($categories)],
+        ];
     }
 }
