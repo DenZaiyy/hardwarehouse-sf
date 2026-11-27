@@ -594,6 +594,16 @@ final class CheckoutComponent
         return $this->getState()->selectedPaymentMethod();
     }
 
+    /**
+     * Transporteurs de l'étape de livraison, une carte chacun.
+     *
+     * @return list<array{id: int, label: string, name: string, description: string|null, logo: string|null, price: float}>
+     */
+    public function getCarriers(): array
+    {
+        return $this->deliveryManager->getCarriers($this->getState());
+    }
+
     public function getSelectedCarrierLabel(): ?string
     {
         return $this->deliveryManager->getCarrierLabel($this->getState());
@@ -658,23 +668,11 @@ final class CheckoutComponent
             return 0.0;
         }
 
-        // Find selected carrier cost
-        $carriers = $this->deliveryManager->getCarriers($state);
-
-        foreach ($carriers as $carrier) {
+        // Prix du transporteur, et non plus relu dans son libellé : « 1 234,50 € » y devenait 234,50 €
+        foreach ($this->deliveryManager->getCarriers($state) as $carrier) {
             if ($carrier['id'] === $state->carrierId) {
-                return $this->extractPriceFromLabel($carrier['label']);
+                return $carrier['price'];
             }
-        }
-
-        return 0.0;
-    }
-
-    private function extractPriceFromLabel(string $label): float
-    {
-        // Extract price from label (format: "Name - X,XX €")
-        if (preg_match('/(\d+(?:,\d+)?)\s*€/', $label, $matches)) {
-            return (float) str_replace(',', '.', $matches[1]);
         }
 
         return 0.0;

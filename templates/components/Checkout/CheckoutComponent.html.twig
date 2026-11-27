@@ -25,6 +25,7 @@
         {% include 'components/Checkout/steps/_step_delivery.html.twig' with {
             state: state,
             form: form,
+            carriers: this.carriers,
             selectedCarrierLabel: this.selectedCarrierLabel
         } only %}
 

@@ -48,7 +48,7 @@
                 </tr>
             {% endfor %}
             <tr>
-                <td colspan="2">Livraison</td>
+                <td colspan="2">Livraison{% if order.carrierNameSnapshot %} ({{ order.carrierNameSnapshot }}){% endif %}</td>
                 <td class="amount">{{ order.shippingAmount|format_currency('EUR', locale = 'fr') }}</td>
             </tr>
             <tr class="total">

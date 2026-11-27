@@ -13,20 +13,32 @@ final readonly class CheckoutDeliveryManager
     }
 
     /**
-     * @return array<int, array{id: int, label: string}>
+     * Transporteurs proposés, du moins cher au plus cher, avec ce qu'affiche leur carte à l'étape de livraison. Le prix
+     * est TTC, comme tous les montants de la boutique : le résumé de commande l'additionne tel quel.
+     *
+     * @return list<array{id: int, label: string, name: string, description: string|null, logo: string|null, price: float}>
      */
     public function getCarriers(CheckoutState $state): array
     {
-        $carriers = $this->carrierRepository->findAll();
+        $carriers = [];
+        foreach ($this->carrierRepository->findBy([], ['price' => 'ASC', 'id' => 'ASC']) as $carrier) {
+            $id = $carrier->getId();
+            if (null === $id) {
+                continue;
+            }
 
-        /** @var array<int, array{id: int, label: string}> */
-        return array_values(array_filter(
-            array_map(static fn ($carrier) => [
-                'id' => $carrier->getId(),
-                'label' => $carrier->getName().' - '.number_format((float) $carrier->getPrice(), 2, ',', ' ').' €',
-            ], $carriers),
-            static fn (array $carrier) => null !== $carrier['id'],
-        ));
+            $price = (float) $carrier->getPrice();
+            $carriers[] = [
+                'id' => $id,
+                'label' => $carrier->getName().' - '.number_format($price, 2, ',', ' ').' €',
+                'name' => (string) $carrier->getName(),
+                'description' => $carrier->getDescription(),
+                'logo' => $carrier->getLogo(),
+                'price' => $price,
+            ];
+        }
+
+        return $carriers;
     }
 
     public function saveCarrier(CheckoutState $state, int $carrierId): CheckoutState

@@ -1,39 +1,39 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Paiement annulé - {{ parent() }}{% endblock %}
+{% block title %}{{ 'payment.cancel.title'|trans(domain = 'title') }} - {{ parent() }}{% endblock %}
 
 {% block body %}
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-2xl mx-auto text-center">
         <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-8 mb-8">
-            <div class="text-warning text-6xl mb-4">
-                ⚠️
-            </div>
+            <span class="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-warning text-white">
+                {{ ux_icon('heroicons:exclamation-triangle', {class: 'size-7', 'aria-hidden': 'true'}) }}
+            </span>
             <h1 class="text-3xl font-bold text-warning mb-4">
-                Paiement annulé
+                {{ 'payment_page.cancel.heading'|trans }}
             </h1>
             <p class="text-warning text-lg">
-                {{ message }}
+                {{ 'payment_page.cancel.message'|trans }}
             </p>
         </div>
 
         <div class="space-y-4">
             <p class="text-gray-600">
-                Votre panier est toujours disponible et vous pouvez finaliser votre commande à tout moment.
+                {{ 'payment_page.cancel.cart_kept'|trans }}
             </p>
 
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="{{ path('checkout.index') }}"
                    class="bg-primary hover:bg-primary-dark text-paragraph px-6 py-3 rounded-lg font-medium">
-                    Reprendre ma commande
+                    {{ 'payment_page.cancel.resume'|trans }}
                 </a>
                 <a href="{{ path('cart.index') }}"
                    class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-lg font-medium">
-                    Voir mon panier
+                    {{ 'payment_page.cancel.cart'|trans }}
                 </a>
                 <a href="{{ path('homepage') }}"
                    class="text-muted hover:text-ink px-6 py-3 rounded-lg">
-                    Retour à l'accueil
+                    {{ 'payment_page.cancel.home'|trans }}
                 </a>
             </div>
         </div>

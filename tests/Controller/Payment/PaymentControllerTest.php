@@ -27,6 +27,41 @@ final class PaymentControllerTest extends WebTestCase
         self::assertResponseIsSuccessful();
     }
 
+    public function testConfirmationSummarisesTheOrder(): void
+    {
+        $client = static::createClient();
+        $customer = $this->createUser('customer');
+        $order = $this->withAddresses($this->createOrder($customer))->setCarrierNameSnapshot('Colissimo');
+        $this->entityManager()->flush();
+        $client->loginUser($customer);
+
+        $crawler = $client->request('GET', '/fr/payment/success/'.$order->getReference());
+
+        $recap = self::plain($crawler->filter('.payment-recap')->text());
+        self::assertStringContainsString('Référence '.$order->getReference(), $recap);
+        self::assertStringContainsString('Livraison Colissimo (4,90 €), 12 rue des Essais, 68100 Mulhouse', $recap);
+        self::assertStringContainsString('Montant payé 124,90 €', $recap);
+        self::assertSelectorExists('a[href$="/profile/orders"]');
+    }
+
+    public function testEnglishConfirmationIsTranslated(): void
+    {
+        $client = static::createClient();
+        $customer = $this->createUser('customer');
+        $order = $this->createOrder($customer);
+        $client->loginUser($customer);
+
+        $client->request('GET', '/en/payment/success/'.$order->getReference());
+
+        self::assertSelectorTextContains('h1', 'Payment successful!');
+        self::assertSelectorTextContains('.payment-recap', 'Amount paid');
+    }
+
+    private static function plain(string $text): string
+    {
+        return (string) preg_replace('/\s+/u', ' ', str_replace(["\u{a0}", "\u{202f}"], ' ', $text));
+    }
+
     public function testAnotherCustomerCannotSeeTheConfirmation(): void
     {
         $client = static::createClient();

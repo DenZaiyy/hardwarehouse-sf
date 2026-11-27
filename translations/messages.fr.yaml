@@ -235,6 +235,43 @@ shipmentStatus:
     delivered:
         label: Livré
 checkout:
+    heading: 'Récapitulatif de commande'
+    step:
+        identity: '1. Informations personnelles'
+        address: '2. Adresse'
+        delivery: '3. Livraison'
+        payment: '4. Paiement'
+        edit: Modifier
+    identity:
+        guest: "Commander en tant qu'invité"
+        login: 'Se connecter'
+        choose: 'Choisis un mode pour continuer.'
+        continue: Continuer
+        logged_in: Connecté
+        password: 'Mot de passe'
+    address:
+        same_billing: 'Utiliser la même adresse pour la facturation'
+        default: 'Par défaut'
+        new: 'Ajouter une nouvelle adresse'
+        save: "Enregistrer l'adresse"
+        save_billing: "Enregistrer l'adresse de facturation"
+    delivery:
+        choose: 'Choisissez votre mode de livraison :'
+        selected: 'Mode de livraison sélectionné'
+    payment:
+        choose: 'Choisissez votre moyen de paiement :'
+        secured: 'Paiement sécurisé par Stripe : vos données bancaires ne transitent pas par HardWareHouse.'
+        pay: 'Payer %amount%'
+    summary:
+        title: 'Résumé de commande'
+        articles: Articles
+        quantity: 'Qté : %quantity%'
+        subtotal: 'Sous-total TTC'
+        delivery: Livraison
+        delivery_pending: 'À choisir'
+        total: 'Total TTC'
+        vat: 'Dont TVA (%rate%%)'
+        continue_shopping: 'Continuer mes achats'
     form:
         title: Civilité
         mr: M.
@@ -261,10 +298,17 @@ error:
         text: "Cette page n'a pas pu s'afficher. Réessayez dans un instant ou revenez à l'accueil."
     home: "Retour à l'accueil"
 cart:
+    title: 'Mon panier'
+    empty: 'Votre panier est vide.'
     summary:
         title: Résumé du panier
+        quantity: 'Qté : %quantity%'
+        clear: 'Vider le panier'
+        clear_confirm: 'Êtes-vous sûr de vouloir vider le panier ?'
         articles: Articles
     line:
+        unit: 'TTC / unité'
+        no_image: "Pas d'image"
         decrease: 'Retirer un exemplaire'
         increase: 'Ajouter un exemplaire'
         remove: 'Retirer cet article du panier'
@@ -447,3 +491,23 @@ home:
             text: 'Des offres suivies régulièrement pour garder un positionnement premium sans dérive tarifaire.'
     brands:
         title: 'Les marques que nous distribuons'
+payment_page:
+    success:
+        heading: 'Paiement réussi !'
+        message: 'Votre commande %reference% a bien été enregistrée.'
+        recap: Récapitulatif
+        reference: Référence
+        date: Date
+        delivery: Livraison
+        payment_method: 'Moyen de paiement'
+        amount: 'Montant payé'
+        email: 'Vous recevrez bientôt un e-mail de confirmation avec le détail de votre commande.'
+        orders: 'Voir mes commandes'
+        continue: 'Continuer mes achats'
+    cancel:
+        heading: 'Paiement annulé'
+        message: 'Le paiement a été annulé. Vous pouvez reprendre votre commande.'
+        cart_kept: 'Votre panier est toujours disponible et vous pouvez finaliser votre commande à tout moment.'
+        resume: 'Reprendre ma commande'
+        cart: 'Voir mon panier'
+        home: "Retour à l'accueil"

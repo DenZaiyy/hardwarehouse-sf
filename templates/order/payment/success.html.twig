@@ -1,40 +1,58 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Paiement réussi - {{ parent() }}{% endblock %}
+{% block title %}{{ 'payment.success.title'|trans(domain = 'title') }} - {{ parent() }}{% endblock %}
 
 {% block body %}
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-2xl mx-auto text-center">
-        <div class="bg-green-50 border border-green-200 rounded-lg p-8 mb-8">
-            <div class="text-success text-6xl mb-4">
-                ✓
-            </div>
-            <h1 class="text-3xl font-bold text-green-800 mb-4">
-                Paiement réussi !
-            </h1>
-            <p class="text-green-700 text-lg">
-                {{ message }}
-            </p>
-        </div>
+<div class="mx-auto max-w-2xl px-4 py-8">
+    <div class="rounded-lg border border-green-300 bg-green-50 p-8 text-center">
+        <span class="mx-auto flex size-12 items-center justify-center rounded-full bg-success text-white">
+            {{ ux_icon('heroicons:check', {class: 'size-7', 'aria-hidden': 'true'}) }}
+        </span>
+        <h1 class="mt-4 text-3xl font-bold text-green-800">{{ 'payment_page.success.heading'|trans }}</h1>
+        <p class="mt-2 text-green-700">{{ 'payment_page.success.message'|trans({'%reference%': order.reference}) }}</p>
+    </div>
 
-        <div class="space-y-4">
-            <p class="text-gray-600">
-                Vous recevrez bientôt un email de confirmation avec les détails de votre commande.
-            </p>
-
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ path('homepage') }}"
-                   class="bg-primary hover:bg-primary-dark text-paragraph px-6 py-3 rounded-lg font-medium">
-                    Retour à l'accueil
-                </a>
-                {% if is_granted('ROLE_USER') %}
-                    <a href="{{ path('order.index') }}"
-                       class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-lg font-medium">
-                        Mes commandes
-                    </a>
-                {% endif %}
+    {# Récapitulatif tiré de la commande enregistrée, transporteur compris (figé à la commande depuis B86) #}
+    {% set delivery = order.orderAddresses|filter(address => address.type and address.type.value == 'DELIVERY')|first %}
+    <section class="payment-recap mt-6 rounded-lg border border-secondary/40 p-6">
+        <h2 class="text-lg font-semibold text-primary">{{ 'payment_page.success.recap'|trans }}</h2>
+        <dl class="mt-4 space-y-2 text-sm">
+            <div class="flex justify-between gap-4">
+                <dt class="text-muted">{{ 'payment_page.success.reference'|trans }}</dt>
+                <dd class="font-semibold text-ink">{{ order.reference }}</dd>
             </div>
-        </div>
+            <div class="flex justify-between gap-4">
+                <dt class="text-muted">{{ 'payment_page.success.date'|trans }}</dt>
+                <dd class="font-semibold text-ink">{{ order.createdAt|format_date('long') }}</dd>
+            </div>
+            <div class="flex justify-between gap-4">
+                <dt class="text-muted">{{ 'payment_page.success.delivery'|trans }}</dt>
+                <dd class="text-right font-semibold text-ink">
+                    {% if order.carrierNameSnapshot %}{{ order.carrierNameSnapshot }} ({{ order.shippingAmount|format_currency('EUR') }}){% else %}{{ order.shippingAmount|format_currency('EUR') }}{% endif %}{% if delivery %}, {{ delivery.address }}, {{ delivery.postalCode }} {{ delivery.city }}{% endif %}
+                </dd>
+            </div>
+            <div class="flex justify-between gap-4">
+                <dt class="text-muted">{{ 'payment_page.success.payment_method'|trans }}</dt>
+                <dd class="font-semibold text-ink">{{ order.paymentMethod|trans }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-t border-secondary/30 pt-2">
+                <dt class="text-muted">{{ 'payment_page.success.amount'|trans }}</dt>
+                <dd class="text-base font-bold text-ink">{{ order.totalAmount|format_currency('EUR') }}</dd>
+            </div>
+        </dl>
+    </section>
+
+    <p class="mt-6 text-center text-muted">{{ 'payment_page.success.email'|trans }}</p>
+
+    <div class="mt-4 flex flex-col justify-center gap-3 sm:flex-row">
+        {% if is_granted('ROLE_USER') %}
+            <a href="{{ path('order.index') }}" class="rounded-lg border-2 border-primary bg-white px-6 py-3 text-center font-semibold text-primary no-underline hover:bg-paragraph">
+                {{ 'payment_page.success.orders'|trans }}
+            </a>
+        {% endif %}
+        <a href="{{ path('product.index') }}" class="rounded-lg bg-primary px-6 py-3 text-center font-semibold text-paragraph no-underline hover:bg-primary-dark">
+            {{ 'payment_page.success.continue'|trans }}
+        </a>
     </div>
 </div>
 {% endblock %}

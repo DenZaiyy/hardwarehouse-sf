@@ -1,49 +1,39 @@
-<section class="rounded-lg border p-4 space-y-4">
-    <h2 class="text-lg font-semibold">1. Informations personnelles</h2>
+{% import 'components/Checkout/steps/_macros.html.twig' as step %}
+{% set status = state.identityCompleted and state.currentStep != 1 ? 'done' : 'current' %}
+<section class="space-y-4 rounded-lg p-4 {{ status == 'current' ? 'border-2 border-primary' : 'border border-secondary/40' }}" data-step-status="{{ status }}">
+    {{ step.header('checkout.step.identity'|trans, status, isAuthenticatedStepSkipped ? null : 'editIdentity') }}
 
     {% if state.identityCompleted and state.currentStep != 1 %}
-        <div class="flex items-center justify-between gap-4">
-            <div class="text-sm">
-                <div class="font-medium">
-                    {{ state.identity.firstName ?? '' }} {{ state.identity.lastName ?? '' }}
-                </div>
-                <div>{{ state.identity.email ?? '' }}</div>
-                {% if isAuthenticatedStepSkipped %}
-                    <div class="text-xs text-success">Connecté</div>
-                {% endif %}
+        <div class="text-sm">
+            <div class="font-medium">
+                {{ state.identity.firstName ?? '' }} {{ state.identity.lastName ?? '' }}
             </div>
-
-            {% if not isAuthenticatedStepSkipped %}
-                <button
-                    type="button"
-                    data-action="live#action"
-                    data-live-action-param="editIdentity"
-                    class="rounded border px-4 py-2"
-                >
-                    Modifier
-                </button>
+            <div>{{ state.identity.email ?? '' }}</div>
+            {% if isAuthenticatedStepSkipped %}
+                <div class="text-xs text-success">{{ 'checkout.identity.logged_in'|trans }}</div>
             {% endif %}
         </div>
     {% else %}
-        <div class="flex items-center gap-3 text-sm">
+        {# Le mode choisi est plein, l'autre en contour. Avant tout choix, l'invité est mis en avant, comme la maquette #}
+        <div class="flex flex-wrap items-center gap-3">
             <button
                 type="button"
                 data-action="live#action"
                 data-live-action-param="chooseGuest"
-                class="{{ state.identityMode == 'guest' ? 'font-semibold underline' : '' }}"
+                aria-pressed="{{ state.identityMode == 'guest' ? 'true' : 'false' }}"
+                class="{{ state.identityMode == 'login' ? 'border-2 border-primary bg-white px-5 py-2 text-primary hover:bg-paragraph' : '' }}"
             >
-                Commander en tant qu'invité
+                {{ 'checkout.identity.guest'|trans }}
             </button>
-
-            <span>|</span>
 
             <button
                 type="button"
                 data-action="live#action"
                 data-live-action-param="chooseLogin"
-                class="{{ state.identityMode == 'login' ? 'font-semibold underline' : '' }}"
+                aria-pressed="{{ state.identityMode == 'login' ? 'true' : 'false' }}"
+                class="{{ state.identityMode == 'login' ? '' : 'border-2 border-primary bg-white px-5 py-2 text-primary hover:bg-paragraph' }}"
             >
-                Connexion
+                {{ 'checkout.identity.login'|trans }}
             </button>
         </div>
 
@@ -56,7 +46,8 @@
                 }
             }) }}
             <div class="grid gap-4 md:grid-cols-2">
-                {{ form_row(form.title) }}
+                {# Civilité : les deux choix collés (○M.○Mme) sans cet espacement #}
+                {{ form_row(form.title, {attr: {class: 'flex flex-wrap items-center gap-x-2 gap-y-1 [&>label]:mr-4'}}) }}
                 <div></div>
                 {{ form_row(form.firstName) }}
                 {{ form_row(form.lastName) }}
@@ -64,8 +55,8 @@
                 {{ form_row(form.password) }}
             </div>
 
-            <button type="submit" class="mt-4 rounded border px-4 py-2">
-                Continuer
+            <button type="submit" class="mt-4">
+                {{ 'checkout.identity.continue'|trans }}
             </button>
             {{ form_end(form) }}
 
@@ -78,7 +69,7 @@
 
             <form action="{{ path('app.login') }}" method="post" class="space-y-4">
                 <div>
-                    <label for="checkout_login_email" class="mb-1 block text-sm font-medium">E-mail</label>
+                    <label for="checkout_login_email" class="mb-1 block text-sm font-medium">{{ 'checkout.form.email'|trans }}</label>
                     <input
                         id="checkout_login_email"
                         type="email"
@@ -90,7 +81,7 @@
                 </div>
 
                 <div>
-                    <label for="checkout_login_password" class="mb-1 block text-sm font-medium">Mot de passe</label>
+                    <label for="checkout_login_password" class="mb-1 block text-sm font-medium">{{ 'checkout.identity.password'|trans }}</label>
                     <input
                         id="checkout_login_password"
                         type="password"
@@ -103,13 +94,13 @@
                 <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
                 <input type="hidden" name="_target_path" value="{{ path('checkout.index') }}">
 
-                <button type="submit" class="rounded border px-4 py-2">
-                    Se connecter
+                <button type="submit">
+                    {{ 'checkout.identity.login'|trans }}
                 </button>
             </form>
         {% else %}
             <div class="text-sm text-muted">
-                Choisis un mode pour continuer.
+                {{ 'checkout.identity.choose'|trans }}
             </div>
         {% endif %}
     {% endif %}

@@ -177,6 +177,81 @@ final class CheckoutComponentTest extends WebTestCase
         self::assertStringContainsString('544,78', $page->filter('button[data-live-action-param="processPayment"]')->text());
     }
 
+    public function testStepsShowWhereTheCustomerIs(): void
+    {
+        $crawler = $this->guestCheckout()->render()->crawler();
+
+        self::assertSame(['current', 'locked', 'locked', 'locked'], $this->stepStatuses($crawler));
+        self::assertStringContainsString("Commander en tant qu'invité", $crawler->filter('[data-step-status="current"]')->text());
+    }
+
+    public function testCompletedStepsCanBeEditedFromTheirTitle(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+
+        $crawler = $this->readyToPay($client, $this->carrier('Colissimo'), $this->cartWith($this->apiHasProduct($slug), $slug))->render()->crawler();
+
+        self::assertSame(['done', 'done', 'done', 'current'], $this->stepStatuses($crawler));
+        foreach (['editIdentity', 'editAddress', 'editDelivery'] as $action) {
+            self::assertCount(1, $crawler->filter('[data-step-status="done"] [data-live-action-param="'.$action.'"]'), $action);
+        }
+    }
+
+    public function testDeliveryIsToBeChosenUntilACarrierIsPicked(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $cart = $this->cartWith($this->apiHasProduct($slug), $slug);
+
+        $beforeChoice = $this->readyToPay($client, 0, $cart, step: 3)->render()->crawler()->text();
+        self::assertStringContainsString('Livraison À choisir', self::plain($beforeChoice));
+
+        $afterChoice = $this->readyToPay($client, $this->carrier('Colissimo'), $cart)->render()->crawler()->text();
+        self::assertStringContainsString('Livraison 4,90', self::plain($afterChoice));
+    }
+
+    public function testDeliveryCostComesFromTheCarrierPrice(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+
+        // Lu dans le libellé « … - 1 234,50 € », le prix devenait 234,50 € : l'espace des milliers coupait le nombre
+        $summary = $this->readyToPay($client, $this->carrier('Transport lourd', '1234.50'), $this->cartWith($this->apiHasProduct($slug), $slug))->render()->crawler()->text();
+
+        self::assertStringContainsString('Livraison 1 234,50 €', self::plain($summary));
+    }
+
+    public function testDeliveryStepShowsACardPerCarrier(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->carrier('Chronopost', '9.90', '<div>Livraison <strong>le lendemain</strong> avant 13 h</div>', 'chronopost.png');
+
+        $crawler = $this->readyToPay($client, 0, $this->cartWith($this->apiHasProduct($slug), $slug), step: 3)->render()->crawler();
+
+        $card = $crawler->filter('[data-step-status="current"] label')->reduce(static fn (Crawler $label): bool => str_contains($label->text(), 'Chronopost'));
+        self::assertCount(1, $card);
+        // Description de l'éditeur de l'admin affichée en texte : ses balises ne passent pas
+        self::assertSame('Chronopost Livraison le lendemain avant 13 h 9,90 €', self::plain(trim($card->text())));
+        self::assertCount(0, $card->filter('strong'));
+        self::assertStringEndsWith('/uploads/images/carriers/chronopost.png', (string) $card->filter('img')->attr('src'));
+        self::assertCount(1, $card->filter('input[type="radio"][data-live-action-param="saveDeliveryChoice"]'));
+    }
+
+    public function testEnglishCheckoutIsTranslated(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $this->prepareSession($client, ['cart_session_token' => $this->cartWith($this->apiHasProduct($slug), $slug)]);
+
+        $client->request('GET', '/en/checkout');
+
+        self::assertSelectorTextContains('h1', 'Order summary');
+        self::assertSelectorTextContains('[data-step-status="current"]', '1. Personal details');
+        self::assertSelectorTextContains('main', 'Total incl. VAT');
+    }
+
     public function testSummaryShowsAmountsIncludingTax(): void
     {
         $client = static::createClient();
@@ -296,6 +371,19 @@ final class CheckoutComponentTest extends WebTestCase
         self::assertSame(PaymentMethod::PAYPAL, $orders[0]->getPaymentMethod());
     }
 
+    public function testOrderKeepsTheCarrierChosenInTheShop(): void
+    {
+        $client = static::createClient();
+        $slug = self::newProductSlug();
+        $checkout = $this->readyToPay($client, $this->carrier('Chronopost', '9.90'), $this->cartWith($this->apiHasProduct($slug), $slug));
+
+        $checkout->call('processPayment');
+
+        // Figé à la commande : l'admin sait quel transporteur le client a payé, même renommé ou supprimé depuis
+        $orders = $this->entityManager()->getRepository(Order::class)->findBy(['userFullNameSnapshot' => 'Jean Dupont'], ['id' => 'DESC'], 1);
+        self::assertSame(['Chronopost', '9.90'], [$orders[0]->getCarrierNameSnapshot(), $orders[0]->getShippingAmount()]);
+    }
+
     public function testOrderKeepsTheCustomerEmailForTheConfirmation(): void
     {
         $client = static::createClient();
@@ -310,17 +398,19 @@ final class CheckoutComponentTest extends WebTestCase
     }
 
     /** Tunnel rempli jusqu'au paiement par un visiteur, dont le panier est rangé sous ce jeton. */
-    private function readyToPay(KernelBrowser $client, Carrier|int $carrier, ?string $cartToken): TestLiveComponent
+    /** À l'étape 3 avec un transporteur à 0, le client n'a pas encore choisi sa livraison */
+    private function readyToPay(KernelBrowser $client, Carrier|int $carrier, ?string $cartToken, int $step = 4): TestLiveComponent
     {
+        $carrierId = $carrier instanceof Carrier ? $carrier->getId() : $carrier;
         $session = ['checkout_state' => (new CheckoutState(
-            currentStep: 4,
+            currentStep: $step,
             identityMode: 'guest',
             identity: self::IDENTITY,
             deliveryAddress: self::ADDRESS,
-            carrierId: $carrier instanceof Carrier ? $carrier->getId() : $carrier,
+            carrierId: 0 === $carrierId ? null : $carrierId,
             identityCompleted: true,
             addressCompleted: true,
-            deliveryCompleted: true,
+            deliveryCompleted: 4 === $step,
         ))->toArray()];
         if (null !== $cartToken) {
             $session['cart_session_token'] = $cartToken;
@@ -342,9 +432,9 @@ final class CheckoutComponentTest extends WebTestCase
         return $token;
     }
 
-    private function carrier(string $name): Carrier
+    private function carrier(string $name, string $price = '4.90', ?string $description = null, ?string $logo = null): Carrier
     {
-        $carrier = (new Carrier())->setName($name)->setPrice('4.90');
+        $carrier = (new Carrier())->setName($name)->setPrice($price)->setDescription($description)->setLogo($logo);
         $this->entityManager()->persist($carrier);
         $this->entityManager()->flush();
 
@@ -373,6 +463,17 @@ final class CheckoutComponentTest extends WebTestCase
         $request->setLocale('fr');
         $request->setSession(new Session(new MockArraySessionStorage()));
         static::getContainer()->get(RequestStack::class)->push($request);
+    }
+
+    /** @return list<string> état de chaque étape, dans l'ordre (current, done, locked) */
+    private function stepStatuses(Crawler $crawler): array
+    {
+        return $crawler->filter('[data-step-status]')->each(static fn (Crawler $step): string => (string) $step->attr('data-step-status'));
+    }
+
+    private static function plain(string $text): string
+    {
+        return (string) preg_replace('/\s+/u', ' ', str_replace(["\u{a0}", "\u{202f}"], ' ', $text));
     }
 
     private function guestCheckout(): TestLiveComponent
