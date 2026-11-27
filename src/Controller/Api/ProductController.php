@@ -3,7 +3,6 @@
 namespace App\Controller\Api;
 
 use App\DTO\Api\Brands\BrandDto;
-use App\DTO\Api\Categories\CategoryDto;
 use App\DTO\Api\Products\ProductDto;
 use App\Entity\Rating;
 use App\Entity\User;
@@ -14,6 +13,7 @@ use App\Repository\RatingRepository;
 use App\Security\Voter\ProductReviewVoter;
 use App\SEO\Schema\ProductSchemaBuilder;
 use App\Service\ApiService;
+use App\Service\Catalog\CategoryCatalog;
 use App\Service\Catalog\ProductSpecFormatter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,6 +28,7 @@ final class ProductController extends AbstractController
 {
     public function __construct(
         private readonly ApiService $apiService,
+        private readonly CategoryCatalog $categoryCatalog,
     ) {
     }
 
@@ -65,7 +66,7 @@ final class ProductController extends AbstractController
             $params['maxPrice'] = $maxPrice;
         }
 
-        $categoriesData = $this->apiService->fetchAllCached('categories', CategoryDto::class);
+        $categoriesData = $this->categoryCatalog->all();
         $brandsData = $this->apiService->fetchAllCached('brands', BrandDto::class);
 
         try {

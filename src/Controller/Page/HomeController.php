@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Controller\Page;
 
 use App\DTO\Api\Brands\BrandDto;
-use App\DTO\Api\Categories\CategoryDto;
 use App\Service\ApiService;
+use App\Service\Catalog\CategoryCatalog;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -28,10 +28,10 @@ class HomeController extends AbstractController
      * @throws DecodingExceptionInterface
      */
     #[Route('/', name: 'homepage', options: ['sitemap' => true])]
-    public function index(ApiService $apiService): Response
+    public function index(ApiService $apiService, CategoryCatalog $categoryCatalog): Response
     {
         $brands = $apiService->fetchAllCached('brands', BrandDto::class);
-        $categories = $apiService->fetchAllCached('categories', CategoryDto::class);
+        $categories = $categoryCatalog->all();
 
         $hero = [
             'eyebrow' => 'Spécialiste composants PC',

@@ -7,6 +7,7 @@ use App\DTO\Api\Categories\CategoryDto;
 use App\DTO\Api\Categories\CategoryProductsDto;
 use App\Exception\Api\ApiException;
 use App\Service\ApiService;
+use App\Service\Catalog\CategoryCatalog;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,6 +19,7 @@ final class CategoryController extends AbstractController
 {
     public function __construct(
         private readonly ApiService $apiService,
+        private readonly CategoryCatalog $categoryCatalog,
     ) {
     }
 
@@ -27,7 +29,7 @@ final class CategoryController extends AbstractController
         $categories = [];
 
         try {
-            $categories = $this->apiService->fetchAllCached('categories', CategoryDto::class);
+            $categories = $this->categoryCatalog->all();
         } catch (ApiException) {
         }
 

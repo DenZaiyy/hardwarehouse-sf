@@ -26,6 +26,20 @@ final class HomeControllerTest extends WebTestCase
         self::assertStringNotContainsString('premium et plus', $page);
     }
 
+    public function testMenuListsCategoriesInTheMockupOrder(): void
+    {
+        $client = static::createClient();
+        // L'API renvoie la catégorie la plus récente en premier
+        $this->apiListsCategories(array_map(static fn (string $slug): array => ['slug' => $slug], ['peripheriques', 'watercooling', 'processeurs', 'cartes-meres']));
+
+        $crawler = $client->request('GET', '/fr');
+
+        $links = array_values(array_unique($crawler->filter('header a[href*="/categories/"]')->each(
+            static fn ($link): string => (string) $link->attr('href'),
+        )));
+        self::assertSame(['/fr/categories/processeurs', '/fr/categories/cartes-meres', '/fr/categories/watercooling', '/fr/categories/peripheriques'], $links);
+    }
+
     public function testCategoryCardShowsTheCategoryVisualWhenTheApiHasOne(): void
     {
         $client = static::createClient();
