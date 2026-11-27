@@ -53,7 +53,8 @@ class DashboardController extends AbstractDashboardController
             MenuItem::linkToDashboard('Dashboard', 'fa fa-home'),
 
             MenuItem::subMenu('Users', 'fa-solid fa-users')->setSubItems([
-                MenuItem::linkTo(UserCrudController::class, 'Users', 'fa-solid fa-users'),
+                // Même règle que UserCrudController : un simple administrateur recevrait un refus
+                MenuItem::linkTo(UserCrudController::class, 'Users', 'fa-solid fa-users')->setPermission('ROLE_SUPER_ADMIN'),
                 MenuItem::linkTo(AddressCrudController::class, 'Address', 'fa-solid fa-address-book'),
             ]),
 
